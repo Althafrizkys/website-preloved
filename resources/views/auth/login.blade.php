@@ -56,7 +56,7 @@
 
                         <div>
                             <label for="email" class="block text-[24px] text-[#00523f]">email kampus :</label>
-                            <input id="email" name="email" type="email" value="{{ old('email') }}" placeholder="@student." autocomplete="email"
+                            <input id="email" name="email" type="email" value="{{ old('email') }}" placeholder="email kampus" autocomplete="email"
                                 class="mt-[6px] block h-[48px] w-full rounded-[5px] bg-[rgba(0,82,63,0.6)] px-[21px] text-[24px] text-white placeholder:text-[#ececec]">
                             @error('email')
                                 <p class="mt-1 text-[16px] text-red-600">{{ $message }}</p>
@@ -65,7 +65,7 @@
 
                         <div class="mt-[11px]">
                             <label for="password" class="block text-[24px] text-[#00523f]">Password :</label>
-                            <input id="password" name="password" type="password" placeholder="12345678" autocomplete="current-password"
+                            <input id="password" name="password" type="password" placeholder="password" autocomplete="current-password"
                                 class="mt-[6px] block h-[48px] w-full rounded-[5px] bg-[rgba(0,82,63,0.6)] px-[21px] text-[24px] text-white placeholder:text-[#ececec]">
                             @error('password')
                                 <p class="mt-1 text-[16px] text-red-600">{{ $message }}</p>
