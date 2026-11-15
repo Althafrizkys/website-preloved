@@ -25,7 +25,7 @@
             <h1 class="font-['Poppins'] text-[60px] leading-normal font-semibold text-[#00523f]">Verifikasi OTP</h1>
             <p class="mt-[25px] text-[25px] font-semibold text-[#00523f]">Masukan 6 digit Angka</p>
 
-            <form id="otp-form" method="POST" action="{{ route('otp.verify') }}" class="mt-[48px] w-[922px]">
+            <form id="otp-form" method="POST" action="{{ route($verifyRoute ?? 'otp.verify') }}" class="mt-[48px] w-[922px]">
                 @csrf
                 <input type="hidden" name="code" id="code">
 
@@ -63,7 +63,7 @@
             </form>
 
             {{-- Form terpisah untuk kirim ulang (dipanggil lewat atribut form pada tombol "Kirim ulang") --}}
-            <form id="resend-form" method="POST" action="{{ route('otp.resend') }}">
+            <form id="resend-form" method="POST" action="{{ route($resendRoute ?? 'otp.resend') }}">
                 @csrf
             </form>
         </div>

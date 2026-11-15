@@ -78,9 +78,9 @@
                         </button>
 
                         {{-- Tautan Lupa Password: sementara "#", diisi saat halaman lupa password dibuat --}}
-                        <a href="#" class="mt-[12px] block text-center text-[24px] text-[#00523f] [text-shadow:0_4px_4px_rgba(0,0,0,0.25)]">
-                            Lupa Password?
-                        </a>
+                    <a href="{{ route('password.request') }}" class="mt-[12px] block text-center text-[24px] text-[#00523f] [text-shadow:0_4px_4px_rgba(0,0,0,0.25)]">
+                         Lupa Password?
+                    </a>
                     </form>
                 </div>
             </div>
