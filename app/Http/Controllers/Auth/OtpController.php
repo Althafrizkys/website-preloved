@@ -50,8 +50,7 @@ class OtpController extends Controller
         if ($result === OtpService::OK) {
             $request->session()->forget('otp_user_id');
 
-            // Sementara ke beranda; akan diganti ke halaman login pada tahap berikutnya.
-            return redirect('/')->with('status', 'Email berhasil diverifikasi.');
+            return redirect()->route('login')->with('status', 'Email berhasil diverifikasi. Silakan login.');
         }
 
         $pesan = match ($result) {

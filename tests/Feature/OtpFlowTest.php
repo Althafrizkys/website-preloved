@@ -46,7 +46,7 @@ class OtpFlowTest extends TestCase
     {
         [$user, $code] = $this->daftar();
 
-        $this->post('/otp', ['code' => $code])->assertRedirect('/');
+        $this->post('/otp', ['code' => $code])->assertRedirect('/login');
 
         $this->assertTrue((bool) $user->refresh()->is_verified);
         $this->assertNull(session('otp_user_id'));
