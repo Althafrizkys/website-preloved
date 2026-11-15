@@ -22,7 +22,7 @@ class RegisterTest extends TestCase
 
     public function test_unsika_valid_membuat_user(): void
     {
-        $this->post('/register', $this->payload())->assertRedirect('/');
+        $this->post('/register', $this->payload())->assertRedirect('/otp');
 
         $user = User::where('email', '2410631170172@student.unsika.ac.id')->first();
         $this->assertSame('UNSIKA', $user->campus);
@@ -38,7 +38,7 @@ class RegisterTest extends TestCase
         $this->post('/register', $this->payload([
             'email' => 'ak24.reysadwiputra@mhs.ubpkarawang.ac.id',
             'npm' => '',
-        ]))->assertRedirect('/');
+        ]))->assertRedirect('/otp');
 
         $user = User::where('email', 'ak24.reysadwiputra@mhs.ubpkarawang.ac.id')->first();
         $this->assertSame('UBP', $user->campus);
@@ -52,7 +52,7 @@ class RegisterTest extends TestCase
             $this->post('/register', $this->payload([
                 'email' => $nama.'@mhs.ubpkarawang.ac.id',
                 'npm' => null,
-            ]))->assertRedirect('/');
+            ]))->assertRedirect('/otp');
         }
 
         $this->assertSame(2, User::count());
@@ -62,7 +62,7 @@ class RegisterTest extends TestCase
     {
         $this->post('/register', $this->payload([
             'email' => ' 2410631170172@Student.Unsika.ac.id ',
-        ]))->assertRedirect('/');
+        ]))->assertRedirect('/otp');
 
         $this->assertDatabaseHas('users', ['email' => '2410631170172@student.unsika.ac.id']);
     }
@@ -110,7 +110,7 @@ class RegisterTest extends TestCase
 
     public function test_email_duplikat_ditolak(): void
     {
-        $this->post('/register', $this->payload())->assertRedirect('/');
+        $this->post('/register', $this->payload())->assertRedirect('/otp');
         $this->post('/register', $this->payload())->assertSessionHasErrors('email');
         $this->assertSame(1, User::count());
     }
