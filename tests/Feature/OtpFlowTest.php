@@ -89,4 +89,15 @@ class OtpFlowTest extends TestCase
         $this->post('/otp/resend')->assertSessionHasNoErrors();
         Mail::assertSent(OtpMail::class, 2);
     }
+
+    public function test_halaman_otp_menampilkan_email_dan_enam_kotak(): void
+    {
+        $this->withoutVite();
+        $this->daftar();
+
+        $this->get('/otp')
+            ->assertOk()
+            ->assertSee('Verifikasi OTP')
+            ->assertSee('2410631170172@student.unsika.ac.id');
+    }
 }
