@@ -24,8 +24,8 @@ class LoginController extends Controller
     {
         $user = User::where('email', $request->input('email'))->first();
 
-        // Pesan sama untuk email tidak terdaftar maupun password salah.
-        if ($user === null || ! Hash::check($request->input('password'), $user->password)) {
+        // Pesan sama untuk email tidak terdaftar, akun admin (login lewat /admin/login), maupun password salah.
+        if ($user === null || $user->isAdmin() || ! Hash::check($request->input('password'), $user->password)) {
             return back()
                 ->withInput($request->only('email'))
                 ->withErrors(['email' => 'Email atau password salah.']);
