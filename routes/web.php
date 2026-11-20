@@ -5,11 +5,12 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\OtpController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\HomeController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [HomeController::class, 'index'])->name('home');
 
 // Halaman untuk yang belum login. Yang sudah login dialihkan keluar dari sini.
 Route::middleware('guest')->group(function () {
@@ -40,3 +41,14 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // Sementara, akan diganti oleh dashboard admin.
     Route::get('/', fn () => 'Dashboard admin (sementara)')->name('dashboard');
 });
+
+Route::post('/logout', function (Request $request) {
+    Auth::logout();
+    $request->session()->invalidate();
+    $request->session()->regenerateToken();
+
+    return redirect()->route('home');
+})->middleware('auth')->name('logout');
+
+Route::get('/jual', fn () => abort(404))->middleware('auth')->name('products.create');
+Route::get('/barang/{product}', fn () => abort(404))->name('products.show');
