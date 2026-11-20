@@ -209,8 +209,9 @@
                                 </div>
                                 <div class="flex min-h-[88px] flex-1 flex-col p-3">
                                     <p class="line-clamp-1 text-[13px] font-medium text-[#236a5a] sm:text-[15px]">{{ $relatedProduct->product_name }}</p>
-                                    <div class="mt-1 flex items-center justify-between gap-2">
+                                    <div class="mt-1.5 flex flex-wrap items-center gap-1">
                                         <span class="rounded-full bg-[#00523f] px-3 py-1 text-[10px] font-medium text-white">{{ $relatedProduct->condition }}</span>
+                                        <span data-product-category="{{ $relatedProduct->category?->category_name ?? 'Lainnya' }}" class="rounded-full bg-[#f0f3f6] px-2.5 py-1 text-[10px] font-medium text-[#526170]">{{ $relatedProduct->category?->category_name ?? 'Lainnya' }}</span>
                                     </div>
                                     <p class="mt-auto pt-2 text-right text-[11px] font-medium text-[#236a5a]">Rp{{ number_format((float) $relatedProduct->price, 0, ',', '.') }}</p>
                                 </div>

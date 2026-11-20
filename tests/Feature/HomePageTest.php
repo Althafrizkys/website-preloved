@@ -67,6 +67,7 @@ class HomePageTest extends TestCase
             ->assertOk()
             ->assertSee('Barang 13')
             ->assertSee('Rp 150.000')
+            ->assertSee('data-product-category="Fashion"', false)
             ->assertSee('UNSIKA')
             ->assertSee('/storage/products/'.$products->last()->product_id.'/foto-awal.jpg')
             ->assertDontSee('foto-kedua.jpg')
