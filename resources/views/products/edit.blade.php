@@ -88,6 +88,11 @@
                     </div>
                 </aside>
             </div>
+
+            @include('negotiations._seller-conversations', [
+                'product' => $product,
+                'conversations' => $negotiationConversations,
+            ])
         </main>
     </body>
 </html>

@@ -123,7 +123,17 @@
 
                         <div class="grid grid-cols-1 gap-2 sm:grid-cols-[minmax(0,1fr)_auto_auto]">
                             <button type="button" disabled title="Fitur pembelian segera hadir" class="min-h-11 cursor-not-allowed rounded-[8px] bg-[#00523f] px-4 text-[12px] font-semibold text-white opacity-80">Beli Sekarang</button>
-                            <button type="button" disabled title="Fitur negosiasi segera hadir" class="min-h-11 cursor-not-allowed rounded-[8px] border border-[#dce3e6] px-4 text-[12px] font-semibold text-[#236a5a] opacity-80">Nego</button>
+                            @guest
+                                <a href="{{ route('login') }}" class="inline-flex min-h-11 items-center justify-center rounded-[8px] border border-[#dce3e6] px-4 text-[12px] font-semibold text-[#236a5a]">Nego</a>
+                            @else
+                                @if ((int) auth()->id() === (int) $product->seller_id)
+                                    <button type="button" disabled title="Penjual tidak dapat menawar barang sendiri" class="min-h-11 cursor-not-allowed rounded-[8px] border border-[#dce3e6] px-4 text-[12px] font-semibold text-[#718096] opacity-70">Nego</button>
+                                @elseif (auth()->user()->isAdmin() || $product->status !== 'tersedia')
+                                    <button type="button" disabled title="Negosiasi hanya tersedia untuk barang aktif" class="min-h-11 cursor-not-allowed rounded-[8px] border border-[#dce3e6] px-4 text-[12px] font-semibold text-[#718096] opacity-70">Nego</button>
+                                @else
+                                    <button type="button" data-nego-open data-nego-url="{{ route('negotiations.show', $product) }}" class="min-h-11 rounded-[8px] border border-[#dce3e6] px-4 text-[12px] font-semibold text-[#236a5a] transition hover:border-[#00523f] hover:bg-[#f7f9fa]">Nego</button>
+                                @endif
+                            @endguest
                             <button type="button" disabled title="Fitur keranjang segera hadir" class="inline-flex min-h-11 cursor-not-allowed items-center justify-center gap-1.5 rounded-[8px] border border-[#dce3e6] px-4 text-[12px] font-semibold text-[#236a5a] opacity-80">
                                 <svg class="size-[17px]" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                                     <path d="M3 4h2l2.2 11.1a2 2 0 0 0 2 1.6h8.2a2 2 0 0 0 1.9-1.4L21 8H6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"/>
@@ -222,6 +232,16 @@
                     <p class="rounded-[12px] border border-dashed border-[#d6dee2] bg-white px-4 py-6 text-center text-[12px] text-[#718096]">Belum ada barang lain yang tersedia.</p>
                 @endif
             </section>
+
+            <dialog
+                data-nego-dialog
+                data-nego-url="{{ route('negotiations.show', $product) }}"
+                data-nego-auto-open="{{ request()->query('nego') === 'open' ? 'true' : 'false' }}"
+                aria-label="Nego harga produk"
+                class="m-auto max-h-[88vh] w-[90vw] max-w-[960px] overflow-y-auto rounded-[24px] bg-transparent p-0 text-[#202b3d] shadow-[0_20px_70px_rgba(25,40,52,0.22)] backdrop:bg-[#202b3d]/35"
+            >
+                <div data-nego-dialog-content></div>
+            </dialog>
         </main>
 
         <footer class="mt-1 bg-[#00523f] px-5 py-7 text-white sm:px-8 sm:py-9">
