@@ -196,12 +196,27 @@ document.addEventListener('DOMContentLoaded', () => {
         updateCounts();
     });
 
-    document.querySelectorAll('[data-gallery-thumb]').forEach((button) => {
+    const galleryThumbs = Array.from(document.querySelectorAll('[data-gallery-thumb]'));
+    galleryThumbs.forEach((button, index) => {
         button.addEventListener('click', () => {
             const image = document.querySelector('[data-gallery-main]');
             if (image && button.dataset.galleryThumb) {
                 image.src = button.dataset.galleryThumb;
             }
+
+            const counter = document.querySelector('[data-gallery-counter]');
+            if (counter) {
+                counter.textContent = `${index + 1}/${galleryThumbs.length} foto`;
+            }
+
+            galleryThumbs.forEach((thumb, thumbIndex) => {
+                const isActive = thumbIndex === index;
+                thumb.setAttribute('aria-pressed', String(isActive));
+                thumb.classList.toggle('border-2', isActive);
+                thumb.classList.toggle('border-[#00523f]', isActive);
+                thumb.classList.toggle('border', !isActive);
+                thumb.classList.toggle('border-[#e5e9ed]', !isActive);
+            });
         });
     });
 });

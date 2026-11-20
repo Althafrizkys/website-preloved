@@ -81,6 +81,10 @@ class ProductUploadTest extends TestCase
             ->assertOk()
             ->assertSee('Jaket Kampus')
             ->assertSee('Tentang produk')
+            ->assertSee('Deskripsi Produk')
+            ->assertSee('Beli Sekarang')
+            ->assertSee('Chat Sekarang')
+            ->assertSee('Lainnya')
             ->assertSee('Angkatan 2024');
     }
 
