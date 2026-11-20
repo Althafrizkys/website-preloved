@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\OtpController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\ProductController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -50,5 +51,23 @@ Route::post('/logout', function (Request $request) {
     return redirect()->route('home');
 })->middleware('auth')->name('logout');
 
-Route::get('/jual', fn () => abort(404))->middleware('auth')->name('products.create');
-Route::get('/barang/{product}', fn () => abort(404))->name('products.show');
+Route::get('/barang/{product}', [ProductController::class, 'show'])
+    ->whereNumber('product')
+    ->name('products.show');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/jual', [ProductController::class, 'create'])->name('products.create');
+    Route::post('/jual', [ProductController::class, 'store'])->name('products.store');
+    Route::get('/barang/{product}/edit', [ProductController::class, 'edit'])
+        ->whereNumber('product')
+        ->name('products.edit');
+    Route::put('/barang/{product}', [ProductController::class, 'update'])
+        ->whereNumber('product')
+        ->name('products.update');
+    Route::patch('/barang/{product}/status', [ProductController::class, 'markSold'])
+        ->whereNumber('product')
+        ->name('products.status');
+    Route::delete('/barang/{product}', [ProductController::class, 'destroy'])
+        ->whereNumber('product')
+        ->name('products.destroy');
+});

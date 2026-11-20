@@ -17,15 +17,20 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' => EnsureUserIsAdmin::class,
         ]);
 
-        // Tamu yang membuka halaman admin diarahkan ke login admin, selain itu ke login biasa.
-        $middleware->redirectGuestsTo(fn (Request $request) => $request->is('admin', 'admin/*')
-            ? route('admin.login')
-            : route('login'));
+        // Alur jual meminta pendaftaran; admin dan route auth lain tetap memakai redirect masing-masing.
+        $middleware->redirectGuestsTo(fn (Request $request) => match (true) {
+            $request->is('admin', 'admin/*') => route('admin.login'),
+            $request->is('jual', 'jual/*', 'barang/*/edit')
+                || (
+                    $request->is('barang/*')
+                    && in_array($request->method(), ['PUT', 'PATCH', 'DELETE'], true)
+                ) => route('register'),
+            default => route('login'),
+        });
 
         // Yang sudah login tidak perlu membuka halaman tamu lagi.
         $middleware->redirectUsersTo(fn (Request $request) => $request->user()?->isAdmin()
             ? route('admin.dashboard')
             : '/');
     })
-    ->withExceptions(function (Exceptions $exceptions): void {
-    })->create();
+    ->withExceptions(function (Exceptions $exceptions): void {})->create();
