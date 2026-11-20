@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\OtpController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\NegotiationController;
 use App\Http\Controllers\ProductController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -70,4 +71,16 @@ Route::middleware('auth')->group(function () {
     Route::delete('/barang/{product}', [ProductController::class, 'destroy'])
         ->whereNumber('product')
         ->name('products.destroy');
+    Route::get('/barang/{product}/nego', [NegotiationController::class, 'show'])
+        ->whereNumber('product')
+        ->name('negotiations.show');
+    Route::post('/barang/{product}/nego', [NegotiationController::class, 'store'])
+        ->whereNumber('product')
+        ->name('negotiations.store');
+    Route::post('/nego/{negotiation}/terima', [NegotiationController::class, 'accept'])
+        ->whereNumber('negotiation')
+        ->name('negotiations.accept');
+    Route::post('/nego/{negotiation}/tolak', [NegotiationController::class, 'reject'])
+        ->whereNumber('negotiation')
+        ->name('negotiations.reject');
 });
