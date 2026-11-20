@@ -18,6 +18,9 @@
 
     <div class="flex flex-1 flex-col p-3.5 sm:p-4">
         <p class="line-clamp-2 min-h-[42px] text-[14px] font-semibold leading-[21px] text-[#202b3d]">{{ $product->product_name }}</p>
+        <div class="mt-1.5">
+            <span data-product-category="{{ $product->category?->category_name ?? 'Lainnya' }}" class="rounded-full bg-[#f0f3f6] px-2.5 py-1 text-[10px] font-medium text-[#526170]">{{ $product->category?->category_name ?? 'Lainnya' }}</span>
+        </div>
         <p class="mt-2 text-[17px] font-bold text-[#00523f]">Rp {{ number_format((float) $product->price, 0, ',', '.') }}</p>
         <div class="mt-auto flex flex-wrap items-center justify-between gap-x-2 gap-y-1 pt-3 text-[12px] text-[#718096]">
             <span>{{ $product->condition }}</span>

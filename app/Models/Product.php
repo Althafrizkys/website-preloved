@@ -32,6 +32,11 @@ class Product extends Model
         ];
     }
 
+    public function getRouteKeyName(): string
+    {
+        return 'product_id';
+    }
+
     public function seller(): BelongsTo
     {
         return $this->belongsTo(User::class, 'seller_id', 'user_id');
@@ -44,6 +49,7 @@ class Product extends Model
 
     public function media(): HasMany
     {
-        return $this->hasMany(ProductMedia::class, 'product_id', 'product_id');
+        return $this->hasMany(ProductMedia::class, 'product_id', 'product_id')
+            ->orderBy('display_order');
     }
 }
