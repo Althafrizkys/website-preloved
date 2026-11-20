@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
 use App\Models\Category;
+use App\Models\Conversation;
 use App\Models\Product;
 use App\Services\ProductService;
 use Illuminate\Contracts\View\View;
@@ -40,6 +41,10 @@ class ProductController extends Controller
 
     public function show(Product $product): View
     {
+        if (request()->query('nego') === 'open') {
+            request()->session()->keep(['errors', '_old_input', 'success']);
+        }
+
         $product->load([
             'media',
             'category',
@@ -70,10 +75,23 @@ class ProductController extends Controller
         Gate::authorize('update', $product);
 
         $product->load('media');
+        $negotiationConversations = Conversation::query()
+            ->where('product_id', $product->product_id)
+            ->where('seller_id', $product->seller_id)
+            ->with([
+                'buyer:user_id,name,campus',
+                'negotiations' => fn ($query) => $query
+                    ->with('sender:user_id,name')
+                    ->orderBy('created_at')
+                    ->orderBy('negotiation_id'),
+            ])
+            ->orderByDesc('created_at')
+            ->get();
 
         return view('products.edit', [
             'categories' => Category::query()->orderBy('category_name')->get(),
             'product' => $product,
+            'negotiationConversations' => $negotiationConversations,
         ]);
     }
 

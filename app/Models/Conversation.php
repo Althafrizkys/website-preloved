@@ -45,4 +45,13 @@ class Conversation extends Model
     {
         return $this->hasMany(Negotiation::class, 'conversation_id', 'conversation_id');
     }
+
+    public function agreedOffer(): ?Negotiation
+    {
+        return $this->negotiations()
+            ->where('status', 'diterima')
+            ->orderByDesc('created_at')
+            ->orderByDesc('negotiation_id')
+            ->first();
+    }
 }

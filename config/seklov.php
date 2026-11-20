@@ -18,4 +18,8 @@ return [
             'Ada kekurangan',
         ],
     ],
+    'negotiations' => [
+        'minimum_price' => 1000,
+        'minimum_price_percent' => 30,
+    ],
 ];
