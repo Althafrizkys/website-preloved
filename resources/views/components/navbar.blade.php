@@ -22,12 +22,26 @@
                         <path d="M14.5 3.8V8h4.2M9 12h6M9 16h6" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"/>
                     </svg>
                 </button>
-                <button type="button" disabled title="Notifikasi segera hadir" aria-label="Notifikasi segera hadir" class="flex size-10 cursor-not-allowed items-center justify-center rounded-[12px] bg-white text-[#00523f] opacity-80 sm:size-11">
+                <button
+                    type="button"
+                    data-notification-trigger
+                    title="Pusat Notifikasi"
+                    aria-label="Pusat Notifikasi"
+                    class="relative flex size-10 items-center justify-center rounded-[12px] bg-white text-[#00523f] transition hover:bg-[#edf7f4] sm:size-11"
+                >
                     <svg class="size-5 sm:size-6" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                         <path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"/>
                     </svg>
+                    <span
+                        data-notification-badge
+                        class="{{ ($unreadNotificationCount ?? 0) > 0 ? '' : 'hidden ' }}absolute -right-1 -top-1 flex size-5 items-center justify-center rounded-full bg-[#e53e3e] text-[10px] font-bold text-white shadow"
+                    >
+                        {{ ($unreadNotificationCount ?? 0) > 9 ? '9+' : ($unreadNotificationCount ?? 0) }}
+                    </span>
                 </button>
             </div>
+
+            @include('notifications._modal')
         @endauth
 
         @guest

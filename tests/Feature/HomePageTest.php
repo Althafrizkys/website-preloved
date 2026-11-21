@@ -24,7 +24,7 @@ class HomePageTest extends TestCase
             ->assertSee('Register')
             ->assertDontSee('Keranjang segera hadir')
             ->assertDontSee('Daftar transaksi segera hadir')
-            ->assertDontSee('Notifikasi segera hadir')
+            ->assertDontSee('Pusat Notifikasi')
             ->assertSee('href="'.route('register').'"', false);
     }
 
@@ -106,7 +106,7 @@ class HomePageTest extends TestCase
             ->assertSee('Logout')
             ->assertSee('Keranjang segera hadir')
             ->assertSee('Daftar transaksi segera hadir')
-            ->assertSee('Notifikasi segera hadir')
+            ->assertSee('Pusat Notifikasi')
             ->assertSee('href="'.route('products.create').'"', false);
     }
 
