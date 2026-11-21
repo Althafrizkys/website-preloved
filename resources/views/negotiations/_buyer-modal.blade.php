@@ -29,9 +29,14 @@
     @endif
 
     @if ($agreedOffer)
-        <p class="mt-5 rounded-[10px] bg-[#e6f4f0] px-4 py-3 text-[12px] text-[#236a5a]">
-            Tawaran telah diterima. Harga yang disepakati: <strong>Rp{{ number_format((float) $agreedOffer->offered_price, 0, ',', '.') }}</strong>.
-        </p>
+        <div class="mt-5 rounded-[12px] bg-[#e6f4f0] p-4 text-[#236a5a]">
+            <p class="text-[13px]">
+                Tawaran telah diterima. Harga yang disepakati: <strong>Rp{{ number_format((float) $agreedOffer->offered_price, 0, ',', '.') }}</strong>.
+            </p>
+            <a href="{{ route('transactions.create', ['product' => $product, 'negotiation_id' => $agreedOffer->negotiation_id]) }}" class="mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-[10px] bg-[#00523f] px-4 text-[14px] font-semibold text-white transition hover:bg-[#006c52]">
+                Lanjut ke Pembayaran COD →
+            </a>
+        </div>
     @elseif ($product->status !== 'tersedia')
         <p class="mt-5 rounded-[10px] bg-[#f0f3f6] px-4 py-3 text-[12px] text-[#526170]">Barang sudah terjual. Form tawaran tidak lagi tersedia.</p>
     @elseif ($negotiations->contains('status', 'menunggu'))

@@ -52,4 +52,9 @@ class Product extends Model
         return $this->hasMany(ProductMedia::class, 'product_id', 'product_id')
             ->orderBy('display_order');
     }
+
+    public function transactionItems(): HasMany
+    {
+        return $this->hasMany(TransactionItem::class, 'product_id', 'product_id');
+    }
 }
