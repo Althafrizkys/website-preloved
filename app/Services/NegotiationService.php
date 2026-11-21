@@ -93,10 +93,15 @@ class NegotiationService
 
             UserNotification::create([
                 'user_id' => $lockedProduct->seller_id,
+                'product_id' => $lockedProduct->product_id,
+                'negotiation_id' => $offer->negotiation_id,
+                'role' => 'penjual',
                 'notification_type' => 'negosiasi',
                 'title' => 'Tawaran nego baru',
                 'message' => $buyer->name.' menawar '.$lockedProduct->product_name
                     .' seharga Rp '.number_format($offeredPrice, 0, ',', '.').'.',
+                'offered_price' => $offeredPrice,
+                'original_price' => (int) $lockedProduct->price,
             ]);
 
             return $offer->load('sender');
@@ -156,11 +161,16 @@ class NegotiationService
             $decision = $status === 'diterima' ? 'diterima' : 'ditolak';
             UserNotification::create([
                 'user_id' => $conversation->buyer_id,
+                'product_id' => $product->product_id,
+                'negotiation_id' => $lockedOffer->negotiation_id,
+                'role' => 'pembeli',
                 'notification_type' => 'negosiasi',
                 'title' => 'Tawaran nego '.$decision,
                 'message' => 'Tawaranmu untuk '.$product->product_name.' sebesar Rp '
                     .number_format((int) $lockedOffer->offered_price, 0, ',', '.')
                     .' telah '.$decision.'.',
+                'offered_price' => (int) $lockedOffer->offered_price,
+                'original_price' => (int) $product->price,
             ]);
 
             return $lockedOffer->load('sender');

@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\NegotiationController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProductController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -83,4 +84,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/nego/{negotiation}/tolak', [NegotiationController::class, 'reject'])
         ->whereNumber('negotiation')
         ->name('negotiations.reject');
+
+    Route::get('/notifikasi', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::patch('/notifikasi/{notification}/baca', [NotificationController::class, 'markAsRead'])
+        ->whereNumber('notification')
+        ->name('notifications.read');
+    Route::post('/notifikasi/baca-semua', [NotificationController::class, 'markAllAsRead'])
+        ->name('notifications.readAll');
 });

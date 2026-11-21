@@ -67,6 +67,11 @@ class User extends Authenticatable
         return $this->hasMany(Conversation::class, 'seller_id', 'user_id');
     }
 
+    public function notifications(): HasMany
+    {
+        return $this->hasMany(UserNotification::class, 'user_id', 'user_id');
+    }
+
     public function isAdmin(): bool
     {
         return $this->role === 'admin';
