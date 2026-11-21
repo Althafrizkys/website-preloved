@@ -97,7 +97,7 @@ class NegotiationService
                 'negotiation_id' => $offer->negotiation_id,
                 'role' => 'penjual',
                 'notification_type' => 'negosiasi',
-                'title' => '💬 Penawaran masuk — '.$lockedProduct->product_name,
+                'title' => 'Penawaran masuk — '.$lockedProduct->product_name,
                 'message' => $buyer->name.' menawarkan harga Rp '.number_format($offeredPrice, 0, ',', '.').' untuk "'.$lockedProduct->product_name.'" (harga asli Rp '.number_format((int)$lockedProduct->price, 0, ',', '.').').',
                 'offered_price' => $offeredPrice,
                 'original_price' => (int) $lockedProduct->price,
@@ -158,14 +158,13 @@ class NegotiationService
             ]);
 
             $decision = $status === 'diterima' ? 'diterima' : 'ditolak';
-            $titleEmoji = $status === 'diterima' ? '✅' : '❌';
             UserNotification::create([
                 'user_id' => $conversation->buyer_id,
                 'product_id' => $product->product_id,
                 'negotiation_id' => $lockedOffer->negotiation_id,
                 'role' => 'pembeli',
                 'notification_type' => 'negosiasi',
-                'title' => $titleEmoji.' Penawaran '.$decision.' — '.$product->product_name,
+                'title' => 'Penawaran '.$decision.' — '.$product->product_name,
                 'message' => 'Tawaranmu sebesar Rp '.number_format((int)$lockedOffer->offered_price, 0, ',', '.').' untuk "'.$product->product_name.'" telah '.$decision.' oleh penjual.',
                 'offered_price' => (int) $lockedOffer->offered_price,
                 'original_price' => (int) $product->price,

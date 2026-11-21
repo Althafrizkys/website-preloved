@@ -65,7 +65,7 @@ class NotificationTest extends TestCase
             'negotiation_id' => $negotiation->negotiation_id,
             'role' => 'penjual',
             'notification_type' => 'negosiasi',
-            'title' => '💬 Penawaran masuk — '.$product->product_name,
+            'title' => '✅ Penawaran masuk — '.$product->product_name,
             'message' => 'Pembeli menawar Nike Court Version LO NN Original',
             'offered_price' => 800000,
             'original_price' => 850000,
@@ -81,7 +81,8 @@ class NotificationTest extends TestCase
             ->assertSee('Belum dibaca')
             ->assertSee('Penjual')
             ->assertSee('Pembeli')
-            ->assertSee('💬 Penawaran masuk')
+            ->assertSee('Penawaran masuk')
+            ->assertDontSee('✅')
             ->assertSee('Nike Court Version LO NN Original')
             ->assertSee('Pembeli menawar Nike Court Version LO NN Original')
             ->assertSee('data-unread-dot', false)
@@ -220,7 +221,7 @@ class NotificationTest extends TestCase
             'negotiation_id' => $offer->negotiation_id,
             'role' => 'penjual',
             'notification_type' => 'negosiasi',
-            'title' => '💬 Penawaran masuk — '.$product->product_name,
+            'title' => 'Penawaran masuk — '.$product->product_name,
             'offered_price' => 8000000,
             'original_price' => 12000000,
             'is_read' => false,
@@ -235,7 +236,7 @@ class NotificationTest extends TestCase
             'negotiation_id' => $offer->negotiation_id,
             'role' => 'pembeli',
             'notification_type' => 'negosiasi',
-            'title' => '✅ Penawaran diterima — '.$product->product_name,
+            'title' => 'Penawaran diterima — '.$product->product_name,
             'offered_price' => 8000000,
             'original_price' => 12000000,
             'is_read' => false,
