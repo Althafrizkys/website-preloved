@@ -43,7 +43,6 @@
                 action="{{ route('transactions.store') }}"
                 data-checkout-form
                 data-unit-price="{{ $unitPrice }}"
-                data-service-fee="{{ $serviceFee }}"
                 class="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1.8fr)_380px]"
             >
                 @csrf
@@ -257,12 +256,6 @@
                                 </span>
                             </div>
 
-                            <div class="flex items-center justify-between text-[#526170]">
-                                <span>Biaya Layanan</span>
-                                <span class="font-semibold text-[#202b3d]">
-                                    Rp{{ number_format($serviceFee, 0, ',', '.') }}
-                                </span>
-                            </div>
                         </div>
 
                         <div class="my-4 border-t border-[#edf0f2]"></div>
@@ -274,16 +267,6 @@
                             </span>
                         </div>
 
-                        {{-- Kotak Escrow Guarantee --}}
-                        <div class="mt-5 flex items-start gap-3 rounded-[12px] bg-[#e8f8f2] p-3.5 text-[#1b5e4c]">
-                            <svg class="mt-0.5 size-5 shrink-0 text-[#00523f]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
-                                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                            </svg>
-                            <p class="text-[12px] leading-relaxed">
-                                Dana ditahan sistem Seklov &amp; baru diteruskan ke penjual setelah COD selesai.
-                            </p>
-                        </div>
 
                         {{-- Tombol Submit --}}
                         <button

@@ -97,8 +97,7 @@ class TransactionController extends Controller
 
         $defaultQuantity = max(1, min(10, (int) $request->query('quantity', 1)));
         $subtotal = $unitPrice * $defaultQuantity;
-        $serviceFee = TransactionService::SERVICE_FEE;
-        $totalPrice = $subtotal + $serviceFee;
+        $totalPrice = $subtotal ;
 
         // Default kampus mengikuti kampus penjual atau user
         $defaultCampus = in_array($user->campus, ['UNSIKA', 'UBP']) ? $user->campus : 'UNSIKA';
@@ -111,7 +110,6 @@ class TransactionController extends Controller
             'unitPrice' => $unitPrice,
             'defaultQuantity' => $defaultQuantity,
             'subtotal' => $subtotal,
-            'serviceFee' => $serviceFee,
             'totalPrice' => $totalPrice,
             'agreedOffer' => $agreedOffer,
         ]);

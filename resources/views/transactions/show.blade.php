@@ -113,10 +113,7 @@
                             <span>Subtotal Produk</span>
                             <span class="font-medium text-[#202b3d]">Rp{{ number_format((float) $transaction->subtotal_price, 0, ',', '.') }}</span>
                         </div>
-                        <div class="flex justify-between">
-                            <span>Biaya Layanan</span>
-                            <span class="font-medium text-[#202b3d]">Rp{{ number_format((float) $transaction->service_fee, 0, ',', '.') }}</span>
-                        </div>
+                        
                         <div class="flex items-center justify-between border-t border-[#edf0f2] pt-3 text-[16px] font-bold text-[#202b3d]">
                             <span>Total Pembayaran (COD)</span>
                             <span class="font-['Poppins'] text-[20px] text-[#00523f]">

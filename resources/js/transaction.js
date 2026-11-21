@@ -5,7 +5,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const unitPrice = Number(form.dataset.unitPrice || 0);
-    const serviceFee = Number(form.dataset.serviceFee || 2000);
 
     const campusInput = form.querySelector('#selected_campus');
     const campusButtons = form.querySelectorAll('[data-campus-btn]');
@@ -81,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
         qtyInput.value = qty;
 
         const subtotal = unitPrice * qty;
-        const total = subtotal + serviceFee;
+        const total = subtotal ;
 
         if (itemSubtotal) {
             itemSubtotal.textContent = formatRupiah(subtotal);

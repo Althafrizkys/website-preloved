@@ -15,7 +15,7 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 class TransactionService
 {
-    public const SERVICE_FEE = 2000;
+    public const SERVICE_FEE = 0;
 
     public function createCodTransaction(
         User $buyer,
@@ -71,15 +71,14 @@ class TransactionService
             }
 
             $subtotal = $unitPrice * $quantity;
-            $serviceFee = self::SERVICE_FEE;
-            $totalPrice = $subtotal + $serviceFee;
+            $totalPrice = $subtotal ;
 
             $transaction = Transaction::create([
                 'buyer_id' => $buyer->user_id,
                 'seller_id' => $lockedProduct->seller_id,
                 'meeting_point_id' => $meetingPoint->meeting_point_id,
                 'subtotal_price' => $subtotal,
-                'service_fee' => $serviceFee,
+                'service_fee' => 0,
                 'agreed_discount' => $agreedDiscount,
                 'total_price' => $totalPrice,
                 'payment_method' => 'cod',
@@ -184,7 +183,7 @@ class TransactionService
             'role' => 'penjual',
             'notification_type' => 'transaksi',
             'title' => 'Transaksi COD Selesai',
-            'message' => 'Transaksi COD untuk '.$productName.' telah selesai. Dana telah diteruskan ke akunmu.',
+            'message' => 'Transaksi COD untuk '.$productName.' telah selesai.',
         ]);
 
         return $transaction;

@@ -70,11 +70,11 @@ class TransactionCodTest extends TestCase
             ->assertSee('Cash On Delivery')
             ->assertSee('Ringkasan Pembayaran')
             ->assertSee('Subtotal Produk')
-            ->assertSee('Biaya Layanan')
-            ->assertSee('Rp2.000')
+            ->assertDontSee('Biaya Layanan')
+            ->assertDontSee('Rp2.000')
+            ->assertDontSee('Dana ditahan sistem Seklov')
             ->assertSee('Total Bayar')
-            ->assertSee('Rp101.000')
-            ->assertSee('Dana ditahan sistem Seklov &amp; baru diteruskan ke penjual setelah COD selesai.', false)
+            ->assertSee('Rp99.000')
             ->assertSee('Bayar &amp; Buat Pesanan', false);
     }
 
@@ -121,8 +121,8 @@ class TransactionCodTest extends TestCase
         $this->assertSame('menunggu', $transaction->transaction_status);
         $this->assertSame('cod', $transaction->payment_method);
         $this->assertEquals(99000, (int) $transaction->subtotal_price);
-        $this->assertEquals(2000, (int) $transaction->service_fee);
-        $this->assertEquals(101000, (int) $transaction->total_price);
+        $this->assertEquals(0, (int) $transaction->service_fee);
+        $this->assertEquals(99000, (int) $transaction->total_price);
         $this->assertSame('Ketemu jam 13.00 WIB setelah kelas di pos satpam.', $transaction->buyer_notes);
 
         // Produk ditandai terjual
@@ -192,7 +192,7 @@ class TransactionCodTest extends TestCase
 
         $transaction = Transaction::first();
         $this->assertEquals(80000, (int) $transaction->subtotal_price);
-        $this->assertEquals(82000, (int) $transaction->total_price); // 80.000 + 2.000 service fee
+        $this->assertEquals(80000, (int) $transaction->total_price);
     }
 
     public function test_penjual_dapat_mengonfirmasi_jadwal_cod(): void
@@ -212,8 +212,8 @@ class TransactionCodTest extends TestCase
             'seller_id' => $seller->user_id,
             'meeting_point_id' => $meetingPoint->meeting_point_id,
             'subtotal_price' => 50000,
-            'service_fee' => 2000,
-            'total_price' => 52000,
+            'service_fee' => 0,
+            'total_price' => 50000,
             'payment_method' => 'cod',
             'transaction_status' => 'menunggu',
         ]);
@@ -242,8 +242,8 @@ class TransactionCodTest extends TestCase
             'seller_id' => $seller->user_id,
             'meeting_point_id' => $meetingPoint->meeting_point_id,
             'subtotal_price' => 50000,
-            'service_fee' => 2000,
-            'total_price' => 52000,
+            'service_fee' => 0,
+            'total_price' => 50000,
             'payment_method' => 'cod',
             'transaction_status' => 'dijadwalkan',
         ]);
@@ -273,8 +273,8 @@ class TransactionCodTest extends TestCase
             'seller_id' => $seller->user_id,
             'meeting_point_id' => $meetingPoint->meeting_point_id,
             'subtotal_price' => 50000,
-            'service_fee' => 2000,
-            'total_price' => 52000,
+            'service_fee' => 0,
+            'total_price' => 50000,
             'payment_method' => 'cod',
             'transaction_status' => 'menunggu',
         ]);
@@ -311,8 +311,8 @@ class TransactionCodTest extends TestCase
             'seller_id' => $seller->user_id,
             'meeting_point_id' => $meetingPoint->meeting_point_id,
             'subtotal_price' => 50000,
-            'service_fee' => 2000,
-            'total_price' => 52000,
+            'service_fee' => 0,
+            'total_price' => 50000,
             'payment_method' => 'cod',
             'transaction_status' => 'menunggu',
         ]);

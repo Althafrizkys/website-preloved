@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::table('transactions', function (Blueprint $table) {
             $table->decimal('subtotal_price', 12, 2)->nullable()->after('meeting_point_id');
-            $table->decimal('service_fee', 12, 2)->default(2000)->after('agreed_discount');
+            $table->decimal('service_fee', 12, 2)->default(0)->after('agreed_discount');
             $table->text('buyer_notes')->nullable()->after('payment_method');
         });
     }
