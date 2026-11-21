@@ -142,14 +142,14 @@ class TransactionCodTest extends TestCase
             'user_id' => $seller->user_id,
             'role' => 'penjual',
             'notification_type' => 'transaksi',
-            'title' => 'Pesanan COD Baru',
+            'title' => '🛒 Pembelian masuk — '.$product->product_name,
         ]);
 
         $this->assertDatabaseHas('notifications', [
             'user_id' => $buyer->user_id,
             'role' => 'pembeli',
             'notification_type' => 'transaksi',
-            'title' => 'Pesanan COD Dibuat',
+            'title' => '🛍️ Pesanan berhasil dibuat — '.$product->product_name,
         ]);
     }
 

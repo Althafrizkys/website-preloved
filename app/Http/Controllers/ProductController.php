@@ -11,6 +11,7 @@ use App\Services\ProductService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Session;
 
 class ProductController extends Controller
 {
@@ -42,7 +43,7 @@ class ProductController extends Controller
     public function show(Product $product): View
     {
         if (request()->query('nego') === 'open') {
-            request()->session()->keep(['errors', '_old_input', 'success']);
+            Session::keep(['errors', '_old_input', 'success']);
         }
 
         $product->load([

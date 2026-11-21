@@ -61,7 +61,7 @@ class NegotiationFlowTest extends TestCase
         $this->assertDatabaseHas('notifications', [
             'user_id' => $seller->user_id,
             'notification_type' => 'negosiasi',
-            'title' => 'Tawaran nego baru',
+            'title' => '💬 Penawaran masuk — '.$product->product_name,
         ]);
     }
 
@@ -129,7 +129,7 @@ class NegotiationFlowTest extends TestCase
         $this->assertDatabaseHas('notifications', [
             'user_id' => $buyer->user_id,
             'notification_type' => 'negosiasi',
-            'title' => 'Tawaran nego diterima',
+            'title' => '✅ Penawaran diterima — '.$product->product_name,
         ]);
 
         $this->actingAs($buyer)
