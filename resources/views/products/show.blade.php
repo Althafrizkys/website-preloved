@@ -122,7 +122,17 @@
                         </div>
 
                         <div class="grid grid-cols-1 gap-2 sm:grid-cols-[minmax(0,1fr)_auto_auto]">
-                            <button type="button" disabled title="Fitur pembelian segera hadir" class="min-h-11 cursor-not-allowed rounded-[8px] bg-[#00523f] px-4 text-[12px] font-semibold text-white opacity-80">Beli Sekarang</button>
+                            @guest
+                                <a href="{{ route('login') }}" class="inline-flex min-h-11 items-center justify-center rounded-[8px] bg-[#00523f] px-4 text-[12px] font-semibold text-white transition hover:bg-[#006c52]">Beli Sekarang</a>
+                            @else
+                                @if ((int) auth()->id() === (int) $product->seller_id)
+                                    <button type="button" disabled title="Penjual tidak dapat membeli barang sendiri" class="min-h-11 cursor-not-allowed rounded-[8px] bg-[#00523f] px-4 text-[12px] font-semibold text-white opacity-70">Beli Sekarang</button>
+                                @elseif ($product->status !== 'tersedia')
+                                    <button type="button" disabled title="Barang sudah tidak tersedia" class="min-h-11 cursor-not-allowed rounded-[8px] bg-[#00523f] px-4 text-[12px] font-semibold text-white opacity-70">Barang Terjual</button>
+                                @else
+                                    <a href="{{ route('transactions.create', $product) }}" class="inline-flex min-h-11 items-center justify-center rounded-[8px] bg-[#00523f] px-4 text-[12px] font-semibold text-white transition hover:bg-[#006c52]">Beli Sekarang</a>
+                                @endif
+                            @endguest
                             @guest
                                 <a href="{{ route('login') }}" class="inline-flex min-h-11 items-center justify-center rounded-[8px] border border-[#dce3e6] px-4 text-[12px] font-semibold text-[#236a5a]">Nego</a>
                             @else

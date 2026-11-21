@@ -9,6 +9,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\NegotiationController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\TransactionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -91,4 +92,23 @@ Route::middleware('auth')->group(function () {
         ->name('notifications.read');
     Route::post('/notifikasi/baca-semua', [NotificationController::class, 'markAllAsRead'])
         ->name('notifications.readAll');
+
+    // Transaksi & COD
+    Route::get('/transaksi', [TransactionController::class, 'index'])->name('transactions.index');
+    Route::get('/transaksi/buat/{product}', [TransactionController::class, 'create'])
+        ->whereNumber('product')
+        ->name('transactions.create');
+    Route::post('/transaksi', [TransactionController::class, 'store'])->name('transactions.store');
+    Route::get('/transaksi/{transaction}', [TransactionController::class, 'show'])
+        ->whereNumber('transaction')
+        ->name('transactions.show');
+    Route::post('/transaksi/{transaction}/konfirmasi', [TransactionController::class, 'confirm'])
+        ->whereNumber('transaction')
+        ->name('transactions.confirm');
+    Route::post('/transaksi/{transaction}/selesai', [TransactionController::class, 'complete'])
+        ->whereNumber('transaction')
+        ->name('transactions.complete');
+    Route::post('/transaksi/{transaction}/batal', [TransactionController::class, 'cancel'])
+        ->whereNumber('transaction')
+        ->name('transactions.cancel');
 });

@@ -72,6 +72,16 @@ class User extends Authenticatable
         return $this->hasMany(UserNotification::class, 'user_id', 'user_id');
     }
 
+    public function buyerTransactions(): HasMany
+    {
+        return $this->hasMany(Transaction::class, 'buyer_id', 'user_id');
+    }
+
+    public function sellerTransactions(): HasMany
+    {
+        return $this->hasMany(Transaction::class, 'seller_id', 'user_id');
+    }
+
     public function isAdmin(): bool
     {
         return $this->role === 'admin';

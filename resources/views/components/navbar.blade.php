@@ -16,12 +16,12 @@
                         <circle cx="18" cy="20" r="1.2" fill="currentColor"/>
                     </svg>
                 </button>
-                <button type="button" disabled title="Daftar transaksi segera hadir" aria-label="Daftar transaksi segera hadir" class="flex size-10 cursor-not-allowed items-center justify-center rounded-[12px] bg-white text-[#00523f] opacity-80 sm:size-11">
+                <a href="{{ route('transactions.index') }}" title="Daftar Transaksi" aria-label="Daftar Transaksi" class="flex size-10 items-center justify-center rounded-[12px] bg-white text-[#00523f] transition hover:bg-[#edf7f4] sm:size-11">
                     <svg class="size-5 sm:size-6" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                         <path d="M6 3.5h9l4 4V20a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4.5a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.8"/>
                         <path d="M14.5 3.8V8h4.2M9 12h6M9 16h6" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"/>
                     </svg>
-                </button>
+                </a>
                 <button
                     type="button"
                     data-notification-trigger
