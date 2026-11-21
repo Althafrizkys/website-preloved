@@ -142,14 +142,14 @@ class TransactionCodTest extends TestCase
             'user_id' => $seller->user_id,
             'role' => 'penjual',
             'notification_type' => 'transaksi',
-            'title' => 'Pesanan COD Baru',
+            'title' => 'Pembelian masuk — '.$product->product_name,
         ]);
 
         $this->assertDatabaseHas('notifications', [
             'user_id' => $buyer->user_id,
             'role' => 'pembeli',
             'notification_type' => 'transaksi',
-            'title' => 'Pesanan COD Dibuat',
+            'title' => 'Pesanan berhasil dibuat — '.$product->product_name,
         ]);
     }
 
@@ -292,6 +292,18 @@ class TransactionCodTest extends TestCase
 
         $this->assertSame('dibatalkan', $transaction->fresh()->transaction_status);
         $this->assertSame('tersedia', $product->fresh()->status);
+        $this->assertDatabaseHas('notifications', [
+            'user_id' => $seller->user_id,
+            'product_id' => $product->product_id,
+            'role' => 'penjual',
+            'notification_type' => 'transaksi',
+            'title' => 'Pesanan dibatalkan — '.$product->product_name,
+        ]);
+
+        $this->actingAs($seller)
+            ->get(route('notifications.index'))
+            ->assertOk()
+            ->assertSee('Pesanan dibatalkan — '.$product->product_name);
     }
 
     public function test_daftar_transaksi_menampilkan_pembelian_dan_penjualan(): void
@@ -329,13 +341,17 @@ class TransactionCodTest extends TestCase
             ->assertOk()
             ->assertSee('Daftar Transaksi COD')
             ->assertSee('Pembelian Saya')
-            ->assertSee('Pesanan #'.$transaction->transaction_id);
+            ->assertSee('Pesanan #'.$transaction->transaction_id)
+            ->assertSee('Hubungi Penjual')
+            ->assertSee('mailto:'.$seller->email, false);
 
         // Seller sees sale
         $this->actingAs($seller)->get(route('transactions.index', ['tab' => 'penjualan']))
             ->assertOk()
             ->assertSee('Penjualan Saya')
-            ->assertSee('Pesanan #'.$transaction->transaction_id);
+            ->assertSee('Pesanan #'.$transaction->transaction_id)
+            ->assertSee('Hubungi Pembeli')
+            ->assertSee('mailto:'.$buyer->email, false);
     }
 
     private function createUser(string $name = 'User', string $campus = 'UNSIKA'): User

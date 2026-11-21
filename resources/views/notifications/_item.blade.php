@@ -26,18 +26,25 @@
         </div>
 
         <div class="min-w-0 flex-1">
-            <h4 class="truncate text-[13px] font-semibold text-[#1c2c26]" title="{{ $notification->product_name }}">
-                {{ $notification->product_name }}
+            {{-- Judul event (konteks apa yang terjadi) --}}
+            <h4 class="truncate text-[13px] font-semibold text-[#1c2c26]" title="{{ $notification->title }}">
+                {{ $notification->title }}
             </h4>
-            <div class="mt-0.5 flex flex-wrap items-center gap-1.5 text-[12px]">
-                @if ($notification->display_original_price)
-                    <span class="text-[#8e9d96] line-through">Rp {{ number_format($notification->display_original_price, 0, ',', '.') }}</span>
-                @endif
-                @if ($notification->display_offered_price)
-                    <span class="font-bold text-[#00523f]">Rp {{ number_format($notification->display_offered_price, 0, ',', '.') }}</span>
-                @endif
-            </div>
-            <p class="mt-0.5 text-[11px] text-[#8e9d96]">{{ $notification->time_ago }}</p>
+            {{-- Pesan detail kontekstual --}}
+            @if ($notification->message)
+                <p class="mt-0.5 line-clamp-2 text-[11.5px] leading-snug text-[#4a5a52]">{{ $notification->message }}</p>
+            @else
+                {{-- Fallback: tampilkan nama produk dan harga --}}
+                <div class="mt-0.5 flex flex-wrap items-center gap-1.5 text-[12px]">
+                    @if ($notification->display_original_price)
+                        <span class="text-[#8e9d96] line-through">Rp {{ number_format($notification->display_original_price, 0, ',', '.') }}</span>
+                    @endif
+                    @if ($notification->display_offered_price)
+                        <span class="font-bold text-[#00523f]">Rp {{ number_format($notification->display_offered_price, 0, ',', '.') }}</span>
+                    @endif
+                </div>
+            @endif
+            <p class="mt-1 text-[11px] text-[#8e9d96]">{{ $notification->time_ago }}</p>
         </div>
     </div>
 

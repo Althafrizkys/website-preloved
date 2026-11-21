@@ -31,8 +31,8 @@ class TransactionController extends Controller
         $transactions = $query
             ->with([
                 'meetingPoint',
-                'buyer:user_id,name,campus',
-                'seller:user_id,name,campus',
+                'buyer:user_id,name,campus,email',
+                'seller:user_id,name,campus,email',
                 'items.product.media',
             ])
             ->orderByDesc('created_at')

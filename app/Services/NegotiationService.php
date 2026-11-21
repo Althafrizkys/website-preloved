@@ -97,9 +97,8 @@ class NegotiationService
                 'negotiation_id' => $offer->negotiation_id,
                 'role' => 'penjual',
                 'notification_type' => 'negosiasi',
-                'title' => 'Tawaran nego baru',
-                'message' => $buyer->name.' menawar '.$lockedProduct->product_name
-                    .' seharga Rp '.number_format($offeredPrice, 0, ',', '.').'.',
+                'title' => 'Penawaran masuk — '.$lockedProduct->product_name,
+                'message' => $buyer->name.' menawarkan harga Rp '.number_format($offeredPrice, 0, ',', '.').' untuk "'.$lockedProduct->product_name.'" (harga asli Rp '.number_format((int)$lockedProduct->price, 0, ',', '.').').',
                 'offered_price' => $offeredPrice,
                 'original_price' => (int) $lockedProduct->price,
             ]);
@@ -165,10 +164,8 @@ class NegotiationService
                 'negotiation_id' => $lockedOffer->negotiation_id,
                 'role' => 'pembeli',
                 'notification_type' => 'negosiasi',
-                'title' => 'Tawaran nego '.$decision,
-                'message' => 'Tawaranmu untuk '.$product->product_name.' sebesar Rp '
-                    .number_format((int) $lockedOffer->offered_price, 0, ',', '.')
-                    .' telah '.$decision.'.',
+                'title' => 'Penawaran '.$decision.' — '.$product->product_name,
+                'message' => 'Tawaranmu sebesar Rp '.number_format((int)$lockedOffer->offered_price, 0, ',', '.').' untuk "'.$product->product_name.'" telah '.$decision.' oleh penjual.',
                 'offered_price' => (int) $lockedOffer->offered_price,
                 'original_price' => (int) $product->price,
             ]);

@@ -103,8 +103,8 @@ class TransactionService
                 'product_id' => $lockedProduct->product_id,
                 'role' => 'penjual',
                 'notification_type' => 'transaksi',
-                'title' => 'Pesanan COD Baru',
-                'message' => $buyer->name.' membuat pesanan COD untuk '.$lockedProduct->product_name.' di '.$meetingPoint->point_name.'.',
+                'title' => 'Pembelian masuk — '.$lockedProduct->product_name,
+                'message' => $buyer->name.' membeli "'.$lockedProduct->product_name.'" seharga Rp '.number_format($unitPrice, 0, ',', '.').' lewat COD di '.$meetingPoint->point_name.'.',
                 'original_price' => (int) $lockedProduct->price,
                 'offered_price' => $unitPrice,
             ]);
@@ -115,8 +115,8 @@ class TransactionService
                 'product_id' => $lockedProduct->product_id,
                 'role' => 'pembeli',
                 'notification_type' => 'transaksi',
-                'title' => 'Pesanan COD Dibuat',
-                'message' => 'Pesanan COD untuk '.$lockedProduct->product_name.' berhasil dibuat. Total bayar: Rp '.number_format($totalPrice, 0, ',', '.').'.',
+                'title' => 'Pesanan berhasil dibuat — '.$lockedProduct->product_name,
+                'message' => 'Pesananmu untuk "'.$lockedProduct->product_name.'" (Rp '.number_format($totalPrice, 0, ',', '.').') berhasil dibuat. Tunggu konfirmasi jadwal COD dari penjual.',
                 'original_price' => (int) $lockedProduct->price,
                 'offered_price' => $unitPrice,
             ]);
@@ -144,8 +144,8 @@ class TransactionService
             'product_id' => $item?->product_id,
             'role' => 'pembeli',
             'notification_type' => 'transaksi',
-            'title' => 'Jadwal COD Dikonfirmasi',
-            'message' => 'Penjual telah mengonfirmasi COD untuk '.$productName.'. Siapkan uang pas saat bertemu.',
+            'title' => 'Jadwal COD dikonfirmasi — '.$productName,
+            'message' => 'Penjual telah mengonfirmasi jadwal COD untuk "'.$productName.'". Siapkan uang tunai saat bertemu di titik COD.',
         ]);
 
         return $transaction;
@@ -173,8 +173,8 @@ class TransactionService
             'product_id' => $item?->product_id,
             'role' => 'pembeli',
             'notification_type' => 'transaksi',
-            'title' => 'Transaksi COD Selesai',
-            'message' => 'Transaksi COD untuk '.$productName.' telah selesai. Terima kasih telah bertransaksi di Seklov!',
+            'title' => 'Transaksi selesai — '.$productName,
+            'message' => 'Transaksi COD untuk "'.$productName.'" telah selesai. Terima kasih telah berbelanja di Seklov!',
         ]);
 
         UserNotification::create([
@@ -182,8 +182,8 @@ class TransactionService
             'product_id' => $item?->product_id,
             'role' => 'penjual',
             'notification_type' => 'transaksi',
-            'title' => 'Transaksi COD Selesai',
-            'message' => 'Transaksi COD untuk '.$productName.' telah selesai.',
+            'title' => 'Barang berhasil terjual — '.$productName,
+            'message' => '"'.$productName.'" telah berhasil terjual lewat COD. Transaksi dinyatakan selesai.',
         ]);
 
         return $transaction;
@@ -204,14 +204,32 @@ class TransactionService
             ]);
         }
 
-        return DB::transaction(function () use ($transaction): Transaction {
+        return DB::transaction(function () use ($user, $transaction): Transaction {
+            $buyerCancelled = (int) $transaction->buyer_id === (int) $user->user_id
+                && $transaction->transaction_status !== 'dibatalkan';
+            $items = $transaction->items()->with('product')->get();
+
             $transaction->update([
                 'transaction_status' => 'dibatalkan',
             ]);
 
             // Kembalikan produk menjadi tersedia
-            foreach ($transaction->items as $item) {
+            foreach ($items as $item) {
                 $item->product?->update(['status' => 'tersedia']);
+            }
+
+            if ($buyerCancelled) {
+                $item = $items->first();
+                $productName = $item?->product?->product_name ?? 'Barang';
+
+                UserNotification::create([
+                    'user_id' => $transaction->seller_id,
+                    'product_id' => $item?->product_id,
+                    'role' => 'penjual',
+                    'notification_type' => 'transaksi',
+                    'title' => 'Pesanan dibatalkan — '.$productName,
+                    'message' => $user->name.' membatalkan pesanan untuk "'.$productName.'".',
+                ]);
             }
 
             return $transaction;

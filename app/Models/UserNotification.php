@@ -71,6 +71,13 @@ class UserNotification extends Model
         return $query->where('is_read', false);
     }
 
+    public function getTitleAttribute(?string $title): ?string
+    {
+        return $title === null
+            ? null
+            : preg_replace('/^\p{Extended_Pictographic}\x{FE0F}?\s*/u', '', $title);
+    }
+
     public function getEffectiveRoleAttribute(): string
     {
         if (! empty($this->attributes['role'])) {

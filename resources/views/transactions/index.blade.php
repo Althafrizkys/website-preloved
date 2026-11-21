@@ -59,6 +59,7 @@
                         @php
                             $firstItem = $transaction->items->first();
                             $cover = $firstItem?->product?->media->firstWhere('media_type', 'foto');
+                            $contact = $currentTab === 'penjualan' ? $transaction->buyer : $transaction->seller;
                         @endphp
                         <article class="rounded-[16px] border border-[#e5e9ed] bg-white p-5 shadow-[0_2px_10px_rgba(22,34,48,0.03)] transition hover:border-[#00523f]/40 sm:p-6">
                             <div class="flex flex-wrap items-center justify-between gap-2 border-b border-[#edf0f2] pb-3 text-[12px] text-[#718096]">
@@ -96,12 +97,22 @@
                                             Rp{{ number_format((float) $transaction->total_price, 0, ',', '.') }}
                                         </span>
                                     </div>
-                                    <a
-                                        href="{{ route('transactions.show', $transaction) }}"
-                                        class="rounded-[10px] bg-[#00523f] px-4 py-2 text-[12px] font-semibold text-white transition hover:bg-[#003d2e]"
-                                    >
-                                        Lihat Detail
-                                    </a>
+                                    <div class="flex flex-wrap gap-2">
+                                        @if ($contact)
+                                            <a
+                                                href="mailto:{{ $contact->email }}"
+                                                class="rounded-[10px] border border-[#00523f] px-4 py-2 text-[12px] font-semibold text-[#00523f] transition hover:bg-[#edf7f4]"
+                                            >
+                                                Hubungi {{ $currentTab === 'penjualan' ? 'Pembeli' : 'Penjual' }}
+                                            </a>
+                                        @endif
+                                        <a
+                                            href="{{ route('transactions.show', $transaction) }}"
+                                            class="rounded-[10px] bg-[#00523f] px-4 py-2 text-[12px] font-semibold text-white transition hover:bg-[#003d2e]"
+                                        >
+                                            Lihat Detail
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                         </article>
