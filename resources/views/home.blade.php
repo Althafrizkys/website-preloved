@@ -16,15 +16,21 @@
         </header>
 
         <main class="mx-auto max-w-[1320px] px-4 pb-16 pt-6 sm:px-6 sm:pt-8">
-            <section class="relative overflow-hidden rounded-[20px] bg-gradient-to-r from-[#00523f] via-[#007b5d] to-[#00a97b] px-6 py-8 text-white shadow-[0_8px_20px_rgba(0,82,63,0.14)] sm:px-10 sm:py-11 lg:px-12">
-                <div class="pointer-events-none absolute -right-10 -top-20 size-64 rounded-full border-[34px] border-white/10 sm:right-8 sm:top-[-110px] sm:size-[340px]"></div>
-                <div class="pointer-events-none absolute bottom-[-86px] right-[22%] size-40 rounded-full bg-[#00b888]/30 blur-2xl"></div>
-                <div class="relative max-w-[700px]">
-                    <p class="mb-3 text-[12px] font-semibold uppercase tracking-[0.18em] text-[#c5f3e7] sm:text-[13px]">Marketplace mahasiswa Karawang</p>
-                    <h1 class="font-['Poppins'] text-[27px] leading-[1.25] font-semibold tracking-[-0.035em] sm:text-[36px] lg:text-[42px]">Dari Mahasiswa,<br class="hidden sm:block"> Untuk Mahasiswa!</h1>
-                    <p class="mt-3 max-w-[520px] text-[14px] leading-6 text-white/85 sm:text-[16px]">Temukan barang preloved kampus dan jual barangmu dengan mudah di Seklov.</p>
-                    <x-sell-button label="Mulai Jual →" class="mt-6 inline-flex min-h-11 items-center justify-center rounded-[10px] bg-white px-5 py-2.5 text-[14px] font-bold text-[#00523f] transition hover:bg-[#e8fff7]" />
+            <section class="relative grid min-h-[360px] grid-cols-1 items-end overflow-hidden rounded-3xl bg-gradient-to-r from-[#00523F] to-[#10B98A] px-6 pt-8 text-white shadow-[0_8px_24px_rgba(0,82,63,0.16)] sm:min-h-[400px] sm:px-10 sm:pt-10 lg:min-h-[320px] lg:grid-cols-[1.1fr_0.9fr] lg:px-12 lg:pt-10">
+                <div class="relative z-10 pb-2 sm:pb-4 lg:max-w-[620px] lg:pb-10">
+                    <h1 class="font-['Poppins'] text-[28px] leading-[1.2] font-semibold tracking-[-0.035em] sm:text-[38px] lg:text-[44px]">Dari Mahasiswa Untuk Mahasiswa!</h1>
+                    <p class="mt-3 text-[15px] leading-6 text-white/90 sm:text-[17px]">Transaksi aman bisa COD di Kampus.</p>
+                    <x-sell-button label="Mulai Jual" class="mt-6 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-white px-5 py-2.5 text-[14px] font-bold text-[#00523F] shadow-sm transition hover:bg-[#e8fff7]">
+                        <svg class="size-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </x-sell-button>
                 </div>
+                <img
+                    src="{{ asset('images/karakter-mahasiswa.png') }}"
+                    alt="Dua mahasiswa berbagi buku"
+                    class="relative ml-auto mt-3 h-40 max-w-[78%] object-contain object-bottom sm:h-52 lg:absolute lg:bottom-0 lg:right-8 lg:mt-0 lg:h-full lg:max-w-[44%]"
+                >
             </section>
 
             <section class="mt-5 rounded-[14px] border border-[#e7ebee] bg-white p-3 shadow-[0_3px_12px_rgba(22,34,48,0.04)] sm:mt-7 sm:p-4" aria-label="Cari dan filter barang">
@@ -51,6 +57,15 @@
                     <button type="submit" class="min-h-11 rounded-[10px] bg-[#00523f] px-5 text-[14px] font-semibold text-white transition hover:bg-[#006c52]">Cari barang</button>
                 </form>
             </section>
+
+            <div class="mt-4 mb-6">
+                <img
+                    src="{{ asset('images/banner-wishlist.jpeg') }}"
+                    alt="Banner wishlist: minta barang yang belum tersedia"
+                    loading="lazy"
+                    class="block h-auto w-full rounded-3xl"
+                >
+            </div>
 
             <section class="mt-8 sm:mt-10">
                 <div class="mb-4 flex flex-wrap items-end justify-between gap-3">
