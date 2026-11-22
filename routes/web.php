@@ -13,6 +13,7 @@ use App\Http\Controllers\TransactionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ChatController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -90,8 +91,19 @@ Route::middleware('auth')->group(function () {
     Route::patch('/notifikasi/{notification}/baca', [NotificationController::class, 'markAsRead'])
         ->whereNumber('notification')
         ->name('notifications.read');
-    Route::post('/notifikasi/baca-semua', [NotificationController::class, 'markAllAsRead'])
+        Route::post('/notifikasi/baca-semua', [NotificationController::class, 'markAllAsRead'])
         ->name('notifications.readAll');
+
+    // Chat
+    Route::post('/chat/mulai/{product}', [ChatController::class, 'start'])
+        ->whereNumber('product')
+        ->name('chat.start');
+    Route::get('/chat/{conversation}/pesan', [ChatController::class, 'messages'])
+        ->whereNumber('conversation')
+        ->name('chat.messages');
+    Route::post('/chat/{conversation}/pesan', [ChatController::class, 'store'])
+        ->whereNumber('conversation')
+        ->name('chat.store');
 
     // Transaksi & COD
     Route::get('/transaksi', [TransactionController::class, 'index'])->name('transactions.index');

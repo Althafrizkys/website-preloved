@@ -46,6 +46,11 @@ class Conversation extends Model
         return $this->hasMany(Negotiation::class, 'conversation_id', 'conversation_id');
     }
 
+    public function messages(): HasMany
+    {
+        return $this->hasMany(Message::class, 'conversation_id', 'conversation_id');
+    }
+
     public function agreedOffer(): ?Negotiation
     {
         return $this->negotiations()
