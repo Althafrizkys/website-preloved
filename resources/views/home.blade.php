@@ -104,5 +104,10 @@
                 <p class="text-[12px] text-white/65">© {{ date('Y') }} Seklov. Untuk mahasiswa UNSIKA &amp; UBP.</p>
             </div>
         </footer>
+        <a href="{{ auth()->check() ? route('chat.index') : route('login') }}" title="Pesan" aria-label="Buka pesan" class="fixed bottom-6 right-6 z-40 flex size-14 items-center justify-center rounded-full bg-[#1a8a68] text-white shadow-lg transition hover:bg-[#1f9d78]">
+            <svg class="size-6" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"/>
+            </svg>
+        </a>
     </body>
 </html>

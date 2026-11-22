@@ -22,6 +22,11 @@
                         <path d="M14.5 3.8V8h4.2M9 12h6M9 16h6" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"/>
                     </svg>
                 </a>
+                <a href="{{ route('chat.index') }}" title="Pesan" aria-label="Pesan" class="flex size-10 items-center justify-center rounded-[12px] bg-white text-[#00523f] transition hover:bg-[#edf7f4] sm:size-11">
+                    <svg class="size-5 sm:size-6" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"/>
+                    </svg>
+                </a>
                 <button
                     type="button"
                     data-notification-trigger
