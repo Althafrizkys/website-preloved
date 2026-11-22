@@ -98,7 +98,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/chat/mulai/{product}', [ChatController::class, 'start'])
         ->whereNumber('product')
         ->name('chat.start');
-    Route::get('/chat/{conversation}/pesan', [ChatController::class, 'messages'])
+        Route::get('/chat', [ChatController::class, 'index'])->name('chat.index');
+        Route::get('/chat/{conversation}', [ChatController::class, 'show'])
+            ->whereNumber('conversation')
+            ->name('chat.show');
+        Route::get('/chat/{conversation}/pesan', [ChatController::class, 'messages'])
         ->whereNumber('conversation')
         ->name('chat.messages');
     Route::post('/chat/{conversation}/pesan', [ChatController::class, 'store'])
