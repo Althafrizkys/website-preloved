@@ -129,7 +129,34 @@ class ChatPageTest extends TestCase
             ->assertSee(route('negotiations.accept', $offer), false)
             ->assertSee(route('negotiations.reject', $offer), false);
     }
+    public function test_tombol_chat_di_notifikasi_membuka_percakapan(): void
+    {
+        [$buyer, $seller, $product, $conversation] = $this->createChat();
+        $offer = Negotiation::create([
+            'conversation_id' => $conversation->conversation_id,
+            'sender_id' => $buyer->user_id,
+            'parent_offer_id' => null,
+            'offered_price' => 90000,
+            'quantity' => 1,
+            'status' => 'menunggu',
+        ]);
 
+        foreach ([[$seller, 'penjual'], [$buyer, 'pembeli']] as [$user, $role]) {
+            $notification = \App\Models\UserNotification::create([
+                'user_id' => $user->user_id,
+                'product_id' => $product->product_id,
+                'negotiation_id' => $offer->negotiation_id,
+                'role' => $role,
+                'notification_type' => 'negosiasi',
+                'title' => 'Tawaran nego baru',
+                'message' => 'Tawaran',
+                'is_read' => false,
+            ]);
+
+            $this->actingAs($user);
+            $this->assertSame(route('chat.show', $conversation), $notification->fresh()->target_url);
+        }
+    }
     /**
      * @return array{0: User, 1: User, 2: Product, 3: Conversation}
      */
