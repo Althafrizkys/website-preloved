@@ -120,6 +120,10 @@ class UserNotification extends Model
             return route('home');
         }
 
+        if ($this->negotiation?->conversation_id) {
+            return route('chat.show', $this->negotiation->conversation_id);
+        }
+
         if ($this->effective_role === 'penjual' || ((int) auth()->id() === (int) $this->product?->seller_id)) {
             return route('products.edit', $this->product_id);
         }
