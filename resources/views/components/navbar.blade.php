@@ -1,10 +1,26 @@
-@props(['detail' => false])
+@props(['detail' => false, 'search' => null, 'filters' => []])
 
-<nav class="mx-auto flex w-full items-center justify-between gap-3 rounded-[18px] bg-[#00523f] text-white shadow-[0_8px_24px_rgba(0,82,63,0.12)] {{ $detail ? 'max-w-[1184px] px-4 py-2 sm:px-5' : 'max-w-[1320px] px-5 py-3 sm:px-7' }}">
+<nav class="mx-auto flex w-full flex-wrap items-center justify-between gap-3 rounded-[18px] bg-[#00523f] text-white shadow-[0_8px_24px_rgba(0,82,63,0.12)] {{ $detail ? 'max-w-[1184px] px-4 py-2 sm:px-5' : 'max-w-[1320px] px-5 py-3 sm:px-7' }}">
     <a href="{{ route('home') }}" class="flex shrink-0 items-center gap-3" aria-label="Seklov, beranda">
         <span class="flex {{ $detail ? 'size-12' : 'size-10' }} items-center justify-center rounded-[12px] bg-white font-['Poppins'] text-[22px] font-bold text-[#00523f]">S</span>
         <span class="font-['Poppins'] text-[21px] font-semibold tracking-[-0.04em]">Seklov</span>
     </a>
+
+    @if ($search !== null)
+        <form method="GET" action="{{ route('home') }}" role="search" class="order-last w-full md:order-none md:max-w-[460px] md:flex-1">
+            @foreach ($filters as $name => $value)
+                <input type="hidden" name="{{ $name }}" value="{{ $value }}">
+            @endforeach
+            <label class="flex min-h-10 items-center gap-2 rounded-[12px] bg-white px-3.5 text-[#202b3d]">
+                <svg class="size-[18px] shrink-0 text-[#718096]" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <circle cx="10.8" cy="10.8" r="6.8" stroke="currentColor" stroke-width="1.8"/>
+                    <path d="m16 16 4.2 4.2" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"/>
+                </svg>
+                <span class="sr-only">Cari nama barang</span>
+                <input type="search" name="q" value="{{ $search }}" placeholder="Cari nama barang..." class="min-w-0 flex-1 border-0 bg-transparent text-[14px] outline-none placeholder:text-[#98a2ad] focus:ring-0">
+            </label>
+        </form>
+    @endif
 
     <div class="flex items-center gap-2 sm:gap-3">
         @auth

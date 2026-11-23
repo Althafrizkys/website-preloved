@@ -40,7 +40,7 @@ class StoreProductRequest extends FormRequest
             'is_negotiable' => ['required', 'boolean'],
             'size' => ['nullable', 'string', 'max:100'],
             'usage_period' => ['nullable', 'string', 'max:100'],
-            'defects' => ['nullable', 'required_if:condition,Ada kekurangan', 'string', 'max:2000'],
+            'defects' => ['nullable', 'string', 'max:2000'],
             'description' => [
                 'required',
                 'string',

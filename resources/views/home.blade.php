@@ -9,10 +9,11 @@
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+        <style>@view-transition { navigation: auto; }</style>
     </head>
     <body class="m-0 bg-[#f7f9fa] font-['Inter'] text-[#202b3d] antialiased">
         <header class="px-4 pt-4 sm:px-6 sm:pt-6">
-            <x-navbar />
+            <x-navbar :search="$search" :filters="$activeFilters" />
         </header>
 
         <main class="mx-auto max-w-[1320px] px-4 pb-16 pt-6 sm:px-6 sm:pt-8">
@@ -33,28 +34,113 @@
                 >
             </section>
 
-            <section class="mt-5 rounded-[14px] border border-[#e7ebee] bg-white p-3 shadow-[0_3px_12px_rgba(22,34,48,0.04)] sm:mt-7 sm:p-4" aria-label="Cari dan filter barang">
-                <form method="GET" action="{{ route('home') }}" class="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_220px_auto]">
-                    <label class="flex min-h-11 items-center gap-2 rounded-[10px] border border-[#e1e6e9] px-3.5 focus-within:border-[#00523f]">
-                        <svg class="size-[18px] shrink-0 text-[#718096]" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                            <circle cx="10.8" cy="10.8" r="6.8" stroke="currentColor" stroke-width="1.8"/>
-                            <path d="m16 16 4.2 4.2" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"/>
-                        </svg>
-                        <span class="sr-only">Cari nama barang</span>
-                        <input type="search" name="q" value="{{ $search }}" placeholder="Cari nama barang..." class="min-w-0 flex-1 border-0 bg-transparent text-[14px] text-[#202b3d] outline-none placeholder:text-[#98a2ad] focus:ring-0">
-                    </label>
+            @php
+                $pillBase = 'flex h-9 cursor-pointer select-none list-none items-center gap-1.5 rounded-[10px] border px-3.5 text-[13px] transition [&::-webkit-details-marker]:hidden';
+                $pillIdle = 'border-[#e1e6e9] bg-white text-[#526170] hover:border-[#00523f]/40';
+                $pillActive = 'border-[#00523f] bg-[#edf7f4] font-medium text-[#00523f]';
+                $panelBase = 'absolute left-0 top-full z-30 mt-2 w-64 rounded-[12px] border border-[#e1e6e9] bg-white p-1.5 shadow-[0_10px_30px_rgba(22,34,48,0.12)]';
+                $rowBase = 'group flex cursor-pointer items-center justify-between rounded-[8px] px-3 py-2.5 text-[13px] text-[#263746] transition hover:bg-[#f7f9fa] has-[:checked]:bg-[#edf7f4] has-[:checked]:font-semibold has-[:checked]:text-[#00523f]';
 
-                    <label class="flex min-h-11 items-center rounded-[10px] border border-[#e1e6e9] px-3.5">
-                        <span class="sr-only">Filter kategori</span>
-                        <select name="kategori" class="w-full border-0 bg-transparent text-[14px] text-[#526170] outline-none focus:ring-0">
-                            <option value="">Semua kategori</option>
-                            @foreach ($categories as $category)
-                                <option value="{{ $category->category_id }}" @selected($selectedCategory === (string) $category->category_id)>{{ $category->category_name }}</option>
-                            @endforeach
-                        </select>
-                    </label>
+                $filterMenus = [
+                    [
+                        'name' => 'kategori',
+                        'label' => 'Kategori',
+                        'all' => 'Semua kategori',
+                        'selected' => $selectedCategory,
+                        'options' => $categories->mapWithKeys(fn ($category) => [(string) $category->category_id => $category->category_name])->all(),
+                    ],
+                    [
+                        'name' => 'kondisi',
+                        'label' => 'Kondisi',
+                        'all' => 'Semua kondisi',
+                        'selected' => $selectedCondition,
+                        'options' => collect($conditions)->mapWithKeys(fn ($condition) => [$condition => $condition])->all(),
+                    ],
+                    [
+                        'name' => 'nego',
+                        'label' => 'Nego',
+                        'all' => 'Semua',
+                        'selected' => $selectedNego,
+                        'options' => ['ya' => 'Bisa nego', 'tidak' => 'Tidak bisa nego'],
+                    ],
+                ];
 
-                    <button type="submit" class="min-h-11 rounded-[10px] bg-[#00523f] px-5 text-[14px] font-semibold text-white transition hover:bg-[#006c52]">Cari barang</button>
+                $hasPrice = $minPrice !== '' || $maxPrice !== '';
+                $priceLabel = $hasPrice
+                    ? 'Harga: '.($minPrice !== '' ? number_format((int) $minPrice, 0, ',', '.') : '0').' – '.($maxPrice !== '' ? number_format((int) $maxPrice, 0, ',', '.') : '∞')
+                    : 'Harga';
+            @endphp
+
+            <section id="filter-barang" class="mt-5 scroll-mt-4 rounded-[14px] border border-[#e7ebee] bg-white px-3 py-3 shadow-[0_3px_12px_rgba(22,34,48,0.04)] sm:mt-7 sm:px-4" aria-label="Filter barang">
+                <form method="GET" action="{{ route('home') }}#filter-barang" onchange="if (event.target.type === 'radio') this.submit()" class="flex flex-wrap items-center gap-2">
+                    @if ($search !== '')
+                        <input type="hidden" name="q" value="{{ $search }}">
+                    @endif
+
+                    @foreach ($filterMenus as $menu)
+                        @php
+                            $selectedLabel = $menu['selected'] !== '' ? ($menu['options'][$menu['selected']] ?? null) : null;
+                        @endphp
+                        <details name="filter-menu" class="relative">
+                            <summary class="{{ $pillBase }} {{ $selectedLabel ? $pillActive : $pillIdle }}">
+                                <span>{{ $selectedLabel ? $menu['label'].': '.$selectedLabel : $menu['label'] }}</span>
+                                <svg class="size-3.5 opacity-70" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m6 9 6 6 6-6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg>
+                            </summary>
+                            <div class="{{ $panelBase }}">
+                                <div class="max-h-60 overflow-y-auto">
+                                    <label class="{{ $rowBase }}">
+                                        <input type="radio" name="{{ $menu['name'] }}" value="" class="sr-only" @checked($menu['selected'] === '')>
+                                        <span>{{ $menu['all'] }}</span>
+                                    </label>
+                                    @foreach ($menu['options'] as $value => $optionLabel)
+                                        <label class="{{ $rowBase }}">
+                                            <input type="radio" name="{{ $menu['name'] }}" value="{{ $value }}" class="sr-only" @checked($menu['selected'] === (string) $value)>
+                                            <span>{{ $optionLabel }}</span>
+                                            <svg class="hidden size-4 group-has-[:checked]:block" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m5 12 5 5 9-10" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg>
+                                        </label>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </details>
+                    @endforeach
+
+                    <details name="filter-menu" class="relative" @if ($hasPrice) open @endif>
+                        <summary class="{{ $pillBase }} {{ $hasPrice ? $pillActive : $pillIdle }}">
+                            <span>{{ $priceLabel }}</span>
+                            <svg class="size-3.5 opacity-70" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m6 9 6 6 6-6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg>
+                        </summary>
+                        <div class="{{ $panelBase }} w-72 p-4">
+                            <p class="text-[13px] font-semibold text-[#263746]">Rentang harga</p>
+                            <div class="mt-3 grid grid-cols-2 gap-3">
+                                <div>
+                                    <label for="harga_min" class="text-[11px] font-medium text-[#718096]">Harga minimum</label>
+                                    <div class="mt-1 flex h-10 items-center overflow-hidden rounded-[8px] border border-[#e1e6e9] bg-[#f7f9fa] transition focus-within:border-[#00523f] focus-within:bg-white">
+                                        <span class="flex h-full items-center border-r border-[#e1e6e9] px-2.5 text-[12px] font-medium text-[#718096]">Rp</span>
+                                        <input id="harga_min" type="number" name="harga_min" min="0" inputmode="numeric" value="{{ $minPrice }}" placeholder="0" class="h-full w-full min-w-0 border-0 bg-transparent px-2.5 text-[13px] text-[#202b3d] placeholder:text-[#a0aab4] focus:ring-0">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label for="harga_max" class="text-[11px] font-medium text-[#718096]">Harga maksimum</label>
+                                    <div class="mt-1 flex h-10 items-center overflow-hidden rounded-[8px] border border-[#e1e6e9] bg-[#f7f9fa] transition focus-within:border-[#00523f] focus-within:bg-white">
+                                        <span class="flex h-full items-center border-r border-[#e1e6e9] px-2.5 text-[12px] font-medium text-[#718096]">Rp</span>
+                                        <input id="harga_max" type="number" name="harga_max" min="0" inputmode="numeric" value="{{ $maxPrice }}" placeholder="Bebas" class="h-full w-full min-w-0 border-0 bg-transparent px-2.5 text-[13px] text-[#202b3d] placeholder:text-[#a0aab4] focus:ring-0">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-4 flex items-center gap-3">
+                                <button type="submit" class="h-10 flex-1 rounded-[8px] bg-[#00523f] text-[13px] font-semibold text-white transition hover:bg-[#006c52]">Terapkan</button>
+                                @if ($hasPrice)
+                                    <a href="{{ route('home', array_filter(array_merge(['q' => $search], \Illuminate\Support\Arr::except($activeFilters, ['harga_min', 'harga_max'])))) }}" class="text-[12px] font-medium text-[#718096] underline hover:text-[#00523f]">Hapus</a>
+                                @endif
+                            </div>
+                        </div>
+                    </details>
+
+                    @if ($activeFilters !== [])
+                        <a href="{{ route('home', array_filter(['q' => $search])) }}" class="px-1 text-[12px] font-medium text-[#00523f] underline">Reset filter</a>
+                    @endif
+
+                    <x-sell-button label="+ Mulai Jual" class="ml-auto inline-flex h-10 items-center justify-center rounded-[10px] bg-[#00523f] px-5 text-[13px] font-semibold text-white transition hover:bg-[#006c52]" />
                 </form>
             </section>
 
@@ -66,21 +152,6 @@
                     class="block h-auto w-full rounded-3xl"
                 >
             </div>
-
-            <section class="mt-8 sm:mt-10">
-                <div class="mb-4 flex flex-wrap items-end justify-between gap-3">
-                    <div>
-                        <p class="text-[12px] font-semibold uppercase tracking-[0.13em] text-[#00a57a]">Pilihan kampus</p>
-                        <h2 class="mt-1 font-['Poppins'] text-[20px] font-semibold tracking-[-0.025em] text-[#202b3d] sm:text-[24px]">Kategori barang</h2>
-                    </div>
-                </div>
-                <div class="flex gap-2.5 overflow-x-auto pb-2">
-                    <a href="{{ route('home', array_filter(['q' => $search])) }}" class="shrink-0 rounded-full border px-4 py-2 text-[13px] font-medium transition {{ $selectedCategory === '' ? 'border-[#00523f] bg-[#00523f] text-white' : 'border-[#e1e6e9] bg-white text-[#526170] hover:border-[#00523f] hover:text-[#00523f]' }}">Semua</a>
-                    @foreach ($categories as $category)
-                        <a href="{{ route('home', array_filter(['q' => $search, 'kategori' => $category->category_id])) }}" class="shrink-0 rounded-full border px-4 py-2 text-[13px] font-medium transition {{ $selectedCategory === (string) $category->category_id ? 'border-[#00523f] bg-[#00523f] text-white' : 'border-[#e1e6e9] bg-white text-[#526170] hover:border-[#00523f] hover:text-[#00523f]' }}">{{ $category->category_name }}</a>
-                    @endforeach
-                </div>
-            </section>
 
             <section class="mt-7 sm:mt-9">
                 <div class="mb-4 flex flex-wrap items-end justify-between gap-3">
@@ -103,7 +174,7 @@
                 @else
                     <div class="rounded-[16px] border border-dashed border-[#d6dee2] bg-white px-5 py-12 text-center">
                         <h3 class="font-['Poppins'] text-[18px] font-semibold text-[#263746]">Belum ada barang yang cocok</h3>
-                        <p class="mt-2 text-[14px] text-[#718096]">Coba kata pencarian atau kategori yang berbeda.</p>
+                        <p class="mt-2 text-[14px] text-[#718096]">Coba ubah kata pencarian atau filter.</p>
                         <a href="{{ route('home') }}" class="mt-5 inline-flex rounded-[9px] bg-[#00523f] px-4 py-2.5 text-[13px] font-semibold text-white">Lihat semua barang</a>
                     </div>
                 @endif

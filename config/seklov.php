@@ -11,11 +11,9 @@ return [
         'photo_max_kb' => 2048,
         'video_max_kb' => 20480,
         'conditions' => [
-            'Baru',
-            'Seperti baru',
-            'Baik',
-            'Cukup',
-            'Ada kekurangan',
+        'Baru',
+        'Seperti Baru',
+        'Bekas',
         ],
     ],
     'negotiations' => [
