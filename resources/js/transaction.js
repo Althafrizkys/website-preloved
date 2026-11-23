@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const meetingPointSelect = form.querySelector('#meeting_point_id');
 
     const qtyInput = form.querySelector('[data-qty-input]');
+    const maxQuantity = Math.max(1, Number(form.dataset.stockMax || qtyInput?.max || 1));
     const qtyMinus = form.querySelector('[data-qty-minus]');
     const qtyPlus = form.querySelector('[data-qty-plus]');
 
@@ -74,10 +75,17 @@ document.addEventListener('DOMContentLoaded', () => {
         let qty = parseInt(qtyInput.value, 10);
         if (isNaN(qty) || qty < 1) {
             qty = 1;
-        } else if (qty > 10) {
-            qty = 10;
+        } else if (qty > maxQuantity) {
+            qty = maxQuantity;
         }
         qtyInput.value = qty;
+        qtyInput.max = String(maxQuantity);
+        if (qtyMinus) {
+            qtyMinus.disabled = qty <= 1;
+        }
+        if (qtyPlus) {
+            qtyPlus.disabled = qty >= maxQuantity;
+        }
 
         const subtotal = unitPrice * qty;
         const total = subtotal ;
@@ -106,7 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (qtyPlus && qtyInput) {
         qtyPlus.addEventListener('click', () => {
             let cur = parseInt(qtyInput.value, 10) || 1;
-            if (cur < 10) {
+            if (cur < maxQuantity) {
                 qtyInput.value = cur + 1;
                 updatePrices();
             }

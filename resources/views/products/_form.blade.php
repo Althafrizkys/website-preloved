@@ -4,12 +4,14 @@
     $photoMaxCount = config('seklov.products.max_photos');
     $photoMaxMb = (int) (config('seklov.products.photo_max_kb') / 1024);
     $videoMaxMb = (int) (config('seklov.products.video_max_kb') / 1024);
+    $negotiableValue = (string) old('is_negotiable', $product?->is_negotiable ? '1' : '0');
 @endphp
 
 <form id="product-form" data-product-form data-max-photos="{{ $photoMaxCount }}" class="mt-5" method="POST" action="{{ $formAction }}" enctype="multipart/form-data">
     @csrf
     @if ($isEditing)
         @method('PUT')
+        <input type="hidden" name="stock_original" value="{{ old('stock_original', $product->stock) }}">
     @endif
 
     @if ($errors->any())
@@ -90,6 +92,28 @@
         @error('price')
             <p class="mt-1 text-[12px] text-red-600">{{ $message }}</p>
         @enderror
+    </div>
+
+    <div class="mt-4 grid gap-4 sm:grid-cols-2">
+        <div>
+            <label for="stock" class="text-[13px] font-semibold text-[#263746]">Stok barang</label>
+            <input id="stock" name="stock" type="number" min="{{ $isEditing ? 0 : 1 }}" max="2147483647" step="1" required value="{{ old('stock', $product?->stock) }}" placeholder="Contoh: 5" class="mt-2 block min-h-11 w-full rounded-[8px] border border-[#dce3e6] px-3.5 text-[14px] outline-none focus:border-[#00523f] focus:ring-2 focus:ring-[#00523f]/10">
+            <p class="mt-1 text-[11px] text-[#718096]">{{ $isEditing ? 'Gunakan 0 bila stok habis; stok positif mengaktifkan kembali barang terjual.' : 'Jumlah unit yang tersedia untuk dibeli.' }}</p>
+            @error('stock')
+                <p class="mt-1 text-[12px] text-red-600">{{ $message }}</p>
+            @enderror
+        </div>
+        <div>
+            <label for="is_negotiable" class="text-[13px] font-semibold text-[#263746]">Negosiasi harga</label>
+            <select id="is_negotiable" name="is_negotiable" required class="mt-2 block min-h-11 w-full rounded-[8px] border border-[#dce3e6] bg-white px-3.5 text-[14px] outline-none focus:border-[#00523f] focus:ring-2 focus:ring-[#00523f]/10">
+                <option value="0" @selected($negotiableValue === '0')>Tidak bisa nego</option>
+                <option value="1" @selected($negotiableValue === '1')>Bisa nego</option>
+            </select>
+            <p class="mt-1 text-[11px] text-[#718096]">Pilih apakah pembeli dapat mengirim tawaran harga.</p>
+            @error('is_negotiable')
+                <p class="mt-1 text-[12px] text-red-600">{{ $message }}</p>
+            @enderror
+        </div>
     </div>
 
     <div class="mt-4">

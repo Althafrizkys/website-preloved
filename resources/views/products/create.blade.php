@@ -49,12 +49,20 @@
                             <img data-live-image alt="Pratinjau foto produk" class="hidden aspect-[4/3] w-full object-contain">
                             <div data-live-placeholder class="flex aspect-[4/3] items-center justify-center text-[14px] text-[#8a969d]">Foto barang akan tampil di sini</div>
                         </div>
+                        <video data-live-video controls preload="metadata" class="mt-3 hidden max-h-40 w-full rounded-[8px] bg-black"></video>
                         <div class="mt-5">
                             <p data-live-name data-empty-text="Nama barangmu" class="font-['Poppins'] text-[21px] font-semibold leading-snug text-[#202b3d]">Nama barangmu</p>
                             <p data-live-price data-empty-text="Rp 0" class="mt-2 text-[24px] font-bold text-[#00523f]">Rp 0</p>
                             <div class="mt-3 flex flex-wrap gap-2">
                                 <span data-live-condition data-empty-text="Kondisi barang" class="rounded-full bg-[#edf7f4] px-3 py-1 text-[12px] font-medium text-[#00523f]">Kondisi barang</span>
                                 <span data-live-category data-empty-text="Kategori" class="rounded-full bg-[#f0f3f6] px-3 py-1 text-[12px] font-medium text-[#526170]">Kategori</span>
+                                <span data-live-negotiable data-empty-text="Harga pas" class="rounded-full bg-[#edf7f4] px-3 py-1 text-[12px] font-medium text-[#00523f]">Harga pas</span>
+                            </div>
+                            <p data-live-stock data-empty-text="Stok belum ditentukan" class="mt-3 text-[12px] font-semibold text-[#526170]">Stok belum ditentukan</p>
+                            <div class="mt-3 space-y-1 text-[12px] text-[#526170]">
+                                <p>Ukuran: <span data-live-size data-empty-text="Belum diisi">Belum diisi</span></p>
+                                <p>Lama pemakaian: <span data-live-usage_period data-empty-text="Belum diisi">Belum diisi</span></p>
+                                <p>Kekurangan: <span data-live-defects data-empty-text="Tidak ada">Tidak ada</span></p>
                             </div>
                             <div class="mt-5 rounded-[10px] bg-[#f7f9fa] p-4">
                                 <p class="text-[12px] font-semibold text-[#263746]">Deskripsi produk</p>

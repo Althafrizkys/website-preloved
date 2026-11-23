@@ -65,6 +65,8 @@ class ProductUploadTest extends TestCase
         $this->assertSame($seller->user_id, $product->seller_id);
         $this->assertSame('tersedia', $product->status);
         $this->assertSame('1500000.00', $product->price);
+        $this->assertSame(3, $product->stock);
+        $this->assertFalse($product->is_negotiable);
         $this->assertCount(3, $product->media);
         $this->assertSame(['foto', 'foto', 'video'], $product->media->pluck('media_type')->all());
         $this->assertSame([1, 2, 3], $product->media->pluck('display_order')->all());
@@ -84,6 +86,10 @@ class ProductUploadTest extends TestCase
             ->assertSee('Deskripsi Produk')
             ->assertSee('Beli Sekarang')
             ->assertSee('Chat Sekarang')
+            ->assertSee('Stok tersedia: 3 unit')
+            ->assertSee('Harga pas')
+            ->assertSee('Penjual tidak mengaktifkan negosiasi')
+            ->assertDontSee('data-nego-open', false)
             ->assertSee('Lainnya')
             ->assertSee('Angkatan 2024');
     }
@@ -128,6 +134,13 @@ class ProductUploadTest extends TestCase
         $this->actingAs($owner)->get('/jual')
             ->assertOk()
             ->assertSee('Tambahkan Detail Produk')
+            ->assertSee('Stok barang')
+            ->assertSee('Negosiasi harga')
+            ->assertSee('data-live-stock', false)
+            ->assertSee('data-live-negotiable', false)
+            ->assertSee('data-live-size', false)
+            ->assertSee('data-live-usage_period', false)
+            ->assertSee('data-live-defects', false)
             ->assertSee('Preview', false);
 
         $this->get(route('products.edit', $product))
@@ -261,6 +274,7 @@ class ProductUploadTest extends TestCase
             'product_id' => $product->product_id,
             'status' => 'terjual',
         ]);
+        $this->assertSame(0, $product->fresh()->stock);
     }
 
     public function test_menghapus_produk_menghapus_semua_file_dan_admin_dapat_menghapus(): void
@@ -340,6 +354,9 @@ class ProductUploadTest extends TestCase
             'price' => '1.500.000',
             'category_id' => $category->category_id,
             'condition' => 'Baik',
+            'stock' => '3',
+            'stock_original' => '1',
+            'is_negotiable' => '0',
             'size' => 'M',
             'usage_period' => '6 bulan',
             'defects' => '',

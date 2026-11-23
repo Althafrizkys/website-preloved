@@ -22,6 +22,8 @@ class UpdateProductRequest extends StoreProductRequest
         $product = $this->route('product');
 
         $rules['photos'] = ['sometimes', 'array', 'max:'.config('seklov.products.max_photos')];
+        $rules['stock'] = ['required', 'integer', 'min:0', 'max:2147483647'];
+        $rules['stock_original'] = ['required', 'integer', 'min:0', 'max:2147483647'];
         $rules['photos.*'] = [
             'image',
             'mimes:jpg,jpeg,png,webp',
@@ -36,6 +38,25 @@ class UpdateProductRequest extends StoreProductRequest
         ];
 
         return $rules;
+    }
+
+    public function messages(): array
+    {
+        return [
+            ...parent::messages(),
+            'stock_original.required' => 'Data stok awal tidak valid. Muat ulang halaman.',
+            'stock_original.integer' => 'Data stok awal tidak valid. Muat ulang halaman.',
+            'stock_original.min' => 'Data stok awal tidak valid. Muat ulang halaman.',
+            'stock_original.max' => 'Data stok awal tidak valid. Muat ulang halaman.',
+        ];
+    }
+
+    public function attributes(): array
+    {
+        return [
+            ...parent::attributes(),
+            'stock_original' => 'stok awal',
+        ];
     }
 
     public function withValidator(Validator $validator): void

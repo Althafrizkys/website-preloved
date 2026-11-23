@@ -43,6 +43,7 @@
                 action="{{ route('transactions.store') }}"
                 data-checkout-form
                 data-unit-price="{{ $unitPrice }}"
+                data-stock-max="{{ $product->stock }}"
                 class="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1.8fr)_380px]"
             >
                 @csrf
@@ -172,6 +173,7 @@
                                         <p class="mt-0.5 text-[11px] text-[#718096]">
                                             Penjual: {{ $product->seller?->name }} ({{ $product->seller?->campus ?? 'Kampus' }})
                                         </p>
+                                        <p class="mt-0.5 text-[11px] text-[#718096]">Stok tersedia: {{ $product->stock }} unit</p>
                                     </div>
                                 </div>
 
@@ -195,7 +197,7 @@
                                             name="quantity"
                                             value="{{ old('quantity', $defaultQuantity) }}"
                                             min="1"
-                                            max="10"
+                                            max="{{ $product->stock }}"
                                             data-qty-input
                                             aria-label="Jumlah produk"
                                             class="h-full w-9 border-x border-[#e1e6e9] p-0 text-center text-[13px] font-semibold text-[#202b3d] outline-none focus:ring-0"
@@ -217,6 +219,9 @@
                             </div>
                         </div>
                     </section>
+                    @error('quantity')
+                        <p class="rounded-[10px] bg-[#fff5f5] px-4 py-3 text-[13px] text-[#9b3434]" role="alert">{{ $message }}</p>
+                    @enderror
 
                     {{-- 2. Metode Pembayaran --}}
                     <section class="rounded-[16px] border border-[#e5e9ed] bg-white p-5 shadow-[0_2px_10px_rgba(22,34,48,0.03)] sm:p-6" aria-labelledby="heading-metode-bayar">
