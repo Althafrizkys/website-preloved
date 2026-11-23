@@ -1,20 +1,21 @@
 <?php
 
+use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\Auth\AdminLoginController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\OtpController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\ChatController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\NegotiationController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProductController;
-use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\RewardController;
+use App\Http\Controllers\TransactionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\ChatController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -44,8 +45,26 @@ Route::middleware('guest')->group(function () {
 
 // Halaman khusus admin. Route dashboard admin ditaruh di dalam grup ini.
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
-    // Sementara, akan diganti oleh dashboard admin.
-    Route::get('/', fn () => 'Dashboard admin (sementara)')->name('dashboard');
+    Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
+
+    // CRUD Titik COD & Kampus
+    Route::post('/meeting-points', [AdminDashboardController::class, 'storeMeetingPoint'])->name('meeting-points.store');
+    Route::put('/meeting-points/{meetingPoint}', [AdminDashboardController::class, 'updateMeetingPoint'])
+        ->whereNumber('meetingPoint')
+        ->name('meeting-points.update');
+    Route::delete('/meeting-points/{meetingPoint}', [AdminDashboardController::class, 'destroyMeetingPoint'])
+        ->whereNumber('meetingPoint')
+        ->name('meeting-points.destroy');
+    Route::delete('/products/{product}', [AdminDashboardController::class, 'destroyProduct'])
+    ->name('products.destroy');
+
+    // Manajemen Akun & Role User
+    Route::patch('/users/{user}/toggle-status', [AdminDashboardController::class, 'toggleUserStatus'])
+        ->whereNumber('user')
+        ->name('users.toggle-status');
+    Route::patch('/users/{user}/role', [AdminDashboardController::class, 'updateUserRole'])
+        ->whereNumber('user')
+        ->name('users.role');
 });
 
 Route::post('/logout', function (Request $request) {
@@ -92,18 +111,18 @@ Route::middleware('auth')->group(function () {
     Route::patch('/notifikasi/{notification}/baca', [NotificationController::class, 'markAsRead'])
         ->whereNumber('notification')
         ->name('notifications.read');
-        Route::post('/notifikasi/baca-semua', [NotificationController::class, 'markAllAsRead'])
+    Route::post('/notifikasi/baca-semua', [NotificationController::class, 'markAllAsRead'])
         ->name('notifications.readAll');
 
     // Chat
     Route::post('/chat/mulai/{product}', [ChatController::class, 'start'])
         ->whereNumber('product')
         ->name('chat.start');
-        Route::get('/chat', [ChatController::class, 'index'])->name('chat.index');
-        Route::get('/chat/{conversation}', [ChatController::class, 'show'])
-            ->whereNumber('conversation')
-            ->name('chat.show');
-        Route::get('/chat/{conversation}/pesan', [ChatController::class, 'messages'])
+    Route::get('/chat', [ChatController::class, 'index'])->name('chat.index');
+    Route::get('/chat/{conversation}', [ChatController::class, 'show'])
+        ->whereNumber('conversation')
+        ->name('chat.show');
+    Route::get('/chat/{conversation}/pesan', [ChatController::class, 'messages'])
         ->whereNumber('conversation')
         ->name('chat.messages');
     Route::post('/chat/{conversation}/pesan', [ChatController::class, 'store'])
@@ -120,8 +139,8 @@ Route::middleware('auth')->group(function () {
         ->whereNumber('transaction')
         ->name('transactions.show');
     Route::post('/transaksi/{transaction}/rating', [TransactionController::class, 'storeRating'])
-    ->whereNumber('transaction')
-    ->name('transactions.rating');
+        ->whereNumber('transaction')
+        ->name('transactions.rating');
     Route::post('/transaksi/{transaction}/konfirmasi', [TransactionController::class, 'confirm'])
         ->whereNumber('transaction')
         ->name('transactions.confirm');

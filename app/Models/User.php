@@ -28,16 +28,8 @@ class User extends Authenticatable
         'campus',
         'cohort',
         'password',
-    ];
-
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
-    protected $hidden = [
-        'password',
-        'remember_token',
+        'role',
+        'is_active',
     ];
 
     /**
@@ -49,6 +41,7 @@ class User extends Authenticatable
     {
         return [
             'password' => 'hashed',
+            'is_active' => 'boolean',
         ];
     }
 
