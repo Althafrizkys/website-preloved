@@ -9,6 +9,7 @@ use App\Models\Negotiation;
 use App\Models\Product;
 use App\Models\Transaction;
 use App\Models\User;
+use App\Models\UserNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -447,7 +448,7 @@ class TransactionCodTest extends TestCase
             ->assertSee('Pembelian Saya')
             ->assertSee('Pesanan #'.$transaction->transaction_id)
             ->assertSee('Hubungi Penjual')
-            ->assertSee('mailto:'.$seller->email, false);
+            ->assertSee(route('transactions.chat', $transaction), false);
 
         // Seller sees sale
         $this->actingAs($seller)->get(route('transactions.index', ['tab' => 'penjualan']))
@@ -455,7 +456,101 @@ class TransactionCodTest extends TestCase
             ->assertSee('Penjualan Saya')
             ->assertSee('Pesanan #'.$transaction->transaction_id)
             ->assertSee('Hubungi Pembeli')
-            ->assertSee('mailto:'.$buyer->email, false);
+            ->assertSee(route('transactions.chat', $transaction), false)
+            ->assertDontSee('mailto:', false);
+    }
+
+    public function test_pembeli_dan_penjual_membuka_chat_dari_transaksi_tanpa_percakapan_ganda(): void
+    {
+        [$seller, $buyer, $product, $transaction] = $this->buatTransaksiLewatCheckout();
+
+        $this->assertDatabaseCount('conversations', 0);
+
+        $this->actingAs($buyer)->get(route('transactions.chat', $transaction))
+            ->assertRedirect();
+        $conversation = Conversation::first();
+        $this->assertNotNull($conversation);
+        $this->assertSame((int) $product->product_id, (int) $conversation->product_id);
+        $this->assertSame((int) $buyer->user_id, (int) $conversation->buyer_id);
+        $this->assertSame((int) $seller->user_id, (int) $conversation->seller_id);
+
+        $this->actingAs($seller)->get(route('transactions.chat', $transaction))
+            ->assertRedirect(route('chat.show', $conversation));
+        $this->actingAs($buyer)->get(route('transactions.chat', $transaction))
+            ->assertRedirect(route('chat.show', $conversation));
+
+        $this->assertDatabaseCount('conversations', 1);
+    }
+
+    public function test_user_lain_tidak_bisa_membuka_chat_transaksi(): void
+    {
+        [, , , $transaction] = $this->buatTransaksiLewatCheckout();
+        $outsider = $this->createUser('Orang Lain');
+
+        $this->actingAs($outsider)->get(route('transactions.chat', $transaction))
+            ->assertForbidden();
+        $this->assertDatabaseCount('conversations', 0);
+    }
+
+    public function test_notifikasi_transaksi_mengarah_ke_chat_bukan_edit_produk(): void
+    {
+        [$seller, $buyer, $product, $transaction] = $this->buatTransaksiLewatCheckout();
+
+        $sellerNotification = UserNotification::where('user_id', $seller->user_id)
+            ->where('notification_type', 'transaksi')
+            ->firstOrFail();
+        $buyerNotification = UserNotification::where('user_id', $buyer->user_id)
+            ->where('notification_type', 'transaksi')
+            ->firstOrFail();
+
+        $this->actingAs($seller);
+        $this->assertSame(route('transactions.chat', $transaction), $sellerNotification->target_url);
+        $this->assertNotSame(route('products.edit', $product), $sellerNotification->target_url);
+
+        $this->actingAs($buyer);
+        $this->assertSame(route('transactions.chat', $transaction), $buyerNotification->target_url);
+    }
+
+    public function test_notifikasi_transaksi_tanpa_transaksi_mengarah_ke_daftar_transaksi(): void
+    {
+        $seller = $this->createUser('Penjual');
+        $product = $this->createProduct($seller);
+
+        $notification = UserNotification::create([
+            'user_id' => $seller->user_id,
+            'product_id' => $product->product_id,
+            'role' => 'penjual',
+            'notification_type' => 'transaksi',
+            'title' => 'Pembelian masuk',
+            'message' => 'Contoh',
+        ]);
+
+        $this->actingAs($seller);
+        $this->assertSame(route('transactions.index', ['tab' => 'penjualan']), $notification->target_url);
+    }
+
+    /**
+     * @return array{0: User, 1: User, 2: Product, 3: Transaction}
+     */
+    private function buatTransaksiLewatCheckout(): array
+    {
+        $seller = $this->createUser('Penjual');
+        $buyer = $this->createUser('Pembeli');
+        $product = $this->createProduct($seller, ['stock' => 1]);
+        $meetingPoint = CampusMeetingPoint::create([
+            'campus' => 'UNSIKA',
+            'point_name' => 'Gerbang Utama',
+            'address_description' => 'Pos satpam',
+            'is_active' => true,
+        ]);
+
+        $this->actingAs($buyer)->post(route('transactions.store'), [
+            'product_id' => $product->product_id,
+            'meeting_point_id' => $meetingPoint->meeting_point_id,
+            'quantity' => 1,
+        ]);
+
+        return [$seller, $buyer, $product, Transaction::firstOrFail()];
     }
 
     private function createUser(string $name = 'User', string $campus = 'UNSIKA'): User

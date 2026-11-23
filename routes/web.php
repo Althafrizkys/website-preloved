@@ -138,6 +138,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/transaksi/{transaction}', [TransactionController::class, 'show'])
         ->whereNumber('transaction')
         ->name('transactions.show');
+    Route::get('/transaksi/{transaction}/chat', [TransactionController::class, 'chat'])
+        ->whereNumber('transaction')
+        ->name('transactions.chat');
     Route::post('/transaksi/{transaction}/rating', [TransactionController::class, 'storeRating'])
         ->whereNumber('transaction')
         ->name('transactions.rating');

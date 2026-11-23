@@ -47,6 +47,28 @@ class TransactionController extends Controller
         ]);
     }
 
+    public function chat(Request $request, Transaction $transaction): RedirectResponse
+    {
+        $userId = (int) $request->user()->user_id;
+
+        abort_unless(
+            in_array($userId, [(int) $transaction->buyer_id, (int) $transaction->seller_id], true),
+            403,
+        );
+
+        $productId = $transaction->items()->value('product_id');
+
+        abort_unless($productId, 404);
+
+        $conversation = Conversation::firstOrCreate([
+            'product_id' => $productId,
+            'buyer_id' => $transaction->buyer_id,
+            'seller_id' => $transaction->seller_id,
+        ]);
+
+        return redirect()->route('chat.show', $conversation);
+    }
+
     public function create(Request $request, Product $product): View|RedirectResponse
     {
         $user = $request->user();
