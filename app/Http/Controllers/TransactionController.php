@@ -6,7 +6,9 @@ use App\Http\Requests\StoreTransactionRequest;
 use App\Models\CampusMeetingPoint;
 use App\Models\Conversation;
 use App\Models\Product;
+use App\Models\Rating;
 use App\Models\Transaction;
+use App\Services\RewardService;
 use App\Services\TransactionService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -113,7 +115,7 @@ class TransactionController extends Controller
 
         $defaultQuantity = $requestedQuantity;
         $subtotal = $unitPrice * $defaultQuantity;
-        $totalPrice = $subtotal ;
+        $totalPrice = $subtotal;
 
         // Default kampus mengikuti kampus penjual atau user
         $defaultCampus = in_array($user->campus, ['UNSIKA', 'UBP']) ? $user->campus : 'UNSIKA';
@@ -175,13 +177,17 @@ class TransactionController extends Controller
         $isBuyer = (int) $transaction->buyer_id === (int) $user->user_id;
         $isSeller = (int) $transaction->seller_id === (int) $user->user_id;
 
+        $hasRated = Rating::where('transaction_id', $transaction->transaction_id)
+            ->where('reviewer_id', $user->user_id)
+            ->exists();
+
         return view('transactions.show', [
             'transaction' => $transaction,
             'isBuyer' => $isBuyer,
             'isSeller' => $isSeller,
+            'hasRated' => $hasRated,
         ]);
     }
-
     public function confirm(Request $request, Transaction $transaction): RedirectResponse
     {
         $this->transactionService->confirmSchedule($request->user(), $transaction);
@@ -207,5 +213,69 @@ class TransactionController extends Controller
         return redirect()
             ->route('transactions.show', $transaction)
             ->with('success', 'Pesanan COD berhasil dibatalkan.');
+    }
+
+    public function storeRating(Request $request, Transaction $transaction, RewardService $rewardService): RedirectResponse
+    {
+        if (! in_array($transaction->transaction_status, ['selesai', 'completed'])) {
+            return back()->with('error', 'Rating hanya dapat diberikan setelah transaksi selesai.');
+        }
+
+        $userId = (int) $request->user()->user_id;
+
+        if ($userId !== (int) $transaction->buyer_id && $userId !== (int) $transaction->seller_id) {
+            abort(403, 'Kamu tidak memiliki akses untuk memberi rating pada transaksi ini.');
+        }
+
+        $validated = $request->validate([
+            'rating' => ['required', 'integer', 'min:1', 'max:5'],
+            'review' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        $reviewedUserId = ($userId === (int) $transaction->buyer_id)
+            ? (int) $transaction->seller_id
+            : (int) $transaction->buyer_id;
+
+        $alreadyRated = Rating::where('transaction_id', $transaction->transaction_id)
+            ->where('reviewer_id', $userId)
+            ->exists();
+
+        if ($alreadyRated) {
+            return back()->with('error', 'Kamu sudah memberikan rating untuk transaksi ini.');
+        }
+
+        Rating::create([
+            'transaction_id'   => $transaction->transaction_id,
+            'reviewer_id'      => $userId,
+            'reviewed_user_id' => $reviewedUserId,
+            'stars'            => $validated['rating'],
+            'review'           => $validated['review'] ?? null,
+        ]);
+
+        // Tambah poin reward untuk penjual dan pembeli
+        // Tambah poin reward untuk penjual dan pembeli
+        $pointsEarned = 25;
+
+        $rewardService->giveReward(
+            userId: $userId,
+            points: $pointsEarned,
+            type: 'poin',
+            description: "Memberikan rating pada Transaksi #{$transaction->transaction_id}"
+        );
+
+        $rewardService->giveReward(
+            userId: $reviewedUserId,
+            points: $pointsEarned,
+            type: 'poin',
+            description: "Transaksi #{$transaction->transaction_id} selesai dan menerima rating"
+        );
+
+        return redirect()
+            ->route('transactions.show', $transaction)
+            ->with('reward_popup', [
+                'points'  => $pointsEarned,
+                'title'   => 'Selamat! Kamu Mendapat Poin Reward!',
+                'message' => "Rating berhasil dikirim! Baik penjual maupun pembeli mendapatkan +{$pointsEarned} poin reward.",
+            ]);
     }
 }
