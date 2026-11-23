@@ -31,6 +31,13 @@ class LoginController extends Controller
                 ->withErrors(['email' => 'Email atau password salah.']);
         }
 
+        // Akun dinonaktifkan oleh admin.
+        if (! $user->is_active) {
+            return back()
+                ->withInput($request->only('email'))
+                ->withErrors(['email' => 'Akun kamu telah dinonaktifkan oleh admin.']);
+        }
+
         // Akun belum diverifikasi: lanjutkan ke halaman OTP.
         if (! $user->is_verified) {
             if ($otp->secondsUntilResend($user) === 0) {

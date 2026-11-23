@@ -42,4 +42,13 @@ class CampusMeetingPoint extends Model
     {
         return $query->where('campus', $campus);
     }
+
+    public function scopeSearch(Builder $query, string $keyword): Builder
+    {
+        return $query->where(function (Builder $sub) use ($keyword) {
+            $sub->where('point_name', 'like', "%{$keyword}%")
+                ->orWhere('address_description', 'like', "%{$keyword}%")
+                ->orWhere('campus', 'like', "%{$keyword}%");
+        });
+    }
 }
