@@ -10,6 +10,7 @@ use App\Http\Controllers\NegotiationController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\RewardController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -118,6 +119,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/transaksi/{transaction}', [TransactionController::class, 'show'])
         ->whereNumber('transaction')
         ->name('transactions.show');
+    Route::post('/transaksi/{transaction}/rating', [TransactionController::class, 'storeRating'])
+    ->whereNumber('transaction')
+    ->name('transactions.rating');
     Route::post('/transaksi/{transaction}/konfirmasi', [TransactionController::class, 'confirm'])
         ->whereNumber('transaction')
         ->name('transactions.confirm');
@@ -127,4 +131,5 @@ Route::middleware('auth')->group(function () {
     Route::post('/transaksi/{transaction}/batal', [TransactionController::class, 'cancel'])
         ->whereNumber('transaction')
         ->name('transactions.cancel');
+    Route::get('/rewards', [RewardController::class, 'index'])->name('rewards.index');
 });
