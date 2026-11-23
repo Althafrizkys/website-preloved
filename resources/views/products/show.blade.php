@@ -173,15 +173,20 @@
                     </div>
                 </div>
                 <div class="flex flex-col gap-2 sm:flex-row">
-                    <button type="button" disabled title="Fitur chat segera hadir" class="inline-flex min-h-10 cursor-not-allowed items-center justify-center gap-2 rounded-[8px] bg-[#00523f] px-4 text-[12px] font-semibold text-white opacity-80">
-                        <svg class="size-[17px]" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                            <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8a2.5 2.5 0 0 1-2.5 2.5H11l-5 4v-4h-.5A2.5 2.5 0 0 1 3 13.5v-8Z" fill="currentColor"/>
-                            <circle cx="8" cy="9.5" r="1" fill="#00523f"/>
-                            <circle cx="12" cy="9.5" r="1" fill="#00523f"/>
-                            <circle cx="16" cy="9.5" r="1" fill="#00523f"/>
-                        </svg>
-                        Chat Sekarang
-                    </button>
+                    @php
+                        $chatBlocked = auth()->check() && (auth()->user()->isAdmin() || (int) auth()->id() === (int) $product->seller_id);
+                    @endphp
+                    <form method="{{ auth()->check() ? 'POST' : 'GET' }}" action="{{ auth()->check() ? route('chat.start', $product) : route('login') }}">
+                        @auth
+                            @csrf
+                        @endauth
+                        <button type="submit" @disabled($chatBlocked) @if ($chatBlocked) title="Anda tidak dapat memulai chat di sini" @endif class="inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-[8px] bg-[#00523f] px-4 text-[12px] font-semibold text-white {{ $chatBlocked ? 'cursor-not-allowed opacity-80' : 'hover:bg-[#006c52]' }}">
+                            <svg class="size-[17px]" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"/>
+                            </svg>
+                            Chat Sekarang
+                        </button>
+                    </form>
                     @if (auth()->check() && (int) auth()->id() === (int) $product->seller_id)
                         <a href="{{ route('products.edit', $product) }}" class="inline-flex min-h-10 items-center justify-center rounded-[8px] border border-[#dce3e6] px-4 text-[12px] font-semibold text-[#236a5a] hover:bg-[#f7f9fa]">Kelola barang</a>
                     @else
