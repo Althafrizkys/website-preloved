@@ -181,25 +181,6 @@ class ProductUploadTest extends TestCase
         $this->assertDatabaseCount('products', 0);
     }
 
-    public function test_kekurangan_wajib_diisi_untuk_kondisi_ada_kekurangan(): void
-    {
-        $seller = $this->createUser();
-        $category = Category::create(['category_name' => 'Buku & Alat Kuliah']);
-
-        $this->actingAs($seller)
-            ->from('/jual')
-            ->post('/jual', array_merge(
-                $this->validProductData($category),
-                [
-                    'condition' => 'Ada kekurangan',
-                    'photos' => [$this->fakeImage('buku.jpg')],
-                ],
-            ))
-            ->assertSessionHasErrors('defects');
-
-        $this->assertDatabaseCount('products', 0);
-    }
-
     public function test_hanya_pemilik_dapat_mengubah_status_mengedit_dan_menghapus_produk(): void
     {
         $owner = $this->createUser();
@@ -326,7 +307,7 @@ class ProductUploadTest extends TestCase
             'product_name' => 'Jaket Kampus',
             'description' => 'Jaket kampus masih dalam kondisi baik dan layak digunakan.',
             'price' => 1500000,
-            'condition' => 'Baik',
+            'condition' => 'Bekas',
             'status' => 'tersedia',
         ]);
     }
@@ -353,7 +334,7 @@ class ProductUploadTest extends TestCase
             'product_name' => 'Jaket Kampus',
             'price' => '1.500.000',
             'category_id' => $category->category_id,
-            'condition' => 'Baik',
+            'condition' => 'Bekas',
             'stock' => '3',
             'stock_original' => '1',
             'is_negotiable' => '0',

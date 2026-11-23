@@ -104,6 +104,128 @@ class HomePageTest extends TestCase
             ->assertDontSee('Sepatu Kampus');
     }
 
+    public function test_filter_kondisi_menampilkan_barang_dengan_kondisi_terpilih(): void
+    {
+        $this->withoutVite();
+        $seller = $this->createUser();
+        $category = Category::create(['category_name' => 'Fashion']);
+        $this->createProduct($seller, $category, ['product_name' => 'Barang Baru', 'condition' => 'Baru']);
+        $this->createProduct($seller, $category, ['product_name' => 'Barang Bekas', 'condition' => 'Bekas']);
+
+        $this->get('/?kondisi=Baru')
+            ->assertOk()
+            ->assertSee('Barang Baru')
+            ->assertDontSee('Barang Bekas');
+    }
+
+    public function test_filter_nego_memisahkan_barang_bisa_nego_dan_harga_pas(): void
+    {
+        $this->withoutVite();
+        $seller = $this->createUser();
+        $category = Category::create(['category_name' => 'Fashion']);
+        $this->createProduct($seller, $category, ['product_name' => 'Barang Nego', 'is_negotiable' => true]);
+        $this->createProduct($seller, $category, ['product_name' => 'Barang Pas', 'is_negotiable' => false]);
+
+        $this->get('/?nego=ya')
+            ->assertOk()
+            ->assertSee('Barang Nego')
+            ->assertDontSee('Barang Pas');
+
+        $this->get('/?nego=tidak')
+            ->assertOk()
+            ->assertSee('Barang Pas')
+            ->assertDontSee('Barang Nego');
+    }
+
+    public function test_filter_rentang_harga_memakai_batas_minimum_dan_maksimum(): void
+    {
+        $this->withoutVite();
+        $seller = $this->createUser();
+        $category = Category::create(['category_name' => 'Fashion']);
+        $this->createProduct($seller, $category, ['product_name' => 'Barang Murah', 'price' => 20000]);
+        $this->createProduct($seller, $category, ['product_name' => 'Barang Sedang', 'price' => 100000]);
+        $this->createProduct($seller, $category, ['product_name' => 'Barang Mahal', 'price' => 500000]);
+
+        $this->get('/?harga_min=50000&harga_max=200000')
+            ->assertOk()
+            ->assertSee('Barang Sedang')
+            ->assertDontSee('Barang Murah')
+            ->assertDontSee('Barang Mahal');
+
+        $this->get('/?harga_min=200000')
+            ->assertOk()
+            ->assertSee('Barang Mahal')
+            ->assertDontSee('Barang Sedang');
+
+        $this->get('/?harga_max=50000')
+            ->assertOk()
+            ->assertSee('Barang Murah')
+            ->assertDontSee('Barang Sedang');
+    }
+
+    public function test_semua_filter_dapat_digabung_dengan_pencarian(): void
+    {
+        $this->withoutVite();
+        $seller = $this->createUser();
+        $fashion = Category::create(['category_name' => 'Fashion']);
+        $gadget = Category::create(['category_name' => 'Gadget']);
+        $this->createProduct($seller, $fashion, [
+            'product_name' => 'Jaket Cocok', 'condition' => 'Seperti Baru', 'is_negotiable' => true, 'price' => 90000,
+        ]);
+        $this->createProduct($seller, $fashion, [
+            'product_name' => 'Jaket Mahal', 'condition' => 'Seperti Baru', 'is_negotiable' => true, 'price' => 900000,
+        ]);
+        $this->createProduct($seller, $gadget, [
+            'product_name' => 'Jaket Gadget', 'condition' => 'Seperti Baru', 'is_negotiable' => true, 'price' => 90000,
+        ]);
+
+        $this->get('/?q=Jaket&kategori='.$fashion->category_id.'&kondisi=Seperti+Baru&nego=ya&harga_min=50000&harga_max=200000')
+            ->assertOk()
+            ->assertSee('Jaket Cocok')
+            ->assertDontSee('Jaket Mahal')
+            ->assertDontSee('Jaket Gadget');
+    }
+
+    public function test_nilai_filter_tidak_valid_diabaikan(): void
+    {
+        $this->withoutVite();
+        $seller = $this->createUser();
+        $category = Category::create(['category_name' => 'Fashion']);
+        $this->createProduct($seller, $category, ['product_name' => 'Barang Aman']);
+
+        $this->get('/?kondisi=Rusak&nego=mungkin&harga_min=abc&harga_max=-5&kategori=xyz')
+            ->assertOk()
+            ->assertSee('Barang Aman');
+    }
+
+    public function test_search_ada_di_navbar_membawa_filter_dan_chip_kategori_dihapus(): void
+    {
+        $this->withoutVite();
+        $category = Category::create(['category_name' => 'Fashion']);
+
+        $this->get('/?kondisi=Bekas&nego=ya')
+            ->assertOk()
+            ->assertSee('role="search"', false)
+            ->assertSee('<input type="hidden" name="kondisi" value="Bekas">', false)
+            ->assertSee('<input type="hidden" name="nego" value="ya">', false)
+            ->assertSee('Reset filter')
+            ->assertSee('+ Mulai Jual')
+            ->assertDontSee('Kategori barang')
+            ->assertDontSee('Cari barang');
+    }
+
+    public function test_halaman_selain_beranda_tidak_menampilkan_search_di_navbar(): void
+    {
+        $this->withoutVite();
+        $seller = $this->createUser();
+        $category = Category::create(['category_name' => 'Fashion']);
+        $product = $this->createProduct($seller, $category);
+
+        $this->get(route('products.show', $product))
+            ->assertOk()
+            ->assertDontSee('role="search"', false);
+    }
+
     public function test_user_login_melihat_nama_logout_dan_tombol_jual_menuju_route_upload(): void
     {
         $this->withoutVite();

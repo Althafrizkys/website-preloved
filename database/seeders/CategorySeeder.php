@@ -10,11 +10,18 @@ class CategorySeeder extends Seeder
     public function run(): void
     {
         foreach ([
-            'Fashion',
+            'Aksesoris',
+            'Gadget',
+            'Buku & Alat Tulis',
+            'Dapur & Peralatan Masak',
             'Elektronik',
-            'Buku & Alat Kuliah',
-            'Perabot Kos',
+            'Fashion',
+            'Hobi & Koleksi',
+            'Kendaraan',
+            'Kosmetik & Skincare',
             'Olahraga',
+            'Perabotan',
+            'Tiket & Voucher',
             'Lainnya',
         ] as $categoryName) {
             Category::firstOrCreate([
