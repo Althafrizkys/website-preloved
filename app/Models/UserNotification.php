@@ -124,6 +124,22 @@ class UserNotification extends Model
             return route('chat.show', $this->negotiation->conversation_id);
         }
 
+        if ($this->notification_type === 'transaksi') {
+            $transaction = Transaction::query()
+                ->where(fn (Builder $query) => $query
+                    ->where('buyer_id', $this->user_id)
+                    ->orWhere('seller_id', $this->user_id))
+                ->whereHas('items', fn (Builder $query) => $query->where('product_id', $this->product_id))
+                ->latest('transaction_id')
+                ->first();
+
+            return $transaction
+                ? route('transactions.chat', $transaction)
+                : route('transactions.index', [
+                    'tab' => $this->effective_role === 'penjual' ? 'penjualan' : 'pembelian',
+                ]);
+        }
+
         if ($this->effective_role === 'penjual' || ((int) auth()->id() === (int) $this->product?->seller_id)) {
             return route('products.edit', $this->product_id);
         }

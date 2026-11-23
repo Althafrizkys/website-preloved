@@ -100,7 +100,7 @@
                                     <div class="flex flex-wrap gap-2">
                                         @if ($contact)
                                             <a
-                                                href="mailto:{{ $contact->email }}"
+                                                href="{{ route('transactions.chat', $transaction) }}"
                                                 class="rounded-[10px] border border-[#00523f] px-4 py-2 text-[12px] font-semibold text-[#00523f] transition hover:bg-[#edf7f4]"
                                             >
                                                 Hubungi {{ $currentTab === 'penjualan' ? 'Pembeli' : 'Penjual' }}
