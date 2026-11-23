@@ -160,6 +160,27 @@ class NegotiationFlowTest extends TestCase
         $this->assertDatabaseCount('negotiations', 0);
     }
 
+    public function test_barang_yang_dinonaktifkan_negonya_menampilkan_harga_pas_dan_menolak_tawaran(): void
+    {
+        $seller = $this->createUser('Penjual');
+        $buyer = $this->createUser('Pembeli');
+        $product = $this->createProduct($seller);
+        $product->update(['is_negotiable' => false]);
+
+        $this->actingAs($buyer)
+            ->get(route('products.show', $product))
+            ->assertOk()
+            ->assertSee('Harga pas')
+            ->assertSee('Penjual tidak mengaktifkan negosiasi')
+            ->assertDontSee('data-nego-open', false);
+
+        $this->post(route('negotiations.store', $product), ['offered_price' => 120000])
+            ->assertForbidden();
+
+        $this->assertDatabaseCount('conversations', 0);
+        $this->assertDatabaseCount('negotiations', 0);
+    }
+
     public function test_penjual_tidak_bisa_menawar_pembeli_tidak_bisa_menanggapi_dan_tidak_ada_tawaran_balik(): void
     {
         $seller = $this->createUser('Penjual');

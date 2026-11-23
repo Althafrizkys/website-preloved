@@ -6,6 +6,7 @@ use App\Models\Product;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class ProductService
 {
@@ -39,10 +40,33 @@ class ProductService
         $deleteIds = array_map('intval', $data['delete_media'] ?? []);
         $attributes = $this->productAttributes($data);
 
-        $oldPaths = DB::transaction(function () use ($product, $attributes, $deleteIds, $photos, $video): array {
-            $product->update($attributes);
+        $oldPaths = DB::transaction(function () use ($product, $attributes, $data, $deleteIds, $photos, $video): array {
+            $lockedProduct = Product::query()
+                ->where('product_id', $product->product_id)
+                ->lockForUpdate()
+                ->firstOrFail();
+            $submittedStock = (int) $attributes['stock'];
+            $originalStock = (int) $data['stock_original'];
 
-            return $this->mediaService->sync($product, $deleteIds, $photos, $video);
+            if ($originalStock !== $lockedProduct->stock && $submittedStock !== $originalStock) {
+                throw ValidationException::withMessages([
+                    'stock' => 'Stok berubah sejak formulir dibuka. Muat ulang halaman sebelum mengubah stok.',
+                ]);
+            }
+
+            $attributes['stock'] = $submittedStock === $originalStock
+                ? $lockedProduct->stock
+                : $submittedStock;
+
+            if ((int) $attributes['stock'] !== (int) $lockedProduct->stock) {
+                $attributes['status'] = (int) $attributes['stock'] === 0
+                    ? 'terjual'
+                    : 'tersedia';
+            }
+
+            $lockedProduct->update($attributes);
+
+            return $this->mediaService->sync($lockedProduct, $deleteIds, $photos, $video);
         });
 
         $this->mediaService->deleteFiles($oldPaths);
@@ -57,7 +81,10 @@ class ProductService
                 ->where('product_id', $product->product_id)
                 ->lockForUpdate()
                 ->firstOrFail();
-            $lockedProduct->update(['status' => 'terjual']);
+            $lockedProduct->update([
+                'stock' => 0,
+                'status' => 'terjual',
+            ]);
         });
     }
 
@@ -87,6 +114,8 @@ class ProductService
             'usage_period',
             'defects',
             'description',
+            'stock',
+            'is_negotiable',
         ]));
     }
 }

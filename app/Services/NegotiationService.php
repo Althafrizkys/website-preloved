@@ -21,8 +21,12 @@ class NegotiationService
                 ->lockForUpdate()
                 ->firstOrFail();
 
-            if ($lockedProduct->status !== 'tersedia') {
-                $this->fail('Barang sudah terjual; negosiasi tidak lagi tersedia.');
+            if ($lockedProduct->status !== 'tersedia' || $lockedProduct->stock < 1) {
+                $this->fail('Stok barang sudah habis; negosiasi tidak lagi tersedia.');
+            }
+
+            if (! $lockedProduct->is_negotiable) {
+                $this->fail('Penjual tidak mengaktifkan negosiasi untuk barang ini.');
             }
 
             if ((int) $lockedProduct->seller_id === (int) $buyer->user_id) {

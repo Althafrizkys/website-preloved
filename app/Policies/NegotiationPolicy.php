@@ -13,7 +13,9 @@ class NegotiationPolicy
     {
         return ! $user->isAdmin()
             && (int) $product->seller_id !== (int) $user->user_id
-            && $product->status === 'tersedia';
+            && $product->status === 'tersedia'
+            && $product->stock > 0
+            && $product->is_negotiable;
     }
 
     public function viewConversation(User $user, Conversation $conversation): bool

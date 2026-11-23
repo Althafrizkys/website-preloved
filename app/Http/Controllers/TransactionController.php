@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreTransactionRequest;
 use App\Models\CampusMeetingPoint;
 use App\Models\Conversation;
-use App\Models\Negotiation;
 use App\Models\Product;
 use App\Models\Transaction;
 use App\Services\TransactionService;
@@ -56,10 +55,21 @@ class TransactionController extends Controller
                 ->with('error', 'Kamu tidak dapat membeli barang milikmu sendiri.');
         }
 
-        if ($product->status !== 'tersedia') {
+        if ($product->status !== 'tersedia' || $product->stock < 1) {
             return redirect()
                 ->route('products.show', $product)
-                ->with('error', 'Barang ini sudah terjual atau tidak tersedia.');
+                ->with('error', 'Stok barang ini sudah habis atau tidak tersedia.');
+        }
+
+        $requestedQuantity = filter_var(
+            $request->query('quantity', 1),
+            FILTER_VALIDATE_INT,
+        );
+
+        if ($requestedQuantity === false || $requestedQuantity < 1 || $requestedQuantity > $product->stock) {
+            return redirect()
+                ->route('products.show', $product)
+                ->with('error', 'Jumlah pembelian melebihi stok yang tersedia.');
         }
 
         $product->loadMissing([
@@ -88,14 +98,20 @@ class TransactionController extends Controller
         $negotiationId = $request->query('negotiation_id');
         $activeNegotiation = null;
         if ($negotiationId) {
-            $activeNegotiation = Negotiation::find($negotiationId);
+            if (! $agreedOffer || (int) $agreedOffer->negotiation_id !== (int) $negotiationId) {
+                return redirect()
+                    ->route('products.show', $product)
+                    ->with('error', 'Tawaran nego tidak berlaku untuk barang ini.');
+            }
+
+            $activeNegotiation = $agreedOffer;
         }
 
         $unitPrice = $activeNegotiation?->status === 'diterima'
             ? (int) $activeNegotiation->offered_price
             : ($agreedOffer ? (int) $agreedOffer->offered_price : (int) $product->price);
 
-        $defaultQuantity = max(1, min(10, (int) $request->query('quantity', 1)));
+        $defaultQuantity = $requestedQuantity;
         $subtotal = $unitPrice * $defaultQuantity;
         $totalPrice = $subtotal ;
 
@@ -129,7 +145,7 @@ class TransactionController extends Controller
             meetingPoint: $meetingPoint,
             quantity: (int) $data['quantity'],
             buyerNotes: $data['buyer_notes'] ?? null,
-            negotiationId: $request->input('negotiation_id') ? (int) $request->input('negotiation_id') : null,
+            negotiationId: isset($data['negotiation_id']) ? (int) $data['negotiation_id'] : null,
         );
 
         return redirect()

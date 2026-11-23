@@ -41,6 +41,12 @@ class TransactionService
                 ]);
             }
 
+            if ($quantity < 1 || $quantity > $lockedProduct->stock) {
+                throw ValidationException::withMessages([
+                    'quantity' => 'Jumlah pesanan melebihi stok yang tersedia ('.$lockedProduct->stock.' unit).',
+                ]);
+            }
+
             if (! $meetingPoint->is_active) {
                 throw ValidationException::withMessages([
                     'meeting_point_id' => 'Titik temu COD yang dipilih tidak aktif.',
@@ -60,11 +66,20 @@ class TransactionService
             $agreedOffer = $conversation?->agreedOffer();
 
             if ($negotiationId) {
-                $offer = Negotiation::find($negotiationId);
-                if ($offer && $offer->status === 'diterima' && (int) $offer->conversation?->buyer_id === (int) $buyer->user_id) {
-                    $unitPrice = (int) $offer->offered_price;
-                    $agreedDiscount = max(0, (int) $lockedProduct->price - $unitPrice);
+                $offer = Negotiation::query()
+                    ->where('negotiation_id', $negotiationId)
+                    ->where('conversation_id', $conversation?->conversation_id)
+                    ->where('status', 'diterima')
+                    ->first();
+
+                if (! $offer) {
+                    throw ValidationException::withMessages([
+                        'negotiation_id' => 'Tawaran nego yang dipilih tidak berlaku untuk barang ini.',
+                    ]);
                 }
+
+                $unitPrice = (int) $offer->offered_price;
+                $agreedDiscount = max(0, (int) $lockedProduct->price - $unitPrice);
             } elseif ($agreedOffer) {
                 $unitPrice = (int) $agreedOffer->offered_price;
                 $agreedDiscount = max(0, (int) $lockedProduct->price - $unitPrice);
@@ -94,8 +109,11 @@ class TransactionService
                 'subtotal' => $subtotal,
             ]);
 
-            // Tandai produk sebagai terjual
-            $lockedProduct->update(['status' => 'terjual']);
+            $lockedProduct->stock -= $quantity;
+            $lockedProduct->update([
+                'stock' => $lockedProduct->stock,
+                'status' => $lockedProduct->stock === 0 ? 'terjual' : 'tersedia',
+            ]);
 
             // Notifikasi untuk Penjual
             UserNotification::create([
@@ -205,17 +223,47 @@ class TransactionService
         }
 
         return DB::transaction(function () use ($user, $transaction): Transaction {
-            $buyerCancelled = (int) $transaction->buyer_id === (int) $user->user_id
-                && $transaction->transaction_status !== 'dibatalkan';
-            $items = $transaction->items()->with('product')->get();
+            $lockedTransaction = Transaction::query()
+                ->where('transaction_id', $transaction->transaction_id)
+                ->lockForUpdate()
+                ->firstOrFail();
 
-            $transaction->update([
+            if ($lockedTransaction->transaction_status === 'dibatalkan') {
+                throw ValidationException::withMessages([
+                    'transaction' => 'Pesanan ini sudah dibatalkan.',
+                ]);
+            }
+
+            if ($lockedTransaction->transaction_status === 'selesai') {
+                throw ValidationException::withMessages([
+                    'transaction' => 'Transaksi yang sudah selesai tidak dapat dibatalkan.',
+                ]);
+            }
+
+            $buyerCancelled = (int) $lockedTransaction->buyer_id === (int) $user->user_id;
+            $items = $lockedTransaction->items()->orderBy('product_id')->get();
+            $products = Product::query()
+                ->whereIn('product_id', $items->pluck('product_id'))
+                ->orderBy('product_id')
+                ->lockForUpdate()
+                ->get()
+                ->keyBy('product_id');
+
+            $lockedTransaction->update([
                 'transaction_status' => 'dibatalkan',
             ]);
 
-            // Kembalikan produk menjadi tersedia
             foreach ($items as $item) {
-                $item->product?->update(['status' => 'tersedia']);
+                $product = $products->get($item->product_id);
+                if (! $product) {
+                    continue;
+                }
+
+                $product->stock += $item->quantity;
+                $product->update([
+                    'stock' => $product->stock,
+                    'status' => 'tersedia',
+                ]);
             }
 
             if ($buyerCancelled) {
@@ -223,7 +271,7 @@ class TransactionService
                 $productName = $item?->product?->product_name ?? 'Barang';
 
                 UserNotification::create([
-                    'user_id' => $transaction->seller_id,
+                    'user_id' => $lockedTransaction->seller_id,
                     'product_id' => $item?->product_id,
                     'role' => 'penjual',
                     'notification_type' => 'transaksi',
@@ -232,7 +280,7 @@ class TransactionService
                 ]);
             }
 
-            return $transaction;
+            return $lockedTransaction;
         });
     }
 }

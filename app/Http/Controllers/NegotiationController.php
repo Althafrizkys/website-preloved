@@ -76,6 +76,8 @@ class NegotiationController extends Controller
         $latestOffer = $negotiations->last();
         $agreedOffer = $conversation?->agreedOffer();
         $canOffer = $product->status === 'tersedia'
+            && $product->stock > 0
+            && $product->is_negotiable
             && ! $negotiations->contains('status', 'menunggu')
             && ! $agreedOffer;
         $minimumOffer = max(

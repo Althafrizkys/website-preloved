@@ -22,6 +22,8 @@ class Product extends Model
         'size',
         'usage_period',
         'defects',
+        'stock',
+        'is_negotiable',
         'status',
     ];
 
@@ -29,6 +31,8 @@ class Product extends Model
     {
         return [
             'price' => 'decimal:2',
+            'stock' => 'integer',
+            'is_negotiable' => 'boolean',
         ];
     }
 

@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Product;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Validator;
 
 class StoreTransactionRequest extends FormRequest
 {
@@ -16,7 +18,8 @@ class StoreTransactionRequest extends FormRequest
         return [
             'product_id' => ['required', 'integer', 'exists:products,product_id'],
             'meeting_point_id' => ['required', 'integer', 'exists:campus_meeting_points,meeting_point_id'],
-            'quantity' => ['required', 'integer', 'min:1', 'max:10'],
+            'quantity' => ['required', 'integer', 'min:1'],
+            'negotiation_id' => ['nullable', 'integer'],
             'buyer_notes' => ['nullable', 'string', 'max:500'],
         ];
     }
@@ -28,8 +31,35 @@ class StoreTransactionRequest extends FormRequest
             'meeting_point_id.required' => 'Titik temu COD wajib dipilih.',
             'meeting_point_id.exists' => 'Titik temu COD tidak valid.',
             'quantity.min' => 'Jumlah pesanan minimal 1.',
-            'quantity.max' => 'Jumlah pesanan maksimal 10.',
+            'quantity.integer' => 'Jumlah pesanan harus berupa angka bulat.',
+            'quantity.required' => 'Jumlah pesanan wajib diisi.',
+            'negotiation_id.integer' => 'Referensi tawaran nego tidak valid.',
             'buyer_notes.max' => 'Catatan untuk penjual maksimal 500 karakter.',
         ];
+    }
+
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function (Validator $validator): void {
+            if ($validator->errors()->isNotEmpty()) {
+                return;
+            }
+
+            $product = Product::query()->find($this->input('product_id'));
+            $quantity = (int) $this->input('quantity');
+
+            if (! $product || $product->status !== 'tersedia' || $product->stock < 1) {
+                $validator->errors()->add('quantity', 'Stok barang ini sudah habis atau tidak tersedia.');
+
+                return;
+            }
+
+            if ($quantity > $product->stock) {
+                $validator->errors()->add(
+                    'quantity',
+                    'Jumlah pesanan melebihi stok yang tersedia ('.$product->stock.' unit).',
+                );
+            }
+        });
     }
 }

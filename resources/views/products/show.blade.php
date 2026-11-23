@@ -90,7 +90,7 @@
 
                     <div class="mt-3 flex flex-wrap items-center gap-2.5">
                         <p class="font-['Poppins'] text-[25px] leading-none font-bold tracking-[-0.03em] text-[#00523f] sm:text-[27px]">Rp{{ number_format((float) $product->price, 0, ',', '.') }}</p>
-                        <span class="rounded-full bg-[#e6f4f0] px-3 py-1.5 text-[11px] font-medium text-[#236a5a]">Bisa nego</span>
+                        <span class="rounded-full px-3 py-1.5 text-[11px] font-medium {{ $product->is_negotiable ? 'bg-[#e6f4f0] text-[#236a5a]' : 'bg-[#f0f3f6] text-[#526170]' }}">{{ $product->is_negotiable ? 'Bisa nego' : 'Harga pas' }}</span>
                     </div>
 
                     <div class="mt-5 flex flex-wrap items-center gap-2">
@@ -112,38 +112,38 @@
                     </div>
 
                     <div class="mt-auto pt-6">
-                        <div class="mb-4 flex items-center justify-between text-[12px] text-[#526170]">
-                            <span>Jumlah</span>
+                        <div class="mb-4 flex flex-wrap items-center justify-between gap-3 text-[12px] text-[#526170]">
+                            <span>Stok tersedia: {{ number_format($product->stock, 0, ',', '.') }} unit</span>
                             <div class="inline-flex h-9 items-center overflow-hidden rounded-[8px] border border-[#e1e6e9]">
-                                <button type="button" disabled aria-label="Kurangi jumlah" class="grid h-full w-9 cursor-not-allowed place-items-center text-[#718096] opacity-70">−</button>
-                                <span class="grid h-full w-8 place-items-center border-x border-[#e1e6e9] font-semibold text-[#263746]">1</span>
-                                <button type="button" disabled aria-label="Tambah jumlah" class="grid h-full w-9 cursor-not-allowed place-items-center text-[#00523f] opacity-70">+</button>
+                                <button type="button" data-product-qty-minus aria-label="Kurangi jumlah" @disabled($product->status !== 'tersedia' || $product->stock < 1) class="grid h-full w-9 place-items-center text-[#718096] enabled:hover:bg-[#f7f9fa] disabled:cursor-not-allowed disabled:opacity-50">−</button>
+                                <input type="number" data-product-quantity min="1" max="{{ max(1, $product->stock) }}" value="1" aria-label="Jumlah barang yang ingin dibeli" @disabled($product->status !== 'tersedia' || $product->stock < 1) class="h-full w-12 border-x border-[#e1e6e9] p-0 text-center font-semibold text-[#263746] outline-none focus:ring-0">
+                                <button type="button" data-product-qty-plus aria-label="Tambah jumlah" @disabled($product->status !== 'tersedia' || $product->stock < 2) class="grid h-full w-9 place-items-center text-[#00523f] enabled:hover:bg-[#f7f9fa] disabled:cursor-not-allowed disabled:opacity-50">+</button>
                             </div>
                         </div>
 
                         <div class="grid grid-cols-1 gap-2 sm:grid-cols-[minmax(0,1fr)_auto_auto]">
-                            @guest
-                                <a href="{{ route('login') }}" class="inline-flex min-h-11 items-center justify-center rounded-[8px] bg-[#00523f] px-4 text-[12px] font-semibold text-white transition hover:bg-[#006c52]">Beli Sekarang</a>
+                            @if ($product->status !== 'tersedia' || $product->stock < 1)
+                                <button type="button" disabled title="Stok barang habis" class="min-h-11 cursor-not-allowed rounded-[8px] bg-[#00523f] px-4 text-[12px] font-semibold text-white opacity-70">Stok Habis</button>
+                            @elseif (auth()->check() && (int) auth()->id() === (int) $product->seller_id)
+                                <button type="button" disabled title="Penjual tidak dapat membeli barang sendiri" class="min-h-11 cursor-not-allowed rounded-[8px] bg-[#00523f] px-4 text-[12px] font-semibold text-white opacity-70">Beli Sekarang</button>
                             @else
-                                @if ((int) auth()->id() === (int) $product->seller_id)
-                                    <button type="button" disabled title="Penjual tidak dapat membeli barang sendiri" class="min-h-11 cursor-not-allowed rounded-[8px] bg-[#00523f] px-4 text-[12px] font-semibold text-white opacity-70">Beli Sekarang</button>
-                                @elseif ($product->status !== 'tersedia')
-                                    <button type="button" disabled title="Barang sudah tidak tersedia" class="min-h-11 cursor-not-allowed rounded-[8px] bg-[#00523f] px-4 text-[12px] font-semibold text-white opacity-70">Barang Terjual</button>
-                                @else
-                                    <a href="{{ route('transactions.create', $product) }}" class="inline-flex min-h-11 items-center justify-center rounded-[8px] bg-[#00523f] px-4 text-[12px] font-semibold text-white transition hover:bg-[#006c52]">Beli Sekarang</a>
-                                @endif
-                            @endguest
-                            @guest
-                                <a href="{{ route('login') }}" class="inline-flex min-h-11 items-center justify-center rounded-[8px] border border-[#dce3e6] px-4 text-[12px] font-semibold text-[#236a5a]">Nego</a>
+                                <a data-product-buy-link href="{{ route('transactions.create', ['product' => $product, 'quantity' => 1]) }}" class="inline-flex min-h-11 items-center justify-center rounded-[8px] bg-[#00523f] px-4 text-[12px] font-semibold text-white transition hover:bg-[#006c52]">Beli Sekarang</a>
+                            @endif
+                            @if (! $product->is_negotiable)
+                                <button type="button" disabled title="Penjual tidak mengaktifkan negosiasi" class="min-h-11 cursor-not-allowed rounded-[8px] border border-[#dce3e6] px-4 text-[12px] font-semibold text-[#718096] opacity-70">Nego</button>
                             @else
-                                @if ((int) auth()->id() === (int) $product->seller_id)
-                                    <button type="button" disabled title="Penjual tidak dapat menawar barang sendiri" class="min-h-11 cursor-not-allowed rounded-[8px] border border-[#dce3e6] px-4 text-[12px] font-semibold text-[#718096] opacity-70">Nego</button>
-                                @elseif (auth()->user()->isAdmin() || $product->status !== 'tersedia')
-                                    <button type="button" disabled title="Negosiasi hanya tersedia untuk barang aktif" class="min-h-11 cursor-not-allowed rounded-[8px] border border-[#dce3e6] px-4 text-[12px] font-semibold text-[#718096] opacity-70">Nego</button>
+                                @guest
+                                    <a href="{{ route('login') }}" class="inline-flex min-h-11 items-center justify-center rounded-[8px] border border-[#dce3e6] px-4 text-[12px] font-semibold text-[#236a5a]">Nego</a>
                                 @else
-                                    <button type="button" data-nego-open data-nego-url="{{ route('negotiations.show', $product) }}" class="min-h-11 rounded-[8px] border border-[#dce3e6] px-4 text-[12px] font-semibold text-[#236a5a] transition hover:border-[#00523f] hover:bg-[#f7f9fa]">Nego</button>
+                                    @if ((int) auth()->id() === (int) $product->seller_id)
+                                        <button type="button" disabled title="Penjual tidak dapat menawar barang sendiri" class="min-h-11 cursor-not-allowed rounded-[8px] border border-[#dce3e6] px-4 text-[12px] font-semibold text-[#718096] opacity-70">Nego</button>
+                                    @elseif (auth()->user()->isAdmin() || $product->status !== 'tersedia' || $product->stock < 1)
+                                        <button type="button" disabled title="Negosiasi hanya tersedia untuk barang aktif" class="min-h-11 cursor-not-allowed rounded-[8px] border border-[#dce3e6] px-4 text-[12px] font-semibold text-[#718096] opacity-70">Nego</button>
+                                    @else
+                                        <button type="button" data-nego-open data-nego-url="{{ route('negotiations.show', $product) }}" class="min-h-11 rounded-[8px] border border-[#dce3e6] px-4 text-[12px] font-semibold text-[#236a5a] transition hover:border-[#00523f] hover:bg-[#f7f9fa]">Nego</button>
+                                    @endif
                                 @endif
-                            @endguest
+                            @endif
                             <button type="button" disabled title="Fitur keranjang segera hadir" class="inline-flex min-h-11 cursor-not-allowed items-center justify-center gap-1.5 rounded-[8px] border border-[#dce3e6] px-4 text-[12px] font-semibold text-[#236a5a] opacity-80">
                                 <svg class="size-[17px]" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                                     <path d="M3 4h2l2.2 11.1a2 2 0 0 0 2 1.6h8.2a2 2 0 0 0 1.9-1.4L21 8H6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"/>

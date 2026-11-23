@@ -9,7 +9,6 @@ use App\Models\Negotiation;
 use App\Models\Product;
 use App\Models\Transaction;
 use App\Models\User;
-use App\Models\UserNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -39,6 +38,7 @@ class TransactionCodTest extends TestCase
         $product = $this->createProduct($seller, [
             'product_name' => 'Rolex Submariner Watch',
             'price' => 49500,
+            'stock' => 2,
         ]);
 
         $meetingPoint = CampusMeetingPoint::create([
@@ -63,6 +63,8 @@ class TransactionCodTest extends TestCase
             ->assertSee('Contoh: Ketemu jam 13.00 WIB setelah kelas...')
             ->assertSee('Produk Dipesan')
             ->assertSee('Rolex Submariner Watch')
+            ->assertSee('data-stock-max="2"', false)
+            ->assertSee('max="2"', false)
             ->assertSee('Rp49.500')
             ->assertSee('Rp99.000')
             ->assertSee('2. Metode Pembayaran 💳')
@@ -70,12 +72,35 @@ class TransactionCodTest extends TestCase
             ->assertSee('Cash On Delivery')
             ->assertSee('Ringkasan Pembayaran')
             ->assertSee('Subtotal Produk')
+            ->assertSee('data-stock-max="2"', false)
+            ->assertSee('max="2"', false)
             ->assertDontSee('Biaya Layanan')
             ->assertDontSee('Rp2.000')
             ->assertDontSee('Dana ditahan sistem Seklov')
             ->assertSee('Total Bayar')
             ->assertSee('Rp99.000')
             ->assertSee('Bayar &amp; Buat Pesanan', false);
+
+        $this->get(route('transactions.create', [
+            'product' => $product,
+            'quantity' => 3,
+        ]))
+            ->assertRedirect(route('products.show', $product))
+            ->assertSessionHas('error', 'Jumlah pembelian melebihi stok yang tersedia.');
+    }
+
+    public function test_halaman_detail_membatasi_jumlah_dan_mengirimkan_stok_ke_checkout(): void
+    {
+        $seller = $this->createUser('Penjual');
+        $buyer = $this->createUser('Pembeli');
+        $product = $this->createProduct($seller, ['stock' => 4]);
+
+        $this->actingAs($buyer)
+            ->get(route('products.show', $product))
+            ->assertOk()
+            ->assertSee('Stok tersedia: 4 unit')
+            ->assertSee('max="4"', false)
+            ->assertSee(route('transactions.create', ['product' => $product, 'quantity' => 1]), false);
     }
 
     public function test_penjual_tidak_bisa_membeli_barangnya_sendiri(): void
@@ -96,6 +121,7 @@ class TransactionCodTest extends TestCase
         $product = $this->createProduct($seller, [
             'product_name' => 'Rolex Submariner Watch',
             'price' => 49500,
+            'stock' => 2,
         ]);
 
         $meetingPoint = CampusMeetingPoint::create([
@@ -125,8 +151,9 @@ class TransactionCodTest extends TestCase
         $this->assertEquals(99000, (int) $transaction->total_price);
         $this->assertSame('Ketemu jam 13.00 WIB setelah kelas di pos satpam.', $transaction->buyer_notes);
 
-        // Produk ditandai terjual
+        // Stok habis setelah semua unit dipesan.
         $this->assertSame('terjual', $product->fresh()->status);
+        $this->assertSame(0, $product->fresh()->stock);
 
         // Ada 1 transaction item
         $this->assertDatabaseHas('transaction_items', [
@@ -151,6 +178,40 @@ class TransactionCodTest extends TestCase
             'notification_type' => 'transaksi',
             'title' => 'Pesanan berhasil dibuat — '.$product->product_name,
         ]);
+    }
+
+    public function test_pesanan_melebihi_stok_ditolak_dan_stok_hanya_berkurang_saat_pesanan_valid(): void
+    {
+        $seller = $this->createUser('Penjual');
+        $buyer = $this->createUser('Pembeli');
+        $product = $this->createProduct($seller, ['stock' => 3]);
+        $meetingPoint = CampusMeetingPoint::create([
+            'campus' => 'UNSIKA',
+            'point_name' => 'Kantin Fasilkom',
+            'address_description' => 'Area kantin',
+            'is_active' => true,
+        ]);
+
+        $this->actingAs($buyer)
+            ->from(route('transactions.create', $product))
+            ->post(route('transactions.store'), [
+                'product_id' => $product->product_id,
+                'meeting_point_id' => $meetingPoint->meeting_point_id,
+                'quantity' => 4,
+            ])
+            ->assertSessionHasErrors('quantity');
+
+        $this->assertDatabaseCount('transactions', 0);
+        $this->assertSame(3, $product->fresh()->stock);
+
+        $this->post(route('transactions.store'), [
+            'product_id' => $product->product_id,
+            'meeting_point_id' => $meetingPoint->meeting_point_id,
+            'quantity' => 2,
+        ])->assertRedirect();
+
+        $this->assertSame(1, $product->fresh()->stock);
+        $this->assertSame('tersedia', $product->fresh()->status);
     }
 
     public function test_checkout_memperhitungkan_harga_nego_yang_disepakati(): void
@@ -193,6 +254,44 @@ class TransactionCodTest extends TestCase
         $transaction = Transaction::first();
         $this->assertEquals(80000, (int) $transaction->subtotal_price);
         $this->assertEquals(80000, (int) $transaction->total_price);
+    }
+
+    public function test_checkout_menolak_tawaran_nego_milik_barang_lain(): void
+    {
+        $seller = $this->createUser('Penjual');
+        $buyer = $this->createUser('Pembeli');
+        $product = $this->createProduct($seller, ['stock' => 2]);
+        $otherProduct = $this->createProduct($seller, ['stock' => 2]);
+        $meetingPoint = CampusMeetingPoint::create([
+            'campus' => 'UNSIKA',
+            'point_name' => 'Kantin Fasilkom',
+            'address_description' => 'Area kantin',
+            'is_active' => true,
+        ]);
+        $conversation = Conversation::create([
+            'product_id' => $otherProduct->product_id,
+            'buyer_id' => $buyer->user_id,
+            'seller_id' => $seller->user_id,
+        ]);
+        $negotiation = Negotiation::create([
+            'conversation_id' => $conversation->conversation_id,
+            'sender_id' => $buyer->user_id,
+            'offered_price' => 40000,
+            'quantity' => 1,
+            'status' => 'diterima',
+        ]);
+
+        $this->actingAs($buyer)
+            ->post(route('transactions.store'), [
+                'product_id' => $product->product_id,
+                'meeting_point_id' => $meetingPoint->meeting_point_id,
+                'quantity' => 1,
+                'negotiation_id' => $negotiation->negotiation_id,
+            ])
+            ->assertSessionHasErrors('negotiation_id');
+
+        $this->assertDatabaseCount('transactions', 0);
+        $this->assertSame(2, $product->fresh()->stock);
     }
 
     public function test_penjual_dapat_mengonfirmasi_jadwal_cod(): void
@@ -260,7 +359,7 @@ class TransactionCodTest extends TestCase
     {
         $seller = $this->createUser('Penjual');
         $buyer = $this->createUser('Pembeli');
-        $product = $this->createProduct($seller, ['status' => 'terjual']);
+        $product = $this->createProduct($seller, ['status' => 'terjual', 'stock' => 0]);
         $meetingPoint = CampusMeetingPoint::create([
             'campus' => 'UNSIKA',
             'point_name' => 'Gerbang Utama',
@@ -292,6 +391,7 @@ class TransactionCodTest extends TestCase
 
         $this->assertSame('dibatalkan', $transaction->fresh()->transaction_status);
         $this->assertSame('tersedia', $product->fresh()->status);
+        $this->assertSame(1, $product->fresh()->stock);
         $this->assertDatabaseHas('notifications', [
             'user_id' => $seller->user_id,
             'product_id' => $product->product_id,
@@ -304,6 +404,10 @@ class TransactionCodTest extends TestCase
             ->get(route('notifications.index'))
             ->assertOk()
             ->assertSee('Pesanan dibatalkan — '.$product->product_name);
+
+        $this->post(route('transactions.cancel', $transaction))
+            ->assertSessionHasErrors('transaction');
+        $this->assertSame(1, $product->fresh()->stock);
     }
 
     public function test_daftar_transaksi_menampilkan_pembelian_dan_penjualan(): void
@@ -378,6 +482,7 @@ class TransactionCodTest extends TestCase
             'description' => 'Deskripsi barang preloved siap COD kampus.',
             'price' => 50000,
             'condition' => 'Baik',
+            'stock' => 5,
             'status' => 'tersedia',
         ], $attributes));
     }

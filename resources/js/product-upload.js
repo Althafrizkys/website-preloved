@@ -49,6 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const liveImage = document.querySelector('[data-live-image]');
         const livePlaceholder = document.querySelector('[data-live-placeholder]');
+        const liveVideo = document.querySelector('[data-live-video]');
         const setLiveImage = (source) => {
             if (!liveImage) {
                 return;
@@ -70,6 +71,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 liveImage.removeAttribute('src');
                 liveImage.classList.add('hidden');
                 livePlaceholder?.classList.remove('hidden');
+            }
+        };
+
+        const setLiveVideo = (source) => {
+            if (!liveVideo) {
+                return;
+            }
+
+            if (source) {
+                liveVideo.src = source;
+                liveVideo.classList.remove('hidden');
+                return;
+            }
+
+            const existingVideo = existingMediaList?.querySelector('[data-existing-media-type="video"] video');
+            if (existingVideo) {
+                liveVideo.src = existingVideo.src;
+                liveVideo.classList.remove('hidden');
+            } else {
+                liveVideo.removeAttribute('src');
+                liveVideo.classList.add('hidden');
             }
         };
 
@@ -122,6 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const file = videoInput?.files?.[0];
             if (file) {
                 videoUrl = URL.createObjectURL(file);
+                setLiveVideo(videoUrl);
                 const wrapper = document.createElement('div');
                 wrapper.className = 'relative';
                 const video = document.createElement('video');
@@ -138,6 +161,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
                 wrapper.append(video, remove);
                 videoPreview?.append(wrapper);
+            } else {
+                setLiveVideo(null);
             }
 
             updateCounts();
@@ -167,34 +192,75 @@ document.addEventListener('DOMContentLoaded', () => {
                 updateCounts();
                 if (mediaItem.dataset.existingMediaType === 'foto') {
                     setLiveImage(photoUrls[0] ?? null);
+                } else if (mediaItem.dataset.existingMediaType === 'video') {
+                    setLiveVideo(videoUrl);
                 }
             });
         });
 
-        const bindPreview = (selector, eventName, format = (value) => value) => {
-            const input = form.querySelector(selector);
-            const output = document.querySelector(`[data-live-${input?.name}]`);
+        const bindPreview = (inputSelector, outputSelector, eventName, format = (value) => value) => {
+            const input = form.querySelector(inputSelector);
+            const output = document.querySelector(outputSelector);
             if (!input || !output) {
                 return;
             }
 
             const update = () => {
                 const value = input.value.trim();
-                output.textContent = value ? format(value, input) : output.dataset.emptyText || output.textContent;
+                output.textContent = value ? format(value, input) : output.dataset.emptyText || '';
             };
 
             input.addEventListener(eventName, update);
             update();
         };
 
-        bindPreview('[name="product_name"]', 'input');
-        bindPreview('[name="price"]', 'input', formatRupiah);
-        bindPreview('[name="condition"]', 'change');
-        bindPreview('[name="description"]', 'input');
-        bindPreview('[name="category_id"]', 'change', (_, input) => input.selectedOptions[0]?.textContent || 'Kategori');
+        bindPreview('[name="product_name"]', '[data-live-name]', 'input');
+        bindPreview('[name="price"]', '[data-live-price]', 'input', formatRupiah);
+        bindPreview('[name="condition"]', '[data-live-condition]', 'change');
+        bindPreview('[name="description"]', '[data-live-description]', 'input');
+        bindPreview('[name="size"]', '[data-live-size]', 'input');
+        bindPreview('[name="usage_period"]', '[data-live-usage_period]', 'input');
+        bindPreview('[name="defects"]', '[data-live-defects]', 'input');
+        bindPreview('[name="stock"]', '[data-live-stock]', 'input', (value) => `Stok tersedia: ${new Intl.NumberFormat('id-ID').format(Number(value))} unit`);
+        bindPreview('[name="is_negotiable"]', '[data-live-negotiable]', 'change', (value) => value === '1' ? 'Bisa nego' : 'Harga pas');
+        bindPreview('[name="category_id"]', '[data-live-category]', 'change', (_, input) => input.selectedOptions[0]?.textContent || 'Kategori');
 
         updateCounts();
     });
+
+    const productQuantity = document.querySelector('[data-product-quantity]');
+    const buyLink = document.querySelector('[data-product-buy-link]');
+    if (productQuantity && buyLink) {
+        const updateProductQuantity = (clamp = false) => {
+            const minimum = Number(productQuantity.min || 1);
+            const maximum = Number(productQuantity.max || 1);
+            const parsed = Number.parseInt(productQuantity.value, 10);
+
+            if (Number.isInteger(parsed) && parsed >= minimum && parsed <= maximum) {
+                const url = new URL(buyLink.href, window.location.href);
+                url.searchParams.set('quantity', String(parsed));
+                buyLink.href = url.toString();
+            } else if (clamp) {
+                const quantity = Math.min(maximum, Math.max(minimum, Number.isInteger(parsed) ? parsed : minimum));
+                productQuantity.value = String(quantity);
+                const url = new URL(buyLink.href, window.location.href);
+                url.searchParams.set('quantity', String(quantity));
+                buyLink.href = url.toString();
+            }
+        };
+
+        productQuantity.addEventListener('input', () => updateProductQuantity());
+        productQuantity.addEventListener('change', () => updateProductQuantity(true));
+        document.querySelector('[data-product-qty-minus]')?.addEventListener('click', () => {
+            productQuantity.value = String(Math.max(Number(productQuantity.min || 1), Number(productQuantity.value || 1) - 1));
+            updateProductQuantity();
+        });
+        document.querySelector('[data-product-qty-plus]')?.addEventListener('click', () => {
+            productQuantity.value = String(Math.min(Number(productQuantity.max || 1), Number(productQuantity.value || 1) + 1));
+            updateProductQuantity();
+        });
+        updateProductQuantity(true);
+    }
 
     const galleryThumbs = Array.from(document.querySelectorAll('[data-gallery-thumb]'));
     galleryThumbs.forEach((button, index) => {
