@@ -78,7 +78,7 @@ class User extends Authenticatable
         return $this->role === 'admin';
     }
 
-    public function rewardRecords()
+    public function rewardRecords(): HasMany
     {
         return $this->hasMany(RewardRecord::class, 'user_id');
     }
@@ -86,5 +86,15 @@ class User extends Authenticatable
     public function getTotalPointsAttribute(): int
     {
         return (int) $this->rewardRecords()->sum('points');
+    }
+
+    public function receivedRatings(): HasMany
+    {
+        return $this->hasMany(Rating::class, 'reviewed_user_id', 'user_id');
+    }
+
+    public function wishlistRequests(): HasMany
+    {
+        return $this->hasMany(WishlistRequest::class, 'user_id', 'user_id');
     }
 }

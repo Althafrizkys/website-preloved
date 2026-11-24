@@ -154,4 +154,25 @@ Route::middleware('auth')->group(function () {
         ->whereNumber('transaction')
         ->name('transactions.cancel');
     Route::get('/rewards', [RewardController::class, 'index'])->name('rewards.index');
+
+    // ===== Profil toko & wishlist (Akmal) =====
+Route::get('/toko/{user}', [\App\Http\Controllers\ProfileController::class, 'show'])
+    ->whereNumber('user')
+    ->name('store.show');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/profil-saya', [\App\Http\Controllers\ProfileController::class, 'me'])->name('profile.me');
+
+    Route::get('/wishlist/buat', [\App\Http\Controllers\WishlistController::class, 'create'])->name('wishlist.create');
+    Route::post('/wishlist', [\App\Http\Controllers\WishlistController::class, 'store'])->name('wishlist.store');
+    Route::get('/wishlist/{wishlist}/edit', [\App\Http\Controllers\WishlistController::class, 'edit'])
+        ->whereNumber('wishlist')
+        ->name('wishlist.edit');
+    Route::put('/wishlist/{wishlist}', [\App\Http\Controllers\WishlistController::class, 'update'])
+        ->whereNumber('wishlist')
+        ->name('wishlist.update');
+    Route::delete('/wishlist/{wishlist}', [\App\Http\Controllers\WishlistController::class, 'destroy'])
+        ->whereNumber('wishlist')
+        ->name('wishlist.destroy');
+});
 });
