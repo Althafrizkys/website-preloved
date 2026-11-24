@@ -89,4 +89,14 @@ public function getTotalPointsAttribute(): int
 {
     return (int) $this->rewardRecords()->sum('points');
 }
+
+    public function receivedRatings(): HasMany
+    {
+        return $this->hasMany(Rating::class, 'reviewed_user_id', 'user_id');
+    }
+
+    public function wishlistRequests(): HasMany
+    {
+        return $this->hasMany(WishlistRequest::class, 'user_id', 'user_id');
+    }
 }

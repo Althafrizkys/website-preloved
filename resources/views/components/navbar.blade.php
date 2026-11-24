@@ -72,7 +72,7 @@
             @if (auth()->user()->isAdmin())
                 <a href="{{ route('admin.dashboard') }}" class="rounded-[10px] bg-white/10 px-3 py-2 text-[13px] font-semibold hover:bg-white/20 sm:px-4">Dashboard Admin</a>
             @endif
-            <span class="hidden max-w-[180px] truncate text-[14px] font-medium sm:inline">{{ auth()->user()->name }}</span>
+            <a href="{{ route('profile.me') }}" title="Profil saya" class="hidden max-w-[180px] truncate text-[14px] font-medium hover:underline sm:inline">{{ auth()->user()->name }}</a>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
                 <button type="submit" class="rounded-[10px] border border-white/40 px-3 py-2 text-[13px] font-semibold hover:bg-white/10 sm:px-4">Logout</button>
