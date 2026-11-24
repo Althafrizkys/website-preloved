@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - Seklov</title>
+    <title>Dashboard admin - Seklov</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="min-h-screen bg-[#f6f8f9] text-[#202b3d] antialiased">
@@ -16,7 +16,7 @@
                     Seklov
                 </a>
                 <span class="rounded-full bg-[#e6f2ee] px-3 py-1 text-[12px] font-semibold text-[#084734]">
-                    Admin Panel
+                    Dashboard admin
                 </span>
             </div>
 
@@ -215,7 +215,8 @@
                                         </button>
 
                                         <form action="{{ route('admin.meeting-points.destroy', $point) }}" method="POST"
-                                              onsubmit="return confirm('Hapus titik COD {{ addslashes($point->point_name) }}?')">
+                                              data-confirm="Hapus titik COD {{ $point->point_name }}?"
+                                              onsubmit="return confirm(this.dataset.confirm)">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit"
@@ -336,15 +337,15 @@
                                         </a>
 
                                         <form action="{{ route('admin.products.destroy', $product) }}" method="POST"
-      data-confirm="Yakin ingin menghapus produk {{ $product->product_name }} milik {{ $product->seller->name ?? 'penjual' }}?"
-      onsubmit="return confirm(this.dataset.confirm)">
-    @csrf
-    @method('DELETE')
-    <button type="submit"
-            class="rounded-[8px] bg-[#fee2e2] px-3 py-1.5 text-[12px] font-medium text-[#b91c1c] hover:bg-[#fecaca]">
-        Hapus
-    </button>
-</form>
+                                              data-confirm="Yakin ingin menghapus produk {{ $product->product_name }} milik {{ $product->seller->name ?? 'penjual' }}?"
+                                              onsubmit="return confirm(this.dataset.confirm)">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit"
+                                                    class="rounded-[8px] bg-[#fee2e2] px-3 py-1.5 text-[12px] font-medium text-[#b91c1c] hover:bg-[#fecaca]">
+                                                Hapus
+                                            </button>
+                                        </form>
                                     </div>
                                 </td>
                             </tr>
