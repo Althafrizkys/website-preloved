@@ -55,4 +55,10 @@ class User extends Authenticatable
     {
         return $this->role === 'admin';
     }
+
+    public function products()
+{
+    return $this->hasMany(Product::class, 'seller_id', 'user_id');
 }
+}
+
