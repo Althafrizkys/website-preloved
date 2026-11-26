@@ -1,4 +1,4 @@
-@props(['wishlist', 'isOwner' => false])
+@props(['wishlist', 'isOwner' => false, 'showUser' => false])
 
 <article class="flex h-full flex-col overflow-hidden rounded-[14px] border border-[#e5e9ed] bg-white shadow-[0_3px_10px_rgba(22,34,48,0.06)]">
     <div class="relative aspect-[4/3] overflow-hidden bg-[#eceff2]">
@@ -33,6 +33,16 @@
         <p class="text-[17px] font-bold text-[#00523f]">Rp {{ number_format((float) $wishlist->budget, 0, ',', '.') }}</p>
 
         <p class="mt-auto pt-3 text-[12px] text-[#718096]">Berlaku sampai {{ $wishlist->expired_at->format('d/m/Y') }}</p>
+
+        @if ($showUser && $wishlist->user)
+            <a href="{{ route('store.show', $wishlist->user) }}" class="mt-3 flex items-center gap-2.5 border-t border-[#eef1f3] pt-3 transition hover:opacity-80">
+                <x-avatar :user="$wishlist->user" size="size-8" text="text-[13px]" />
+                <span class="min-w-0">
+                    <span class="block truncate text-[12px] font-semibold text-[#202b3d]">{{ $wishlist->user->name }}</span>
+                    <span class="block text-[11px] text-[#718096]">{{ $wishlist->user->campus }} · Lihat profil</span>
+                </span>
+            </a>
+        @endif
 
         @if ($isOwner)
             <div class="mt-3 flex items-center gap-4 border-t border-[#eef1f3] pt-3 text-[13px] font-medium">

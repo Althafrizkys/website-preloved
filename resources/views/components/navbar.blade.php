@@ -38,6 +38,11 @@
                         <path d="M14.5 3.8V8h4.2M9 12h6M9 16h6" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"/>
                     </svg>
                 </a>
+                                <a href="{{ route('wishlist.index') }}" title="Wishlist / Permintaan Barang" aria-label="Wishlist / Permintaan Barang" class="flex size-10 items-center justify-center rounded-[12px] bg-white text-[#00523f] transition hover:bg-[#edf7f4] sm:size-11">
+                    <svg class="size-5 sm:size-6" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="M12 20.5s-8-4.6-8-11A4.5 4.5 0 0 1 12 6.8 4.5 4.5 0 0 1 20 9.5c0 6.4-8 11-8 11Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"/>
+                    </svg>
+                </a>
                 <a href="{{ route('chat.index') }}" title="Pesan" aria-label="Pesan" class="flex size-10 items-center justify-center rounded-[12px] bg-white text-[#00523f] transition hover:bg-[#edf7f4] sm:size-11">
                     <svg class="size-5 sm:size-6" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"/>
@@ -72,7 +77,9 @@
             @if (auth()->user()->isAdmin())
                 <a href="{{ route('admin.dashboard') }}" class="rounded-[10px] bg-white/10 px-3 py-2 text-[13px] font-semibold hover:bg-white/20 sm:px-4">Dashboard Admin</a>
             @endif
-            <a href="{{ route('profile.me') }}" title="Profil saya" class="hidden max-w-[180px] truncate text-[14px] font-medium hover:underline sm:inline">{{ auth()->user()->name }}</a>
+           <a href="{{ route('profile.me') }}" title="Profil saya" aria-label="Profil saya" class="shrink-0 rounded-full ring-2 ring-white/70 transition hover:ring-white">
+    <x-avatar :user="auth()->user()" size="size-10 sm:size-11" text="text-base" />
+</a>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
                 <button type="submit" class="rounded-[10px] border border-white/40 px-3 py-2 text-[13px] font-semibold hover:bg-white/10 sm:px-4">Logout</button>

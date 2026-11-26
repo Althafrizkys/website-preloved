@@ -12,7 +12,36 @@ use Illuminate\Validation\Rule;
 
 class WishlistController extends Controller
 {
-    public function create(): View
+
+    public function index(Request $request): View
+    {
+        $search = trim((string) $request->query('q', ''));
+        $categoryId = $request->query('kategori');
+        $condition = $request->query('kondisi');
+
+        $selectedCategory = is_string($categoryId) && ctype_digit($categoryId) ? $categoryId : '';
+        $selectedCondition = in_array($condition, config('seklov.products.conditions'), true) ? $condition : '';
+
+        $wishlists = WishlistRequest::query()
+            ->where('status', 'aktif')
+            ->where('expired_at', '>', now())
+            ->with(['category', 'user:user_id,name,campus,profile_photo'])
+            ->when($search !== '', fn ($q) => $q->where('item_name', 'like', '%'.$search.'%'))
+            ->when($selectedCategory !== '', fn ($q) => $q->where('category_id', (int) $selectedCategory))
+            ->when($selectedCondition !== '', fn ($q) => $q->where('condition', $selectedCondition))
+            ->orderByDesc('created_at')
+            ->paginate(12)
+            ->withQueryString();
+
+        return view('wishlist.index', [
+            'wishlists' => $wishlists,
+            'search' => $search,
+            'selectedCategory' => $selectedCategory,
+            'selectedCondition' => $selectedCondition,
+        ] + $this->formData());
+    }
+    
+public function create(): View
     {
         return view('wishlist.create', $this->formData());
     }

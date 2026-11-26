@@ -161,6 +161,9 @@ Route::get('/toko/{user}', [\App\Http\Controllers\ProfileController::class, 'sho
     ->whereNumber('user')
     ->name('store.show');
 
+    Route::get('/wishlist', [\App\Http\Controllers\WishlistController::class, 'index'])->name('wishlist.index');
+
+
 Route::middleware('auth')->group(function () {
     Route::get('/profil-saya', [\App\Http\Controllers\ProfileController::class, 'me'])->name('profile.me');
 
