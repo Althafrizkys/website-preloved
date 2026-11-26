@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Carbon\CarbonInterface;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -64,6 +66,13 @@ class Transaction extends Model
     public function items(): HasMany
     {
         return $this->hasMany(TransactionItem::class, 'transaction_id', 'transaction_id');
+    }
+
+    public function scopeCreatedBetween(Builder $query, ?CarbonInterface $start, ?CarbonInterface $end): Builder
+    {
+        return $query
+            ->when($start, fn (Builder $q) => $q->where('created_at', '>=', $start))
+            ->when($end, fn (Builder $q) => $q->where('created_at', '<=', $end));
     }
 
     public function getStatusLabelAttribute(): string

@@ -131,6 +131,7 @@ Route::middleware('auth')->group(function () {
 
     // Transaksi & COD
     Route::get('/transaksi', [TransactionController::class, 'index'])->name('transactions.index');
+    Route::get('/transaksi/export', [TransactionController::class, 'export'])->name('transactions.export');
     Route::get('/transaksi/buat/{product}', [TransactionController::class, 'create'])
         ->whereNumber('product')
         ->name('transactions.create');
