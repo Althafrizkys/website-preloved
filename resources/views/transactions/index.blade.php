@@ -43,6 +43,73 @@
                 </a>
             </div>
 
+            @if ($currentTab === 'penjualan')
+                @if ($errors->any())
+                    <div class="mb-4 rounded-[12px] border border-[#f5c2c7] bg-[#fff3f3] px-4 py-3 text-[13px] text-[#a33c3c]">
+                        {{ $errors->first() }}
+                    </div>
+                @endif
+
+                <div class="mb-6 rounded-[16px] border border-[#e5e9ed] bg-white p-4 shadow-[0_2px_10px_rgba(22,34,48,0.03)] sm:p-5">
+                    <form method="GET" action="{{ route('transactions.index') }}" class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
+                        <input type="hidden" name="tab" value="penjualan">
+
+                        <div class="flex flex-wrap items-end gap-3">
+                            <div>
+                                <label for="filter-start" class="mb-1 block text-[12px] font-medium text-[#526170]">
+                                    Dari Tanggal
+                                </label>
+                                <input
+                                    id="filter-start"
+                                    type="date"
+                                    name="start"
+                                    value="{{ $startDate ?? '' }}"
+                                    class="rounded-[10px] border border-[#d6dee2] bg-white px-3 py-2 text-[13px] text-[#202b3d] focus:border-[#00523f] focus:outline-none"
+                                >
+                            </div>
+                            <div>
+                                <label for="filter-end" class="mb-1 block text-[12px] font-medium text-[#526170]">
+                                    Sampai Tanggal
+                                </label>
+                                <input
+                                    id="filter-end"
+                                    type="date"
+                                    name="end"
+                                    value="{{ $endDate ?? '' }}"
+                                    class="rounded-[10px] border border-[#d6dee2] bg-white px-3 py-2 text-[13px] text-[#202b3d] focus:border-[#00523f] focus:outline-none"
+                                >
+                            </div>
+                            <button
+                                type="submit"
+                                class="rounded-[10px] border border-[#00523f] bg-white px-4 py-2 text-[13px] font-semibold text-[#00523f] transition hover:bg-[#edf7f4]"
+                            >
+                                Tampilkan
+                            </button>
+                            @if (! empty($startDate) || ! empty($endDate))
+                                <a
+                                    href="{{ route('transactions.index', ['tab' => 'penjualan']) }}"
+                                    class="rounded-[10px] px-3 py-2 text-[13px] font-medium text-[#718096] transition hover:text-[#202b3d]"
+                                >
+                                    Reset
+                                </a>
+                            @endif
+                        </div>
+
+                        <a
+                            href="{{ route('transactions.export', array_filter(['start' => $startDate ?? null, 'end' => $endDate ?? null])) }}"
+                            class="inline-flex items-center justify-center gap-2 rounded-[10px] bg-[#00523f] px-4 py-2.5 text-[13px] font-semibold text-white transition hover:bg-[#003d2e]"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                <polyline points="7 10 12 15 17 10" />
+                                <line x1="12" x2="12" y1="15" y2="3" />
+                            </svg>
+                            Export Excel
+                        </a>
+                    </form>
+                </div>
+            @endif
+
             @if ($transactions->isEmpty())
                 <div class="rounded-[16px] border border-dashed border-[#d6dee2] bg-white px-5 py-16 text-center">
                     <h3 class="font-['Poppins'] text-[18px] font-semibold text-[#263746]">Belum ada transaksi</h3>

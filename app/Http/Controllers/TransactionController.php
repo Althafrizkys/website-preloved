@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\SellerTransactionsExport;
 use App\Http\Requests\StoreTransactionRequest;
 use App\Models\CampusMeetingPoint;
 use App\Models\Conversation;
@@ -10,9 +11,12 @@ use App\Models\Rating;
 use App\Models\Transaction;
 use App\Services\RewardService;
 use App\Services\TransactionService;
+use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class TransactionController extends Controller
 {
@@ -25,8 +29,12 @@ class TransactionController extends Controller
         $user = $request->user();
         $tab = $request->query('tab', 'pembelian');
 
+        [$start, $end] = $tab === 'penjualan'
+            ? $this->resolveDateRange($request)
+            : [null, null];
+
         $query = $tab === 'penjualan'
-            ? $user->sellerTransactions()
+            ? $user->sellerTransactions()->createdBetween($start, $end)
             : $user->buyerTransactions();
 
         $transactions = $query
@@ -44,7 +52,59 @@ class TransactionController extends Controller
         return view('transactions.index', [
             'transactions' => $transactions,
             'currentTab' => $tab,
+            'startDate' => $start?->format('Y-m-d'),
+            'endDate' => $end?->format('Y-m-d'),
         ]);
+    }
+
+    public function export(Request $request): BinaryFileResponse
+    {
+        $user = $request->user();
+        [$start, $end] = $this->resolveDateRange($request);
+
+        $filename = match (true) {
+            $start !== null && $end !== null => 'riwayat-penjualan-cod-'.$start->format('Ymd').'-'.$end->format('Ymd').'.xlsx',
+            $start !== null => 'riwayat-penjualan-cod-mulai-'.$start->format('Ymd').'.xlsx',
+            $end !== null => 'riwayat-penjualan-cod-sampai-'.$end->format('Ymd').'.xlsx',
+            default => 'riwayat-penjualan-cod-'.now()->format('Ymd').'.xlsx',
+        };
+
+        return Excel::download(
+            new SellerTransactionsExport((int) $user->user_id, $start, $end),
+            $filename,
+        );
+    }
+
+    /**
+     * Parse optional date range query parameters for sales listing and export.
+     *
+     * @return array{0: ?Carbon, 1: ?Carbon}
+     */
+    private function resolveDateRange(Request $request): array
+    {
+        $endRules = ['nullable', 'date'];
+        if ($request->filled('start')) {
+            $endRules[] = 'after_or_equal:start';
+        }
+
+        $validated = $request->validate([
+            'start' => ['nullable', 'date'],
+            'end' => $endRules,
+        ], [
+            'start.date' => 'Format tanggal awal tidak valid.',
+            'end.date' => 'Format tanggal akhir tidak valid.',
+            'end.after_or_equal' => 'Tanggal akhir harus sama atau setelah tanggal awal.',
+        ]);
+
+        $start = ! empty($validated['start'])
+            ? Carbon::parse($validated['start'])->startOfDay()
+            : null;
+
+        $end = ! empty($validated['end'])
+            ? Carbon::parse($validated['end'])->endOfDay()
+            : null;
+
+        return [$start, $end];
     }
 
     public function chat(Request $request, Transaction $transaction): RedirectResponse
