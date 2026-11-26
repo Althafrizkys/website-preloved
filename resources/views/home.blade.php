@@ -11,7 +11,7 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         <style>@view-transition { navigation: auto; }</style>
     </head>
-    <body class="m-0 bg-[#f7f9fa] font-['Inter'] text-[#202b3d] antialiased">
+    <body class="m-0 bg-[#f7f9fa] font-['Inter'] text-[#202b3d] antialiased" style="zoom: 80%">
         <header class="px-4 pt-4 sm:px-6 sm:pt-6">
             <x-navbar :search="$search" :filters="$activeFilters" />
         </header>

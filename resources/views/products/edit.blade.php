@@ -67,11 +67,12 @@
                         <span class="inline-flex items-center gap-2 rounded-full bg-[#edf7f4] px-3 py-1.5 text-[12px] font-semibold text-[#00523f]">
                             <span class="size-1.5 rounded-full bg-[#00b888]"></span> Live Preview
                         </span>
-                        <div class="mt-5 overflow-hidden rounded-[10px] bg-[#f0f1ef]">
+                        <div class="mx-auto mt-4 w-full max-w-[300px] overflow-hidden rounded-[10px] bg-[#f0f1ef]">
                             @php($cover = $product->media->firstWhere('media_type', 'foto'))
-                            <img data-live-image src="{{ $cover ? \Illuminate\Support\Facades\Storage::disk('public')->url($cover->media_url) : '' }}" alt="Pratinjau foto produk" class="{{ $cover ? '' : 'hidden' }} aspect-[4/3] w-full object-contain">
-                            <div data-live-placeholder class="{{ $cover ? 'hidden' : '' }} flex aspect-[4/3] items-center justify-center text-[14px] text-[#8a969d]">Foto barang akan tampil di sini</div>
+                            <img data-live-image src="{{ $cover ? \Illuminate\Support\Facades\Storage::disk('public')->url($cover->media_url) : '' }}" alt="Pratinjau foto produk" class="{{ $cover ? '' : 'hidden' }} h-36 w-full object-contain sm:h-40">
+                            <div data-live-placeholder class="{{ $cover ? 'hidden' : '' }} flex h-36 items-center justify-center text-[14px] text-[#8a969d] sm:h-40">Foto barang akan tampil di sini</div>
                         </div>
+                        <div data-live-photo-thumbnails role="group" aria-label="Pilih foto pratinjau" class="mx-auto mt-2 hidden max-w-[300px] gap-2 overflow-x-auto py-1"></div>
                         @php($previewVideo = $product->media->firstWhere('media_type', 'video'))
                         <video data-live-video @if ($previewVideo) src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($previewVideo->media_url) }}" @endif controls preload="metadata" class="mt-3 max-h-40 w-full rounded-[8px] bg-black {{ $previewVideo ? '' : 'hidden' }}"></video>
                         <div class="mt-5">

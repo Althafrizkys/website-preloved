@@ -141,14 +141,45 @@ class ProductUploadTest extends TestCase
             ->assertSee('data-live-size', false)
             ->assertSee('data-live-usage_period', false)
             ->assertSee('data-live-defects', false)
-            ->assertSee('Preview', false);
+            ->assertSee('data-live-photo-thumbnails', false)
+            ->assertSee('Preview', false)
+            ->assertSee('data-restore-photos="false"', false);
 
         $this->get(route('products.edit', $product))
             ->assertOk()
             ->assertSee('Perbarui Detail Produk')
             ->assertSee('Tandai terjual')
             ->assertSee('Hapus postingan')
+            ->assertSee('data-live-photo-thumbnails', false)
             ->assertSee('data-product-form', false);
+    }
+
+    public function test_validasi_form_upload_hanya_menandai_field_salah_dan_mempertahankan_isian_lain(): void
+    {
+        $seller = $this->createUser();
+        $category = Category::create(['category_name' => 'Fashion']);
+        $data = array_merge($this->validProductData($category), [
+            'product_name' => '',
+            'photos' => [$this->fakeImage('foto.jpg')],
+        ]);
+
+        $response = $this->actingAs($seller)
+            ->from('/jual')
+            ->post('/jual', $data)
+            ->assertSessionHasErrors(['product_name'])
+            ->assertSessionHasInput('price', '1.500.000')
+            ->assertSessionHasInput('description', $data['description'])
+            ->assertSessionHasInput('stock', '3');
+
+        $page = $this->get('/jual')
+            ->assertOk()
+            ->assertSee('id="product_name"', false)
+            ->assertSee('data-restore-photos="true"', false)
+            ->assertSee('value="1.500.000"', false)
+            ->assertSee('value="3"', false)
+            ->assertSee('aria-invalid="true"', false);
+
+        $this->assertSame(1, substr_count($page->getContent(), 'aria-invalid="true"'));
     }
 
     public function test_upload_menolak_foto_lebih_dari_lima_file_terlalu_besar_dan_tipe_salah(): void

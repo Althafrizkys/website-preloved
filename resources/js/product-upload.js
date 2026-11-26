@@ -12,6 +12,74 @@ function formatFileSize(bytes) {
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+function openPhotoDraftDatabase() {
+    return new Promise((resolve, reject) => {
+        if (!window.indexedDB) {
+            reject(new Error('Penyimpanan foto sementara tidak tersedia di browser ini.'));
+            return;
+        }
+
+        const request = window.indexedDB.open('seklov-product-upload', 1);
+        request.onupgradeneeded = () => {
+            if (!request.result.objectStoreNames.contains('photo-drafts')) {
+                request.result.createObjectStore('photo-drafts');
+            }
+        };
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error || new Error('Penyimpanan foto sementara gagal dibuka.'));
+    });
+}
+
+async function savePhotoDraft(id, files) {
+    const database = await openPhotoDraftDatabase();
+
+    try {
+        await new Promise((resolve, reject) => {
+            const transaction = database.transaction('photo-drafts', 'readwrite');
+            transaction.objectStore('photo-drafts').put(files, id);
+            transaction.oncomplete = resolve;
+            transaction.onerror = () => reject(transaction.error || new Error('Foto sementara gagal disimpan.'));
+            transaction.onabort = () => reject(transaction.error || new Error('Penyimpanan foto sementara dibatalkan.'));
+        });
+    } finally {
+        database.close();
+    }
+}
+
+async function loadPhotoDraft(id) {
+    const database = await openPhotoDraftDatabase();
+
+    try {
+        return await new Promise((resolve, reject) => {
+            const transaction = database.transaction('photo-drafts', 'readonly');
+            const request = transaction.objectStore('photo-drafts').get(id);
+            request.onsuccess = () => resolve(request.result || []);
+            request.onerror = () => reject(request.error || new Error('Foto sementara gagal dipulihkan.'));
+            transaction.oncomplete = () => database.close();
+            transaction.onerror = () => reject(transaction.error || new Error('Foto sementara gagal dipulihkan.'));
+        });
+    } catch (error) {
+        database.close();
+        throw error;
+    }
+}
+
+async function deletePhotoDraft(id) {
+    const database = await openPhotoDraftDatabase();
+
+    try {
+        await new Promise((resolve, reject) => {
+            const transaction = database.transaction('photo-drafts', 'readwrite');
+            transaction.objectStore('photo-drafts').delete(id);
+            transaction.oncomplete = resolve;
+            transaction.onerror = () => reject(transaction.error || new Error('Foto sementara gagal dihapus.'));
+            transaction.onabort = () => reject(transaction.error || new Error('Penghapusan foto sementara dibatalkan.'));
+        });
+    } finally {
+        database.close();
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('[data-product-form]').forEach((form) => {
         const photosInput = form.querySelector('#photos');
@@ -19,11 +87,53 @@ document.addEventListener('DOMContentLoaded', () => {
         const photoPreview = form.querySelector('[data-new-photo-preview]');
         const videoPreview = form.querySelector('[data-new-video-preview]');
         const photoCount = form.querySelector('[data-photo-count]');
+        const photoLimitWarning = form.querySelector('[data-photo-limit-warning]');
         const videoCount = form.querySelector('[data-video-count]');
         const maxPhotos = Number(form.dataset.maxPhotos || 5);
         const existingMediaList = form.querySelector('[data-existing-media-list]');
+        const photoDraftError = form.querySelector('[data-photo-draft-error]');
+        const photoDraftSessionKey = `seklov:product-photo-draft:${form.dataset.photoDraftScope}`;
+        let photoDraftId = null;
+        let photoSavePromise = Promise.resolve();
+        let pendingPhotoSaves = 0;
+        let photoSaveFailed = false;
+        let waitingToSubmit = false;
+        let submittingAfterSave = false;
         let photoUrls = [];
         let videoUrl = null;
+        let selectedPhotos = Array.from(photosInput?.files ?? []);
+
+        const showPhotoDraftError = (error) => {
+            photoDraftError?.classList.remove('hidden');
+            console.error('Foto produk sementara tidak dapat dipertahankan.', error);
+        };
+
+        const createPhotoDraftId = () => {
+            if (!photoDraftId) {
+                const draftId = window.crypto.randomUUID();
+                window.sessionStorage.setItem(photoDraftSessionKey, draftId);
+                photoDraftId = draftId;
+            }
+
+            return photoDraftId;
+        };
+
+        const persistPhotos = () => {
+            pendingPhotoSaves++;
+            photoSaveFailed = false;
+            const files = [...selectedPhotos];
+
+            photoSavePromise = photoSavePromise
+                .then(() => savePhotoDraft(createPhotoDraftId(), files))
+                .then(() => photoDraftError?.classList.add('hidden'))
+                .catch((error) => {
+                    photoSaveFailed = true;
+                    showPhotoDraftError(error);
+                })
+                .finally(() => {
+                    pendingPhotoSaves--;
+                });
+        };
 
         const updateCounts = () => {
             const existingMedia = Array.from(existingMediaList?.querySelectorAll('[data-existing-media]') ?? []);
@@ -49,7 +159,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const liveImage = document.querySelector('[data-live-image]');
         const livePlaceholder = document.querySelector('[data-live-placeholder]');
+        const livePhotoThumbnails = document.querySelector('[data-live-photo-thumbnails]');
         const liveVideo = document.querySelector('[data-live-video]');
+        let activeLivePhotoKey = null;
+
+        const newPhotoKey = (file) => `new:${file.name}:${file.size}:${file.lastModified}`;
+
         const setLiveImage = (source) => {
             if (!liveImage) {
                 return;
@@ -62,16 +177,65 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            const existingImage = existingMediaList?.querySelector('[data-existing-media-type="foto"] img');
-            if (existingImage) {
-                liveImage.src = existingImage.src;
-                liveImage.classList.remove('hidden');
-                livePlaceholder?.classList.add('hidden');
-            } else {
-                liveImage.removeAttribute('src');
-                liveImage.classList.add('hidden');
-                livePlaceholder?.classList.remove('hidden');
+            liveImage.removeAttribute('src');
+            liveImage.classList.add('hidden');
+            livePlaceholder?.classList.remove('hidden');
+        };
+
+        const renderLivePhotoGallery = (preferredKey = activeLivePhotoKey) => {
+            const existingPhotos = Array.from(existingMediaList?.querySelectorAll('[data-existing-media-type="foto"]') ?? [])
+                .map((item) => ({
+                    key: `existing:${item.dataset.existingMedia}`,
+                    source: item.querySelector('img')?.src,
+                    alt: 'Foto produk tersimpan',
+                }))
+                .filter((photo) => photo.source);
+            const newPhotos = selectedPhotos.map((file, index) => ({
+                key: newPhotoKey(file),
+                source: photoUrls[index],
+                alt: `Foto produk baru ${index + 1}`,
+            }));
+            const photos = [...existingPhotos, ...newPhotos];
+
+            if (photos.length === 0) {
+                activeLivePhotoKey = null;
+                livePhotoThumbnails?.replaceChildren();
+                livePhotoThumbnails?.classList.add('hidden');
+                livePhotoThumbnails?.classList.remove('flex');
+                setLiveImage(null);
+                return;
             }
+
+            const activePhoto = photos.find((photo) => photo.key === preferredKey) ?? photos[0];
+            activeLivePhotoKey = activePhoto.key;
+            setLiveImage(activePhoto.source);
+
+            if (!livePhotoThumbnails) {
+                return;
+            }
+
+            livePhotoThumbnails.replaceChildren();
+            livePhotoThumbnails.classList.toggle('hidden', photos.length < 2);
+            livePhotoThumbnails.classList.toggle('flex', photos.length > 1);
+
+            if (photos.length < 2) {
+                return;
+            }
+
+            photos.forEach((photo, index) => {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.setAttribute('aria-label', `Tampilkan foto ${index + 1} dari ${photos.length}`);
+                button.setAttribute('aria-pressed', String(photo.key === activePhoto.key));
+                button.className = `size-12 shrink-0 overflow-hidden rounded-[7px] border-2 bg-white transition ${photo.key === activePhoto.key ? 'border-[#00523f] ring-2 ring-[#00523f]/20' : 'border-transparent opacity-70 hover:opacity-100'}`;
+                const image = document.createElement('img');
+                image.src = photo.source;
+                image.alt = photo.alt;
+                image.className = 'size-full object-cover';
+                button.append(image);
+                button.addEventListener('click', () => renderLivePhotoGallery(photo.key));
+                livePhotoThumbnails.append(button);
+            });
         };
 
         const setLiveVideo = (source) => {
@@ -95,12 +259,20 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
 
+        const syncPhotoInput = () => {
+            const transfer = new DataTransfer();
+            selectedPhotos.forEach((file) => transfer.items.add(file));
+            if (photosInput) {
+                photosInput.files = transfer.files;
+            }
+        };
+
         const renderPhotoPreviews = () => {
             photoUrls.forEach((url) => URL.revokeObjectURL(url));
             photoUrls = [];
             photoPreview?.replaceChildren();
 
-            const files = Array.from(photosInput?.files ?? []);
+            const files = [...selectedPhotos];
             files.forEach((file, index) => {
                 const url = URL.createObjectURL(file);
                 photoUrls.push(url);
@@ -117,20 +289,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 remove.setAttribute('aria-label', `Hapus foto ${index + 1}`);
                 remove.className = 'absolute right-1 top-1 flex size-5 items-center justify-center rounded-full bg-white/95 text-[14px] leading-none text-[#8b3030] shadow';
                 remove.addEventListener('click', () => {
-                    const transfer = new DataTransfer();
-                    files.filter((_, fileIndex) => fileIndex !== index).forEach((remainingFile) => transfer.items.add(remainingFile));
-                    photosInput.files = transfer.files;
+                    selectedPhotos = files.filter((_, fileIndex) => fileIndex !== index);
+                    syncPhotoInput();
                     renderPhotoPreviews();
                     updateCounts();
+                    persistPhotos();
                 });
                 item.append(image, remove);
                 photoPreview?.append(item);
             });
 
+            if (files.length > 0 && files.length < maxPhotos) {
+                const addMore = document.createElement('button');
+                addMore.type = 'button';
+                addMore.textContent = '+';
+                addMore.setAttribute('aria-label', 'Tambah foto produk');
+                addMore.title = 'Tambah foto produk';
+                addMore.className = 'flex size-[76px] items-center justify-center rounded-[8px] border border-dashed border-[#b8c9c4] bg-white text-[30px] font-light leading-none text-[#00523f] transition hover:border-[#00523f] hover:bg-[#f2faf7]';
+                addMore.addEventListener('click', () => photosInput?.click());
+                photoPreview?.append(addMore);
+            }
+
             if (files[0]) {
-                setLiveImage(photoUrls[0]);
+                renderLivePhotoGallery(newPhotoKey(files[0]));
             } else {
-                setLiveImage(null);
+                renderLivePhotoGallery();
             }
         };
 
@@ -169,8 +352,30 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         photosInput?.addEventListener('change', () => {
+            const selectedKeys = new Set(selectedPhotos.map((file) => `${file.name}:${file.size}:${file.lastModified}`));
+            const newPhotos = Array.from(photosInput.files ?? []).filter((file) => {
+                const key = `${file.name}:${file.size}:${file.lastModified}`;
+                if (selectedKeys.has(key)) {
+                    return false;
+                }
+
+                selectedKeys.add(key);
+                return true;
+            });
+            const availableSlots = Math.max(0, maxPhotos - selectedPhotos.length);
+            selectedPhotos = [...selectedPhotos, ...newPhotos.slice(0, availableSlots)];
+            if (newPhotos.length > availableSlots && photoLimitWarning) {
+                photoLimitWarning.textContent = availableSlots > 0
+                    ? `Maksimal ${maxPhotos} foto. Hanya ${availableSlots} foto tambahan yang dimasukkan.`
+                    : `Maksimal ${maxPhotos} foto. Foto tambahan tidak dimasukkan.`;
+                photoLimitWarning.classList.remove('hidden');
+            } else {
+                photoLimitWarning?.classList.add('hidden');
+            }
+            syncPhotoInput();
             renderPhotoPreviews();
             updateCounts();
+            persistPhotos();
         });
         videoInput?.addEventListener('change', renderVideoPreview);
 
@@ -191,7 +396,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 mediaItem.remove();
                 updateCounts();
                 if (mediaItem.dataset.existingMediaType === 'foto') {
-                    setLiveImage(photoUrls[0] ?? null);
+                    renderLivePhotoGallery();
                 } else if (mediaItem.dataset.existingMediaType === 'video') {
                     setLiveVideo(videoUrl);
                 }
@@ -225,6 +430,87 @@ document.addEventListener('DOMContentLoaded', () => {
         bindPreview('[name="is_negotiable"]', '[data-live-negotiable]', 'change', (value) => value === '1' ? 'Bisa nego' : 'Harga pas');
         bindPreview('[name="category_id"]', '[data-live-category]', 'change', (_, input) => input.selectedOptions[0]?.textContent || 'Kategori');
 
+        renderLivePhotoGallery();
+
+        form.addEventListener('submit', (event) => {
+            if (submittingAfterSave) {
+                submittingAfterSave = false;
+                return;
+            }
+
+            if (photoSaveFailed) {
+                event.preventDefault();
+                return;
+            }
+
+            if (pendingPhotoSaves === 0 || waitingToSubmit) {
+                return;
+            }
+
+            event.preventDefault();
+            waitingToSubmit = true;
+            const submitter = event.submitter;
+
+            const submitWhenSaved = async () => {
+                while (pendingPhotoSaves > 0) {
+                    await photoSavePromise;
+                }
+
+                waitingToSubmit = false;
+                if (photoSaveFailed) {
+                    return;
+                }
+
+                submittingAfterSave = true;
+                if (submitter) {
+                    form.requestSubmit(submitter);
+                } else {
+                    form.requestSubmit();
+                }
+                submittingAfterSave = false;
+            };
+
+            submitWhenSaved();
+        });
+
+        const restoreOrClearPhotoDraft = async () => {
+            try {
+                const draftId = window.sessionStorage.getItem(photoDraftSessionKey);
+                if (!draftId) {
+                    return;
+                }
+
+                if (form.dataset.restorePhotos !== 'true') {
+                    await deletePhotoDraft(draftId);
+                    window.sessionStorage.removeItem(photoDraftSessionKey);
+                    photoDraftId = null;
+                    return;
+                }
+
+                photoDraftId = draftId;
+                if (photosInput) {
+                    photosInput.disabled = true;
+                }
+
+                const files = await loadPhotoDraft(draftId);
+                selectedPhotos = files;
+                const transfer = new DataTransfer();
+                files.forEach((file) => transfer.items.add(file));
+                if (photosInput) {
+                    photosInput.files = transfer.files;
+                }
+                renderPhotoPreviews();
+                updateCounts();
+            } catch (error) {
+                showPhotoDraftError(error);
+            } finally {
+                if (photosInput) {
+                    photosInput.disabled = false;
+                }
+            }
+        };
+
+        restoreOrClearPhotoDraft();
         updateCounts();
     });
 
