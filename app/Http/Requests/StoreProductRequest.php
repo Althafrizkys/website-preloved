@@ -8,15 +8,16 @@ use Illuminate\Validation\Rule;
 
 class StoreProductRequest extends FormRequest
 {
-    protected function prepareForValidation(): void
+    public function validationData(): array
     {
-        $price = $this->input('price');
+        $data = $this->all();
+        $price = $data['price'] ?? null;
 
         if (is_string($price)) {
-            $this->merge([
-                'price' => str_replace(['.', ' '], '', trim($price)),
-            ]);
+            $data['price'] = str_replace(['.', ' '], '', trim($price));
         }
+
+        return $data;
     }
 
     public function authorize(): bool
