@@ -187,16 +187,16 @@
                             Chat Sekarang
                         </button>
                     </form>
-                    @if (auth()->check() && (int) auth()->id() === (int) $product->seller_id)
+                                        @if (auth()->check() && (int) auth()->id() === (int) $product->seller_id)
                         <a href="{{ route('products.edit', $product) }}" class="inline-flex min-h-10 items-center justify-center rounded-[8px] border border-[#dce3e6] px-4 text-[12px] font-semibold text-[#236a5a] hover:bg-[#f7f9fa]">Kelola barang</a>
-                    @else
+                    @elseif ($product->seller)
                         <a href="{{ route('store.show', $product->seller) }}" title="Lihat profil penjual" class="inline-flex min-h-10 items-center justify-center gap-2 rounded-[8px] border border-[#dce3e6] px-4 text-[12px] font-semibold text-[#236a5a] transition hover:bg-[#edf7f4]">
- npm run build   <svg class="size-[17px]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-        <circle cx="12" cy="7" r="4"/>
-        <path d="M4 20a8 8 0 0 1 16 0H4Z"/>
-    </svg>
-    Kunjungi Profile
-</a>
+                            <svg class="size-[17px]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                <circle cx="12" cy="7" r="4"/>
+                                <path d="M4 20a8 8 0 0 1 16 0H4Z"/>
+                            </svg>
+                            Kunjungi Profile
+                        </a>
                     @endif
                 </div>
             </section>
