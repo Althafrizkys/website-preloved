@@ -145,6 +145,7 @@
             </section>
 
             <div class="mt-4 mb-6">
+                 <a href="{{ route('wishlist.index') }}" aria-label="Lihat permintaan barang (wishlist)" class="block rounded-3xl transition hover:opacity-95">
                 <img
                     src="{{ asset('images/banner-wishlist.jpeg') }}"
                     alt="Banner wishlist: minta barang yang belum tersedia"
