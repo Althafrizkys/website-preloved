@@ -24,15 +24,15 @@
     @if (session('success'))
         <p role="status" class="border-b border-[#bfe6d9] bg-[#edf7f4] px-5 py-2.5 text-[12px] font-medium text-[#00523f]">{{ session('success') }}</p>
     @endif
-    <header class="flex items-center justify-between gap-3 border-b border-[#e7ebee] px-5 py-4">
+    <header class="flex items-center justify-between gap-3 border-b border-[#e7ebee] px-3 py-3 sm:px-5 sm:py-4">
         <div class="flex min-w-0 items-center gap-3">
-            <a href="{{ route('chat.index') }}" class="mr-1 grid size-11 shrink-0 place-items-center rounded-full text-[24px] text-[#236a5a] hover:bg-[#edf7f4] lg:hidden" aria-label="Kembali ke daftar pesan">‹</a>
+            <a href="{{ route('chat.index') }}" class="mr-1 grid size-11 shrink-0 place-items-center rounded-full text-[24px] text-[#236a5a] transition-colors hover:bg-[#edf7f4] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8fd0bb] lg:hidden" aria-label="Kembali ke daftar pesan">‹</a>
             @include('chat._avatar', ['user' => $other, 'size' => 'size-12'])
             <div class="min-w-0">
                 <p class="truncate font-['Poppins'] text-[16px] font-semibold text-[#263746]">{{ $other?->name ?? 'Pengguna' }}</p>
                 <p class="mt-0.5 text-[11px]">
                     @if ($other?->campus)
-                        <span class="rounded-full bg-[#e6f4f0] px-2.5 py-0.5 font-medium text-[#236a5a]">{{ $other->campus }} · {{ $isWishlistConversation ? ($iAmSeller ? 'Pemilik wishlist' : 'Calon penjual') : ($iAmSeller ? 'Pembeli' : 'Penjual') }}</span>
+                        <span class="inline-block max-w-full truncate rounded-full bg-[#e6f4f0] px-2.5 py-0.5 align-bottom font-medium text-[#236a5a]">{{ $other->campus }} · {{ $isWishlistConversation ? ($iAmSeller ? 'Pemilik wishlist' : 'Calon penjual') : ($iAmSeller ? 'Pembeli' : 'Penjual') }}</span>
                     @else
                         <span class="text-[#718096]">{{ $isWishlistConversation ? ($iAmSeller ? 'Pemilik wishlist' : 'Calon penjual') : ($iAmSeller ? 'Pembeli' : 'Penjual') }}</span>
                     @endif
@@ -41,7 +41,7 @@
         </div>
     </header>
 
-    <div class="flex items-center justify-between gap-3 border-b border-[#e7ebee] bg-[#f5f7f7] px-5 py-3">
+    <div class="flex min-w-0 items-center justify-between gap-2 border-b border-[#e7ebee] bg-[#f5f7f7] px-3 py-3 sm:gap-3 sm:px-5">
         <div class="flex min-w-0 items-center gap-3">
             @if ($isWishlistConversation && $latestWishlistPhoto)
                 <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($latestWishlistPhoto->media_url) }}" alt="{{ $latestWishlistProduct->product_name }}" class="size-[52px] shrink-0 rounded-[8px] object-cover">
@@ -69,7 +69,7 @@
             </div>
         </div>
         @if (! $isWishlistConversation && $product)
-            <a href="{{ route('products.show', $product) }}" class="shrink-0 text-[12px] font-semibold text-[#00523f] hover:underline">Lihat produk ›</a>
+            <a href="{{ route('products.show', $product) }}" class="inline-flex min-h-11 shrink-0 items-center rounded-lg px-2 text-[12px] font-semibold text-[#00523f] transition-colors hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8fd0bb]">Lihat produk ›</a>
         @endif
     </div>
 
@@ -80,8 +80,8 @@
          data-last-id="{{ $lastId }}"
          data-offer-state="{{ $isWishlistConversation ? $offerState : '' }}"
          data-watch-offers="{{ $isWishlistConversation ? 'true' : 'false' }}"
-         class="min-h-0 flex-1 space-y-3 overflow-y-auto bg-[#f7f9fa] px-5 py-5">
-        <p class="text-center text-[11px] text-[#718096]">
+         class="min-h-0 min-w-0 flex-1 space-y-3 overflow-y-auto overscroll-contain bg-[#f7f9fa] px-3 py-4 sm:px-5 sm:py-5">
+        <p class="mx-auto max-w-lg rounded-xl border border-[#e7ebee] bg-white px-4 py-3 text-center text-[11px] leading-5 text-[#718096] shadow-sm">
             @if ($isWishlistConversation)
                 Percakapan untuk wishlist {{ $wishlist?->item_name }}.<br>Diskusikan detail barang sebelum menyepakati transaksi.
             @else
@@ -93,8 +93,8 @@
             @php $mine = (int) $entry['item']->sender_id === (int) $me->user_id; @endphp
             <div class="flex {{ $mine ? 'justify-end' : 'justify-start' }}">
                 @if ($entry['type'] === 'message')
-                    <div class="max-w-[75%]" data-message-id="{{ $entry['item']->message_id }}">
-                        <div class="rounded-[14px] border border-[#e1e6e9] bg-white px-4 py-3 text-[14px] text-[#202b3d] break-words whitespace-pre-line">{{ $entry['item']->message_text }}</div>
+                    <div class="w-fit max-w-[88%] sm:max-w-[75%]" data-message-id="{{ $entry['item']->message_id }}">
+                        <div class="rounded-[16px] px-4 py-3 text-[14px] leading-6 shadow-sm break-words whitespace-pre-line {{ $mine ? 'rounded-br-[5px] bg-[#00523f] text-white' : 'rounded-bl-[5px] border border-[#e1e6e9] bg-white text-[#202b3d]' }}">{{ $entry['item']->message_text }}</div>
                         <p class="mt-1 text-[10px] text-[#87929e] {{ $mine ? 'text-right' : '' }}">{{ $entry['item']->sent_at?->format('H.i') }}</p>
                     </div>
                 @else
@@ -115,9 +115,9 @@
                             default => 'Harga penawaran',
                         };
                     @endphp
-                    <div class="w-full max-w-[75%]" data-offer-id="{{ $offer->negotiation_id }}">
-                        <div class="rounded-[14px] border border-[#e1e6e9] bg-white p-3">
-                            <div class="rounded-[10px] bg-[#f0faf6] p-4">
+                    <div class="w-full min-w-0 max-w-[92%] sm:max-w-[75%]" data-offer-id="{{ $offer->negotiation_id }}">
+                        <div class="rounded-[14px] border border-[#e1e6e9] bg-white p-2 shadow-sm sm:p-3">
+                            <div class="min-w-0 rounded-[10px] bg-[#f0faf6] p-3 sm:p-4">
                                 <p class="text-[12px] font-semibold text-[#00523f]">{{ $isWishlistConversation ? 'Penawaran barang wishlist' : 'Penawaran harga' }}</p>
                                 @if ($isWishlistConversation)
                                     <p class="mt-1 text-[13px] font-semibold text-[#263746]">{{ $offerItemName }}</p>
@@ -141,7 +141,7 @@
                                             @if ($wishlistIsOpen && (($offer->product_id === null && $offer->offered_item_name) || ($offerProduct && $offerProduct->status === 'tersedia' && $offerProduct->stock > 0)))
                                                 <form method="POST" action="{{ route('wishlist-deals.accept', $offer) }}">
                                                     @csrf
-                                                    <button type="submit" class="min-h-11 rounded-[8px] bg-[#00523f] px-4 py-2 text-[14px] font-semibold text-white shadow hover:bg-[#006c52]">Setujui &amp; lanjut transaksi</button>
+                                                    <button type="submit" class="min-h-11 max-w-full rounded-[8px] bg-[#00523f] px-3 py-2 text-left text-[14px] font-semibold leading-5 text-white shadow transition-colors hover:bg-[#006c52] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8fd0bb]">Setujui &amp; lanjut transaksi</button>
                                                 </form>
                                             @else
                                                 <p class="self-center text-[11px] text-[#718096]">Wishlist atau barang ini sudah tidak aktif.</p>
@@ -179,7 +179,7 @@
     </div>
 
     @if ($isWishlistConversation && $iAmSeller)
-        <section class="border-t border-[#e7ebee] bg-white px-5 py-3" aria-label="Tawarkan barang untuk wishlist">
+        <section class="border-t border-[#e7ebee] bg-white px-3 py-3 sm:px-5" aria-label="Tawarkan barang untuk wishlist">
             @if (! $wishlistIsOpen)
                 <p class="text-[12px] text-[#718096]">Wishlist ini sudah tidak aktif.</p>
             @elseif ($active->negotiations->contains('status', 'menunggu'))
@@ -206,11 +206,11 @@
         </section>
     @endif
 
-    <form data-chat-form action="{{ route('chat.store', $active) }}" method="POST" class="bg-[#00523f] px-5 py-4">
+    <form data-chat-form action="{{ route('chat.store', $active) }}" method="POST" class="bg-[#00523f] px-3 py-3 sm:px-5 sm:py-4">
         @csrf
         <div class="flex items-center gap-3">
-            <input type="text" name="message_text" maxlength="1000" autocomplete="off" required placeholder="Tulis pesan..." class="min-h-11 min-w-0 flex-1 rounded-[8px] border-0 bg-white px-4 text-[14px] text-[#202b3d] placeholder:text-[#9aa5ae] focus:outline-none focus:ring-2 focus:ring-[#8fd0bb]">
-            <button type="submit" class="min-h-11 shrink-0 rounded-[8px] bg-[#1a8a68] px-5 text-[14px] font-semibold text-white hover:bg-[#1f9d78]">Kirim</button>
+            <input type="text" name="message_text" maxlength="1000" autocomplete="off" required placeholder="Tulis pesan..." class="min-h-11 min-w-0 flex-1 rounded-xl border-0 bg-white px-4 text-[14px] text-[#202b3d] placeholder:text-[#9aa5ae] focus:outline-none focus:ring-2 focus:ring-[#8fd0bb]">
+            <button type="submit" class="min-h-11 shrink-0 rounded-xl bg-[#1a8a68] px-5 text-[14px] font-semibold text-white transition-colors hover:bg-[#1f9d78] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#00523f]">Kirim</button>
         </div>
     </form>
 </section>
