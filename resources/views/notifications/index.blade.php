@@ -22,40 +22,40 @@
             </nav>
 
             <div class="rounded-[24px] border border-[#e1e6e9] bg-white p-5 shadow-[0_12px_36px_rgba(22,34,48,0.06)] sm:p-7">
-                <div class="flex items-center justify-between">
+                <div class="flex flex-wrap items-center justify-between gap-2">
                     <h1 class="font-['Poppins'] text-[22px] font-semibold tracking-[-0.025em] text-[#00523f] sm:text-[24px]">
                         Pusat Notifikasi
                     </h1>
                     <button
                         type="button"
                         data-mark-all-read
-                        class="text-[12px] font-medium text-[#00523f] hover:underline"
+                        class="inline-flex min-h-11 items-center text-[14px] font-medium text-[#00523f] hover:underline"
                     >
                         Tandai semua dibaca
                     </button>
                 </div>
 
                 {{-- Filter Tabs (Semua / Belum dibaca) --}}
-                <div class="mt-4 flex rounded-full bg-[#f0f2f1] p-1 text-[13px] font-medium text-[#5c6f68]">
+                <div class="mt-4 flex rounded-full bg-[#f0f2f1] p-1 text-[14px] font-medium text-[#5c6f68]">
                     <button
                         type="button"
                         data-notification-tab="semua"
-                        class="flex-1 rounded-full py-2 text-center font-semibold bg-white text-[#00523f] shadow-sm transition"
+                        class="min-h-11 flex-1 rounded-full py-2 text-center font-semibold bg-white text-[#00523f] shadow-sm transition"
                     >
                         Semua
                     </button>
                     <button
                         type="button"
                         data-notification-tab="belum_dibaca"
-                        class="flex-1 rounded-full py-2 text-center font-medium text-[#5c6f68] hover:text-[#00523f] transition"
+                        class="min-h-11 flex-1 rounded-full py-2 text-center font-medium text-[#5c6f68] hover:text-[#00523f] transition"
                     >
                         Belum dibaca
                     </button>
                 </div>
 
                 {{-- Filter Role (Radio Penjual & Pembeli) --}}
-                <div class="mt-4 flex items-center gap-6 text-[13px]">
-                    <label class="flex cursor-pointer items-center gap-2 select-none">
+                <div class="mt-4 flex flex-wrap items-center gap-3 text-[14px] sm:gap-6">
+                    <label class="flex min-h-11 cursor-pointer items-center gap-2 select-none">
                         <input
                             type="radio"
                             name="page_notification_role"
@@ -70,7 +70,7 @@
                         <span data-radio-label="penjual" class="font-semibold text-[#00523f] transition">Penjual</span>
                     </label>
 
-                    <label class="flex cursor-pointer items-center gap-2 select-none">
+                    <label class="flex min-h-11 cursor-pointer items-center gap-2 select-none">
                         <input
                             type="radio"
                             name="page_notification_role"

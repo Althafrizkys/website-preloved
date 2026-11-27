@@ -11,7 +11,7 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         <style>@view-transition { navigation: auto; }</style>
     </head>
-    <body class="m-0 bg-[#f7f9fa] font-['Inter'] text-[#202b3d] antialiased" style="zoom: 80%">
+    <body class="m-0 bg-[#f7f9fa] font-['Inter'] text-[#202b3d] antialiased">
         <header class="px-4 pt-4 sm:px-6 sm:pt-6">
             <x-navbar :search="$search" :filters="$activeFilters" />
         </header>
@@ -35,11 +35,11 @@
             </section>
 
             @php
-                $pillBase = 'flex h-9 cursor-pointer select-none list-none items-center gap-1.5 rounded-[10px] border px-3.5 text-[13px] transition [&::-webkit-details-marker]:hidden';
+                $pillBase = 'flex min-h-11 cursor-pointer select-none list-none items-center gap-1.5 rounded-[10px] border px-3.5 text-[14px] transition [&::-webkit-details-marker]:hidden';
                 $pillIdle = 'border-[#e1e6e9] bg-white text-[#526170] hover:border-[#00523f]/40';
                 $pillActive = 'border-[#00523f] bg-[#edf7f4] font-medium text-[#00523f]';
-                $panelBase = 'absolute left-0 top-full z-30 mt-2 w-64 rounded-[12px] border border-[#e1e6e9] bg-white p-1.5 shadow-[0_10px_30px_rgba(22,34,48,0.12)]';
-                $rowBase = 'group flex cursor-pointer items-center justify-between rounded-[8px] px-3 py-2.5 text-[13px] text-[#263746] transition hover:bg-[#f7f9fa] has-[:checked]:bg-[#edf7f4] has-[:checked]:font-semibold has-[:checked]:text-[#00523f]';
+                $panelBase = 'absolute left-0 top-full z-30 mt-2 w-64 max-w-[calc(100vw-2rem)] rounded-[12px] border border-[#e1e6e9] bg-white p-1.5 shadow-[0_10px_30px_rgba(22,34,48,0.12)]';
+                $rowBase = 'group flex min-h-11 cursor-pointer items-center justify-between rounded-[8px] px-3 py-2.5 text-[14px] text-[#263746] transition hover:bg-[#f7f9fa] has-[:checked]:bg-[#edf7f4] has-[:checked]:font-semibold has-[:checked]:text-[#00523f]';
 
                 $filterMenus = [
                     [
@@ -109,38 +109,38 @@
                             <span>{{ $priceLabel }}</span>
                             <svg class="size-3.5 opacity-70" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m6 9 6 6 6-6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg>
                         </summary>
-                        <div class="{{ $panelBase }} w-72 p-4">
+                        <div class="{{ $panelBase }} left-1/2 w-72 -translate-x-1/2 p-4 sm:left-0 sm:translate-x-0">
                             <p class="text-[13px] font-semibold text-[#263746]">Rentang harga</p>
                             <div class="mt-3 grid grid-cols-2 gap-3">
                                 <div>
-                                    <label for="harga_min" class="text-[11px] font-medium text-[#718096]">Harga minimum</label>
+                                    <label for="harga_min" class="text-[14px] font-medium text-[#718096]">Harga minimum</label>
                                     <div class="mt-1 flex h-10 items-center overflow-hidden rounded-[8px] border border-[#e1e6e9] bg-[#f7f9fa] transition focus-within:border-[#00523f] focus-within:bg-white">
-                                        <span class="flex h-full items-center border-r border-[#e1e6e9] px-2.5 text-[12px] font-medium text-[#718096]">Rp</span>
-                                        <input id="harga_min" type="number" name="harga_min" min="0" inputmode="numeric" value="{{ $minPrice }}" placeholder="0" class="h-full w-full min-w-0 border-0 bg-transparent px-2.5 text-[13px] text-[#202b3d] placeholder:text-[#a0aab4] focus:ring-0">
+                                        <span class="flex h-full items-center border-r border-[#e1e6e9] px-2.5 text-[14px] font-medium text-[#718096]">Rp</span>
+                                        <input id="harga_min" type="number" name="harga_min" min="0" inputmode="numeric" value="{{ $minPrice }}" placeholder="0" class="h-full w-full min-w-0 border-0 bg-transparent px-2.5 text-[14px] text-[#202b3d] placeholder:text-[#a0aab4] focus:ring-0">
                                     </div>
                                 </div>
                                 <div>
-                                    <label for="harga_max" class="text-[11px] font-medium text-[#718096]">Harga maksimum</label>
+                                    <label for="harga_max" class="text-[14px] font-medium text-[#718096]">Harga maksimum</label>
                                     <div class="mt-1 flex h-10 items-center overflow-hidden rounded-[8px] border border-[#e1e6e9] bg-[#f7f9fa] transition focus-within:border-[#00523f] focus-within:bg-white">
-                                        <span class="flex h-full items-center border-r border-[#e1e6e9] px-2.5 text-[12px] font-medium text-[#718096]">Rp</span>
-                                        <input id="harga_max" type="number" name="harga_max" min="0" inputmode="numeric" value="{{ $maxPrice }}" placeholder="Bebas" class="h-full w-full min-w-0 border-0 bg-transparent px-2.5 text-[13px] text-[#202b3d] placeholder:text-[#a0aab4] focus:ring-0">
+                                        <span class="flex h-full items-center border-r border-[#e1e6e9] px-2.5 text-[14px] font-medium text-[#718096]">Rp</span>
+                                        <input id="harga_max" type="number" name="harga_max" min="0" inputmode="numeric" value="{{ $maxPrice }}" placeholder="Bebas" class="h-full w-full min-w-0 border-0 bg-transparent px-2.5 text-[14px] text-[#202b3d] placeholder:text-[#a0aab4] focus:ring-0">
                                     </div>
                                 </div>
                             </div>
                             <div class="mt-4 flex items-center gap-3">
-                                <button type="submit" class="h-10 flex-1 rounded-[8px] bg-[#00523f] text-[13px] font-semibold text-white transition hover:bg-[#006c52]">Terapkan</button>
+                                <button type="submit" class="min-h-11 flex-1 rounded-[8px] bg-[#00523f] text-[14px] font-semibold text-white transition hover:bg-[#006c52]">Terapkan</button>
                                 @if ($hasPrice)
-                                    <a href="{{ route('home', array_filter(array_merge(['q' => $search], \Illuminate\Support\Arr::except($activeFilters, ['harga_min', 'harga_max'])))) }}" class="text-[12px] font-medium text-[#718096] underline hover:text-[#00523f]">Hapus</a>
+                                    <a href="{{ route('home', array_filter(array_merge(['q' => $search], \Illuminate\Support\Arr::except($activeFilters, ['harga_min', 'harga_max'])))) }}" class="inline-flex min-h-11 items-center text-[14px] font-medium text-[#718096] underline hover:text-[#00523f]">Hapus</a>
                                 @endif
                             </div>
                         </div>
                     </details>
 
                     @if ($activeFilters !== [])
-                        <a href="{{ route('home', array_filter(['q' => $search])) }}" class="px-1 text-[12px] font-medium text-[#00523f] underline">Reset filter</a>
+                        <a href="{{ route('home', array_filter(['q' => $search])) }}" class="inline-flex min-h-11 items-center px-1 text-[14px] font-medium text-[#00523f] underline">Reset filter</a>
                     @endif
 
-                    <x-sell-button label="+ Mulai Jual" class="ml-auto inline-flex h-10 items-center justify-center rounded-[10px] bg-[#00523f] px-5 text-[13px] font-semibold text-white transition hover:bg-[#006c52]" />
+                    <x-sell-button label="+ Mulai Jual" class="ml-auto inline-flex min-h-11 items-center justify-center rounded-[10px] bg-[#00523f] px-5 text-[14px] font-semibold text-white transition hover:bg-[#006c52]" />
                 </form>
             </section>
 
