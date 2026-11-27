@@ -87,11 +87,12 @@
                 <p class="mt-1 text-[12px] text-[#084734]">{{ $stats['active_meeting_points'] }} titik aktif tersedia</p>
             </div>
 
-            <div class="rounded-[16px] border border-[#e5eaed] bg-white p-5 shadow-xs">
+            <a href="#section-transaksi-cod"
+               class="block rounded-[16px] border border-[#e5eaed] bg-white p-5 shadow-xs transition hover:border-[#084734]">
                 <p class="text-[12px] font-medium text-[#64748b]">Total Transaksi COD</p>
                 <p class="mt-2 text-[28px] font-bold text-[#0f172a]">{{ $stats['total_transactions'] }}</p>
-                <p class="mt-1 text-[12px] text-[#64748b]">Seluruh transaksi tercatat</p>
-            </div>
+                <p class="mt-1 text-[12px] font-medium text-[#084734]">Lihat detail &amp; status transaksi &rarr;</p>
+            </a>
         </section>
 
         {{-- Manajemen Titik COD & Kampus --}}
@@ -332,7 +333,7 @@
                                 <td class="py-3.5 text-right">
                                     <div class="inline-flex items-center justify-end gap-2">
                                         <a href="{{ route('products.show', $product) }}" target="_blank"
-                                           class="min-h-11 rounded-[8px] border border-[#dce3e6] bg-white px-3 text-[14px] font-medium text-[#202b3d] hover:bg-[#f7f9fa]">
+                                           class="inline-flex min-h-11 items-center rounded-[8px] border border-[#dce3e6] bg-white px-3 text-[14px] font-medium text-[#202b3d] hover:bg-[#f7f9fa]">
                                             Lihat
                                         </a>
 
@@ -363,6 +364,129 @@
             @if (isset($products) && method_exists($products, 'links'))
                 <div class="mt-4">
                     {{ $products->links() }}
+                </div>
+            @endif
+        </section>
+
+        {{-- Monitoring Transaksi COD --}}
+        <section id="section-transaksi-cod" class="rounded-[16px] border border-[#e5eaed] bg-white p-6 shadow-xs">
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h2 class="text-[18px] font-bold text-[#0f172a]">Monitoring Transaksi COD</h2>
+                    <p class="text-[13px] text-[#64748b]">
+                        Pantau seluruh transaksi COD antar mahasiswa beserta titik temu dan statusnya.
+                    </p>
+                </div>
+
+                <form action="{{ route('admin.dashboard') }}#section-transaksi-cod" method="GET" class="flex w-full flex-wrap items-center gap-2 sm:w-auto">
+                    <input type="text" name="tx_q" value="{{ $transactionSearch ?? '' }}"
+                           placeholder="Cari produk, pembeli, penjual..."
+                           class="min-h-11 w-full min-w-0 rounded-[10px] border border-[#dce3e6] bg-white px-3.5 text-[14px] text-[#202b3d] placeholder:text-[#94a3b8] focus:border-[#084734] focus:outline-none sm:w-auto">
+
+                    <select name="tx_status"
+                            class="min-h-11 w-full rounded-[10px] border border-[#dce3e6] bg-white px-3.5 text-[14px] text-[#202b3d] focus:border-[#084734] focus:outline-none sm:w-auto">
+                        <option value="">Semua Status</option>
+                        <option value="pending" @selected(($transactionStatusFilter ?? '') === 'pending')>Menunggu Konfirmasi</option>
+                        <option value="confirmed" @selected(($transactionStatusFilter ?? '') === 'confirmed')>Dijadwalkan COD</option>
+                        <option value="completed" @selected(($transactionStatusFilter ?? '') === 'completed')>Selesai</option>
+                        <option value="cancelled" @selected(($transactionStatusFilter ?? '') === 'cancelled')>Dibatalkan</option>
+                    </select>
+
+                    <button type="submit"
+                            class="min-h-11 rounded-[10px] bg-[#084734] px-4 text-[14px] font-semibold text-white hover:bg-[#063829]">
+                        Cari
+                    </button>
+
+                    @if (($transactionSearch ?? '') !== '' || ($transactionStatusFilter ?? '') !== '')
+                        <a href="{{ route('admin.dashboard') }}#section-transaksi-cod"
+                           class="inline-flex min-h-11 items-center rounded-[10px] border border-[#dce3e6] bg-white px-3.5 text-[14px] font-medium text-[#475569] hover:bg-[#f7f9fa]">
+                            Reset
+                        </a>
+                    @endif
+                </form>
+            </div>
+
+            <div class="mt-5 overflow-x-auto">
+                <table class="w-full min-w-[720px] border-collapse text-left">
+                    <thead>
+                        <tr class="border-b border-[#e5eaed] text-[11px] font-bold uppercase tracking-wider text-[#64748b]">
+                            <th class="py-3 pr-4">Produk &amp; Total</th>
+                            <th class="py-3 pr-4">Pembeli &rarr; Penjual</th>
+                            <th class="py-3 pr-4">Titik COD &amp; Jadwal</th>
+                            <th class="py-3 pr-4">Status Transaksi</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-[#eef2f5] text-[13px]">
+                        @forelse ($transactions ?? [] as $tx)
+                            @php
+                                $firstItem = $tx->items->first();
+                                $txProductName = $firstItem?->product?->product_name ?? ($tx->product?->product_name ?? 'Produk tidak tersedia');
+                                $txQty = $firstItem?->quantity ?? ($tx->quantity ?? 1);
+                                $rawStatus = $tx->transaction_status ?? $tx->cod_status ?? $tx->status ?? '';
+                                $txStatus = strtolower((string) $rawStatus);
+                            @endphp
+                            <tr class="hover:bg-[#fafbfc]">
+                                <td class="py-3.5 pr-4">
+                                    <p class="font-semibold text-[#0f172a]">
+                                        {{ $txProductName }}
+                                        <span class="text-[12px] font-normal text-[#64748b]">(x{{ $txQty }})</span>
+                                    </p>
+                                    <p class="text-[12px] font-semibold text-[#084734]">
+                                        Rp {{ number_format((float) ($tx->total_price ?? $tx->agreed_price ?? $firstItem?->subtotal ?? 0), 0, ',', '.') }}
+                                    </p>
+                                </td>
+                                <td class="py-3.5 pr-4">
+                                    <p class="text-[#202b3d]">
+                                        <span class="font-medium">{{ $tx->buyer->name ?? '-' }}</span>
+                                        <span class="text-[#94a3b8]">&rarr;</span>
+                                        <span class="font-medium">{{ $tx->seller->name ?? '-' }}</span>
+                                    </p>
+                                    <p class="text-[12px] text-[#64748b]">
+                                        {{ $tx->buyer->campus ?? '-' }} / {{ $tx->seller->campus ?? '-' }}
+                                    </p>
+                                </td>
+                                <td class="py-3.5 pr-4">
+                                    <p class="font-medium text-[#202b3d]">
+                                        {{ $tx->meetingPoint->point_name ?? ($tx->custom_meeting_point ?? 'Belum ditentukan') }}
+                                    </p>
+                                    <p class="text-[12px] text-[#64748b]">
+                                        {{ $tx->cod_schedule ? \Carbon\Carbon::parse($tx->cod_schedule)->format('d M Y, H:i') : ($tx->created_at?->format('d M Y, H:i') ?? '-') }}
+                                    </p>
+                                </td>
+                                <td class="py-3.5 pr-4">
+                                    @if (in_array($txStatus, ['completed', 'selesai', 'done']))
+                                        <span class="inline-flex rounded-full bg-[#dcfce7] px-2.5 py-0.5 text-[11px] font-semibold text-[#15803d]">
+                                            Selesai
+                                        </span>
+                                    @elseif (in_array($txStatus, ['confirmed', 'scheduled', 'dijadwalkan', 'processing']))
+                                        <span class="inline-flex rounded-full bg-[#e0f2fe] px-2.5 py-0.5 text-[11px] font-semibold text-[#0369a1]">
+                                            Dijadwalkan COD
+                                        </span>
+                                    @elseif (in_array($txStatus, ['cancelled', 'canceled', 'dibatalkan', 'rejected']))
+                                        <span class="inline-flex rounded-full bg-[#fee2e2] px-2.5 py-0.5 text-[11px] font-semibold text-[#b91c1c]">
+                                            Dibatalkan
+                                        </span>
+                                    @else
+                                        <span class="inline-flex rounded-full bg-[#fef3c7] px-2.5 py-0.5 text-[11px] font-semibold text-[#b45309]">
+                                            {{ $rawStatus !== '' ? ucfirst($rawStatus) : 'Menunggu Konfirmasi' }}
+                                        </span>
+                                    @endif
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="4" class="py-6 text-center text-[13px] text-[#64748b]">
+                                    Belum ada transaksi COD yang tercatat.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+
+            @if (isset($transactions) && method_exists($transactions, 'links'))
+                <div class="mt-4">
+                    {{ $transactions->links() }}
                 </div>
             @endif
         </section>
@@ -402,7 +526,7 @@
             </div>
 
             <div class="mt-5 overflow-x-auto">
-                <table class="w-full min-w-[700px] border-collapse text-left">
+                <table class="w-full min-w-[760px] border-collapse text-left">
                     <thead>
                         <tr class="border-b border-[#e5eaed] text-[11px] font-bold uppercase tracking-wider text-[#64748b]">
                             <th class="py-3 pr-4">Pengguna</th>
@@ -449,14 +573,27 @@
                                     @if ($user->user_id === auth()->id())
                                         <span class="text-[12px] italic text-[#94a3b8]">Akun saat ini</span>
                                     @else
-                                        <form action="{{ route('admin.users.toggle-status', $user) }}" method="POST" class="inline">
-                                            @csrf
-                                            @method('PATCH')
-                                            <button type="submit"
-                                                    class="min-h-11 rounded-[8px] px-3 text-[14px] font-medium {{ $user->is_active ? 'bg-[#fee2e2] text-[#b91c1c] hover:bg-[#fecaca]' : 'bg-[#dcfce7] text-[#15803d] hover:bg-[#bbf7d0]' }}">
-                                                {{ $user->is_active ? 'Nonaktifkan' : 'Aktifkan' }}
-                                            </button>
-                                        </form>
+                                        <div class="inline-flex items-center justify-end gap-2">
+                                            <form action="{{ route('admin.users.toggle-status', $user) }}" method="POST" class="inline">
+                                                @csrf
+                                                @method('PATCH')
+                                                <button type="submit"
+                                                        @disabled($user->is_active)
+                                                        class="min-h-11 rounded-[8px] px-3 text-[14px] font-medium {{ $user->is_active ? 'cursor-not-allowed bg-[#f1f5f9] text-[#94a3b8]' : 'bg-[#dcfce7] text-[#15803d] hover:bg-[#bbf7d0]' }}">
+                                                    Aktifkan
+                                                </button>
+                                            </form>
+
+                                            <form action="{{ route('admin.users.toggle-status', $user) }}" method="POST" class="inline">
+                                                @csrf
+                                                @method('PATCH')
+                                                <button type="submit"
+                                                        @disabled(! $user->is_active)
+                                                        class="min-h-11 rounded-[8px] px-3 text-[14px] font-medium {{ ! $user->is_active ? 'cursor-not-allowed bg-[#f1f5f9] text-[#94a3b8]' : 'bg-[#fee2e2] text-[#b91c1c] hover:bg-[#fecaca]' }}">
+                                                    Nonaktifkan
+                                                </button>
+                                            </form>
+                                        </div>
                                     @endif
                                 </td>
                             </tr>
@@ -522,11 +659,11 @@
 
                 <div class="flex justify-end gap-2 pt-2">
                     <button type="button" onclick="closeEditPointModal()"
-                            class="rounded-[10px] border border-[#dce3e6] bg-white px-4 py-2 text-[13px] font-medium text-[#475569] hover:bg-[#f7f9fa]">
+                            class="min-h-11 rounded-[10px] border border-[#dce3e6] bg-white px-4 text-[14px] font-medium text-[#475569] hover:bg-[#f7f9fa]">
                         Batal
                     </button>
                     <button type="submit"
-                            class="rounded-[10px] bg-[#084734] px-4 py-2 text-[13px] font-semibold text-white hover:bg-[#063829]">
+                            class="min-h-11 rounded-[10px] bg-[#084734] px-4 text-[14px] font-semibold text-white hover:bg-[#063829]">
                         Simpan Perubahan
                     </button>
                 </div>
