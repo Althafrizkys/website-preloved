@@ -20,7 +20,7 @@
     };
     $wishlistIsOpen = $wishlist?->status === 'aktif' && $wishlist->expired_at?->isFuture();
 @endphp
-<section class="flex min-h-0 flex-1 flex-col" aria-label="Percakapan">
+<section class="flex min-h-0 min-w-0 flex-1 flex-col" aria-label="Percakapan">
     @if (session('success'))
         <p role="status" class="border-b border-[#bfe6d9] bg-[#edf7f4] px-5 py-2.5 text-[12px] font-medium text-[#00523f]">{{ session('success') }}</p>
     @endif
@@ -209,8 +209,8 @@
     <form data-chat-form action="{{ route('chat.store', $active) }}" method="POST" class="bg-[#00523f] px-5 py-4">
         @csrf
         <div class="flex items-center gap-3">
-            <input type="text" name="message_text" maxlength="1000" autocomplete="off" required placeholder="Tulis pesan..." class="min-h-11 flex-1 rounded-[8px] border-0 bg-white px-4 text-[14px] text-[#202b3d] placeholder:text-[#9aa5ae] focus:outline-none focus:ring-2 focus:ring-[#8fd0bb]">
-            <button type="submit" class="min-h-11 rounded-[8px] bg-[#1a8a68] px-6 text-[13px] font-semibold text-white hover:bg-[#1f9d78]">Kirim</button>
+            <input type="text" name="message_text" maxlength="1000" autocomplete="off" required placeholder="Tulis pesan..." class="min-h-11 min-w-0 flex-1 rounded-[8px] border-0 bg-white px-4 text-[14px] text-[#202b3d] placeholder:text-[#9aa5ae] focus:outline-none focus:ring-2 focus:ring-[#8fd0bb]">
+            <button type="submit" class="min-h-11 shrink-0 rounded-[8px] bg-[#1a8a68] px-5 text-[14px] font-semibold text-white hover:bg-[#1f9d78]">Kirim</button>
         </div>
     </form>
 </section>
