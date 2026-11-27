@@ -24,7 +24,10 @@
     </div>
 
     @if ($isOwner)
-        <a href="{{ route('products.create') }}" class="inline-flex h-11 items-center justify-center rounded-[10px] bg-[#00523f] px-6 text-[14px] font-semibold text-white transition hover:bg-[#006c52]">+ Jual Barang</a>
+        <div class="flex flex-wrap gap-3">
+            <a href="{{ route('profile.edit') }}" class="inline-flex h-11 items-center justify-center rounded-[10px] border border-[#00523f] px-5 text-[14px] font-semibold text-[#00523f] transition hover:bg-[#edf7f4]">Edit Profil</a>
+            <a href="{{ route('products.create') }}" class="inline-flex h-11 items-center justify-center rounded-[10px] bg-[#00523f] px-6 text-[14px] font-semibold text-white transition hover:bg-[#006c52]">+ Jual Barang</a>
+        </div>
     @else
         <button type="button" disabled title="Chat dari profil segera hadir" class="inline-flex h-11 cursor-not-allowed items-center justify-center gap-2 rounded-[10px] bg-[#00523f] px-6 text-[14px] font-semibold text-white opacity-60">
             <svg class="size-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">

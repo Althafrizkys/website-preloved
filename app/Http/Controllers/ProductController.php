@@ -49,7 +49,7 @@ class ProductController extends Controller
         $product->load([
             'media',
             'category',
-            'seller:user_id,name,campus,cohort',
+            'seller:user_id,name,campus,cohort,profile_photo',
         ]);
 
         $relatedProducts = Product::query()

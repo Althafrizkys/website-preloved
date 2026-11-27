@@ -159,7 +159,11 @@
 
             <section class="mt-5 flex flex-col gap-4 rounded-[12px] border border-[#e5e9ed] bg-white p-4 shadow-[0_2px_8px_rgba(22,34,48,0.025)] sm:flex-row sm:items-center sm:justify-between sm:px-4 sm:py-3" aria-label="Informasi penjual">
                 <div class="flex min-w-0 items-center gap-3">
-                    <div class="grid size-14 shrink-0 place-items-center overflow-hidden rounded-full bg-[#e9d8e6] font-['Poppins'] text-[17px] font-semibold text-[#00523f]" aria-hidden="true">{{ $sellerInitial }}</div>
+                    @if ($product->seller)
+                        <x-avatar :user="$product->seller" size="size-14" text="text-[17px]" />
+                    @else
+                        <div class="grid size-14 shrink-0 place-items-center overflow-hidden rounded-full bg-[#e9d8e6] font-['Poppins'] text-[17px] font-semibold text-[#00523f]" aria-hidden="true">{{ $sellerInitial }}</div>
+                    @endif
                     <div class="min-w-0">
                         <div class="flex flex-wrap items-center gap-2">
                             <p class="truncate text-[13px] font-semibold text-[#263746]">{{ $sellerName }}</p>

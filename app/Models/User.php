@@ -27,6 +27,8 @@ class User extends Authenticatable
         'npm',
         'campus',
         'cohort',
+        'gender',
+        'profile_photo',
         'password',
     ];
 

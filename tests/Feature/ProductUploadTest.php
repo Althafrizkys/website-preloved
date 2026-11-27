@@ -44,6 +44,8 @@ class ProductUploadTest extends TestCase
     public function test_upload_valid_menyimpan_produk_dan_media_dengan_seller_dari_session(): void
     {
         $seller = $this->createUser();
+        $seller->update(['profile_photo' => 'profiles/seller.png']);
+        Storage::disk('public')->put('profiles/seller.png', 'foto profil');
         $otherUser = $this->createUser();
         $category = Category::create(['category_name' => 'Fashion']);
 
@@ -91,7 +93,8 @@ class ProductUploadTest extends TestCase
             ->assertSee('Penjual tidak mengaktifkan negosiasi')
             ->assertDontSee('data-nego-open', false)
             ->assertSee('Lainnya')
-            ->assertSee('Angkatan 2024');
+            ->assertSee('Angkatan 2024')
+            ->assertSee(Storage::disk('public')->url('profiles/seller.png'));
     }
 
     public function test_gagal_menyimpan_salah_satu_file_membersihkan_file_sebelumnya_dan_rollback_produk(): void
