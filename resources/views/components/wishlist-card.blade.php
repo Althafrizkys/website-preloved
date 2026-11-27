@@ -15,43 +15,43 @@
         @endif
 
         @if ($isOwner && $wishlist->status !== 'aktif')
-            <span class="absolute left-3 top-3 rounded-full bg-[#526170] px-3 py-1 text-[11px] font-semibold capitalize text-white">{{ $wishlist->status }}</span>
+            <span class="absolute left-3 top-3 rounded-full bg-[#526170] px-3 py-1 text-[12px] font-semibold capitalize text-white">{{ $wishlist->status }}</span>
         @endif
     </div>
 
     <div class="flex flex-1 flex-col p-3.5 sm:p-4">
-        <p class="line-clamp-2 min-h-[42px] text-[14px] font-semibold leading-[21px] text-[#202b3d]">{{ $wishlist->item_name }}</p>
+        <p class="line-clamp-2 min-h-[42px] break-words text-[14px] font-semibold leading-[21px] text-[#202b3d]">{{ $wishlist->item_name }}</p>
 
         <div class="mt-1.5 flex flex-wrap gap-1.5">
             @if ($wishlist->condition)
-                <span class="rounded-full bg-[#00523f] px-3 py-1 text-[11px] font-semibold text-white">{{ $wishlist->condition }}</span>
+                <span class="rounded-full bg-[#00523f] px-3 py-1 text-[12px] font-semibold text-white">{{ $wishlist->condition }}</span>
             @endif
-            <span class="rounded-full bg-[#f0f3f6] px-2.5 py-1 text-[10px] font-medium text-[#526170]">{{ $wishlist->category?->category_name ?? 'Lainnya' }}</span>
+            <span class="max-w-full rounded-full bg-[#f0f3f6] px-2.5 py-1 text-[12px] font-medium text-[#526170]">{{ $wishlist->category?->category_name ?? 'Lainnya' }}</span>
         </div>
 
-        <p class="mt-2 text-[12px] text-[#718096]">Budget</p>
+        <p class="mt-2 text-[14px] text-[#718096]">Budget</p>
         <p class="text-[17px] font-bold text-[#00523f]">Rp {{ number_format((float) $wishlist->budget, 0, ',', '.') }}</p>
 
-        <p class="mt-auto pt-3 text-[12px] text-[#718096]">Berlaku sampai {{ $wishlist->expired_at->format('d/m/Y') }}</p>
+        <p class="mt-auto pt-3 text-[14px] text-[#718096]">Berlaku sampai {{ $wishlist->expired_at->format('d/m/Y') }}</p>
 
         @if ($showUser && $wishlist->user)
-            <a href="{{ route('store.show', $wishlist->user) }}" class="mt-3 flex items-center gap-2.5 border-t border-[#eef1f3] pt-3 transition hover:opacity-80">
-                <x-avatar :user="$wishlist->user" size="size-8" text="text-[13px]" />
+            <a href="{{ route('store.show', $wishlist->user) }}" class="mt-3 flex min-h-11 items-center gap-2.5 border-t border-[#eef1f3] pt-3 transition hover:opacity-80">
+                <x-avatar :user="$wishlist->user" size="size-9" text="text-[14px]" />
                 <span class="min-w-0">
-                    <span class="block truncate text-[12px] font-semibold text-[#202b3d]">{{ $wishlist->user->name }}</span>
-                    <span class="block text-[11px] text-[#718096]">{{ $wishlist->user->campus }} · Lihat profil</span>
+                    <span class="block truncate text-[14px] font-semibold text-[#202b3d]">{{ $wishlist->user->name }}</span>
+                    <span class="block text-[12px] text-[#718096]">{{ $wishlist->user->campus }} · Lihat profil</span>
                 </span>
             </a>
             @if (! $isOwner && $wishlist->status === 'aktif' && $wishlist->expired_at?->isFuture())
                 @auth
                     <form method="POST" action="{{ route('chat.wishlist.start', $wishlist) }}" class="mt-3">
                         @csrf
-                        <button type="submit" class="inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-[10px] bg-[#00523f] px-4 text-[13px] font-semibold text-white transition hover:bg-[#006c52]">
+                        <button type="submit" class="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-[10px] bg-[#00523f] px-4 text-[14px] font-semibold text-white transition hover:bg-[#006c52]">
                             <span aria-hidden="true">◉</span> Chat pemilik wishlist
                         </button>
                     </form>
                 @else
-                    <a href="{{ route('login') }}" class="mt-3 inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-[10px] bg-[#00523f] px-4 text-[13px] font-semibold text-white transition hover:bg-[#006c52]">
+                    <a href="{{ route('login') }}" class="mt-3 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-[10px] bg-[#00523f] px-4 text-[14px] font-semibold text-white transition hover:bg-[#006c52]">
                         Chat pemilik wishlist
                     </a>
                 @endauth
@@ -59,12 +59,12 @@
         @endif
 
         @if ($isOwner)
-            <div class="mt-3 flex items-center gap-4 border-t border-[#eef1f3] pt-3 text-[13px] font-medium">
-                <a href="{{ route('wishlist.edit', $wishlist) }}" class="text-[#00523f] hover:underline">Edit</a>
+            <div class="mt-3 flex items-center gap-4 border-t border-[#eef1f3] pt-3 text-[14px] font-medium">
+                <a href="{{ route('wishlist.edit', $wishlist) }}" class="inline-flex min-h-11 items-center text-[#00523f] hover:underline">Edit</a>
                 <form method="POST" action="{{ route('wishlist.destroy', $wishlist) }}" onsubmit="return confirm('Hapus permintaan barang ini?')">
                     @csrf
                     @method('DELETE')
-                    <button type="submit" class="text-[#e53e3e] hover:underline">Hapus</button>
+                    <button type="submit" class="min-h-11 text-[#e53e3e] hover:underline">Hapus</button>
                 </form>
             </div>
         @endif

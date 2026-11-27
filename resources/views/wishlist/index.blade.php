@@ -1,6 +1,6 @@
 @php
     $me = (int) (auth()->user()?->user_id ?? 0);
-    $field = 'h-10 rounded-[10px] border border-[#e1e6e9] bg-white px-3 text-[13px] text-[#526170] focus:border-[#00523f] focus:outline-none focus:ring-0';
+    $field = 'min-h-11 rounded-[10px] border border-[#e1e6e9] bg-white px-3 text-[14px] text-[#526170] focus:border-[#00523f] focus:outline-none focus:ring-0';
     $hasFilter = $search !== '' || $selectedCategory !== '' || $selectedCondition !== '';
 @endphp
 
@@ -32,14 +32,14 @@
             @endforeach
         </select>
 
-        <button type="submit" class="h-10 rounded-[10px] bg-[#00523f] px-5 text-[13px] font-semibold text-white transition hover:bg-[#006c52]">Cari</button>
+        <button type="submit" class="min-h-11 rounded-[10px] bg-[#00523f] px-5 text-[14px] font-semibold text-white transition hover:bg-[#006c52]">Cari</button>
 
         @if ($hasFilter)
-            <a href="{{ route('wishlist.index') }}" class="px-1 text-[12px] font-medium text-[#00523f] underline">Reset filter</a>
+            <a href="{{ route('wishlist.index') }}" class="inline-flex min-h-11 items-center px-1 text-[14px] font-medium text-[#00523f] underline">Reset filter</a>
         @endif
     </form>
 
-    <div class="mb-4 mt-6 flex items-end justify-between">
+    <div class="mb-4 mt-6 flex flex-wrap items-end justify-between gap-2">
         <h2 class="font-['Poppins'] text-[21px] font-semibold tracking-[-0.025em] sm:text-[26px]">Sedang dicari</h2>
         <p class="text-[13px] text-[#718096]">{{ $wishlists->total() }} barang</p>
     </div>

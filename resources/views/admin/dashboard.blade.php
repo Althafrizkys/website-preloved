@@ -10,7 +10,7 @@
 
     {{-- Top Navbar --}}
     <header class="sticky top-0 z-30 border-b border-[#e5eaed] bg-white">
-        <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3.5 sm:px-6">
+        <div class="mx-auto flex max-w-6xl flex-col items-start gap-3 px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
             <div class="flex items-center gap-3">
                 <a href="{{ route('admin.dashboard') }}" class="text-[22px] font-extrabold tracking-tight text-[#084734]">
                     Seklov
@@ -20,9 +20,9 @@
                 </span>
             </div>
 
-            <div class="flex items-center gap-3">
+            <div class="flex w-full flex-wrap items-center justify-end gap-2 sm:w-auto sm:gap-3">
                 <a href="{{ route('home') }}"
-                   class="rounded-[10px] border border-[#dce3e6] bg-white px-3.5 py-2 text-[13px] font-medium text-[#202b3d] hover:bg-[#f7f9fa]">
+                   class="inline-flex min-h-11 items-center rounded-[10px] border border-[#dce3e6] bg-white px-3.5 text-[14px] font-medium text-[#202b3d] hover:bg-[#f7f9fa]">
                     Lihat Beranda
                 </a>
                 <span class="hidden text-[13px] text-[#5c6a7a] sm:inline">
@@ -31,7 +31,7 @@
                 <form action="{{ route('logout') }}" method="POST">
                     @csrf
                     <button type="submit"
-                            class="rounded-[10px] bg-[#fee2e2] px-3.5 py-2 text-[13px] font-semibold text-[#b91c1c] hover:bg-[#fecaca]">
+                            class="min-h-11 rounded-[10px] bg-[#fee2e2] px-3.5 text-[14px] font-semibold text-[#b91c1c] hover:bg-[#fecaca]">
                         Keluar
                     </button>
                 </form>
@@ -109,11 +109,11 @@
                            value="{{ $pointSearch ?? '' }}"
                            oninput="filterMeetingPoints()"
                            placeholder="Cari titik COD / patokan..."
-                           class="w-full rounded-[10px] border border-[#dce3e6] bg-white px-3.5 py-2 text-[13px] text-[#202b3d] placeholder:text-[#94a3b8] focus:border-[#084734] focus:outline-none sm:w-64">
+                           class="min-h-11 w-full rounded-[10px] border border-[#dce3e6] bg-white px-3.5 text-[14px] text-[#202b3d] placeholder:text-[#94a3b8] focus:border-[#084734] focus:outline-none sm:w-64">
 
                     <select id="campusFilterSelect"
                             onchange="filterMeetingPoints()"
-                            class="rounded-[10px] border border-[#dce3e6] bg-white px-3.5 py-2 text-[13px] font-medium text-[#202b3d] focus:border-[#084734] focus:outline-none">
+                            class="min-h-11 w-full rounded-[10px] border border-[#dce3e6] bg-white px-3.5 text-[14px] font-medium text-[#202b3d] focus:border-[#084734] focus:outline-none sm:w-auto">
                         <option value="" @selected(($campusFilter ?? '') === '')>Semua Kampus</option>
                         <option value="UNSIKA" @selected(($campusFilter ?? '') === 'UNSIKA')>UNSIKA</option>
                         <option value="UBP" @selected(($campusFilter ?? '') === 'UBP')>UBP</option>
@@ -129,7 +129,7 @@
                     <div class="md:col-span-2">
                         <label class="mb-1 block text-[12px] font-semibold text-[#334155]">Kampus</label>
                         <select name="campus" required
-                                class="w-full rounded-[10px] border border-[#dce3e6] bg-white px-3 py-2 text-[13px] text-[#202b3d] focus:border-[#084734] focus:outline-none">
+                                class="w-full rounded-[10px] border border-[#dce3e6] bg-white px-3 py-2 text-[14px] text-[#202b3d] focus:border-[#084734] focus:outline-none">
                             <option value="UNSIKA" @selected(old('campus') === 'UNSIKA')>UNSIKA</option>
                             <option value="UBP" @selected(old('campus') === 'UBP')>UBP</option>
                         </select>
@@ -139,14 +139,14 @@
                         <label class="mb-1 block text-[12px] font-semibold text-[#334155]">Nama Titik COD</label>
                         <input type="text" name="point_name" value="{{ old('point_name') }}" required
                                placeholder="Contoh: Depan Gedung Rektorat"
-                               class="w-full rounded-[10px] border border-[#dce3e6] bg-white px-3 py-2 text-[13px] text-[#202b3d] placeholder:text-[#94a3b8] focus:border-[#084734] focus:outline-none">
+                               class="w-full rounded-[10px] border border-[#dce3e6] bg-white px-3 py-2 text-[14px] text-[#202b3d] placeholder:text-[#94a3b8] focus:border-[#084734] focus:outline-none">
                     </div>
 
                     <div class="md:col-span-4">
                         <label class="mb-1 block text-[12px] font-semibold text-[#334155]">Deskripsi / Patokan Lokasi</label>
                         <input type="text" name="address_description" value="{{ old('address_description') }}" required
                                placeholder="Contoh: Area tangga lobi utama dekat pos satpam"
-                               class="w-full rounded-[10px] border border-[#dce3e6] bg-white px-3 py-2 text-[13px] text-[#202b3d] placeholder:text-[#94a3b8] focus:border-[#084734] focus:outline-none">
+                               class="w-full rounded-[10px] border border-[#dce3e6] bg-white px-3 py-2 text-[14px] text-[#202b3d] placeholder:text-[#94a3b8] focus:border-[#084734] focus:outline-none">
                     </div>
 
                     <div class="flex items-center justify-between gap-3 md:col-span-3 md:justify-end">
@@ -157,7 +157,7 @@
                         </label>
 
                         <button type="submit"
-                                class="rounded-[10px] bg-[#084734] px-4 py-2 text-[13px] font-semibold text-white hover:bg-[#063829]">
+                                class="min-h-11 rounded-[10px] bg-[#084734] px-4 py-2 text-[14px] font-semibold text-white hover:bg-[#063829]">
                             + Tambah Titik
                         </button>
                     </div>
@@ -166,7 +166,7 @@
 
             {{-- Tabel Titik COD --}}
             <div class="mt-5 overflow-x-auto">
-                <table class="w-full border-collapse text-left">
+                <table class="w-full min-w-[720px] border-collapse text-left">
                     <thead>
                         <tr class="border-b border-[#e5eaed] text-[11px] font-bold uppercase tracking-wider text-[#64748b]">
                             <th class="py-3 pr-4">Kampus</th>
@@ -210,7 +210,7 @@
                                                 data-description="{{ $point->address_description }}"
                                                 data-active="{{ $point->is_active ? '1' : '0' }}"
                                                 onclick="openEditPointModal(this)"
-                                                class="rounded-[8px] border border-[#dce3e6] bg-white px-3 py-1.5 text-[12px] font-medium text-[#202b3d] hover:bg-[#f7f9fa]">
+                                                class="min-h-11 rounded-[8px] border border-[#dce3e6] bg-white px-3 text-[14px] font-medium text-[#202b3d] hover:bg-[#f7f9fa]">
                                             Edit
                                         </button>
 
@@ -220,7 +220,7 @@
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit"
-                                                    class="rounded-[8px] bg-[#fee2e2] px-3 py-1.5 text-[12px] font-medium text-[#b91c1c] hover:bg-[#fecaca]">
+                                                    class="min-h-11 rounded-[8px] bg-[#fee2e2] px-3 text-[14px] font-medium text-[#b91c1c] hover:bg-[#fecaca]">
                                                 Hapus
                                             </button>
                                         </form>
@@ -255,13 +255,13 @@
                     </p>
                 </div>
 
-                <form action="{{ route('admin.dashboard') }}" method="GET" class="flex flex-wrap items-center gap-2">
+                <form action="{{ route('admin.dashboard') }}" method="GET" class="flex w-full flex-wrap items-center gap-2 sm:w-auto">
                     <input type="text" name="product_q" value="{{ $productSearch ?? '' }}"
                            placeholder="Cari nama produk / penjual..."
-                           class="rounded-[10px] border border-[#dce3e6] bg-white px-3.5 py-2 text-[13px] text-[#202b3d] placeholder:text-[#94a3b8] focus:border-[#084734] focus:outline-none">
+                           class="min-h-11 w-full min-w-0 rounded-[10px] border border-[#dce3e6] bg-white px-3.5 text-[14px] text-[#202b3d] placeholder:text-[#94a3b8] focus:border-[#084734] focus:outline-none sm:w-auto">
 
                     <select name="product_status"
-                            class="rounded-[10px] border border-[#dce3e6] bg-white px-3.5 py-2 text-[13px] text-[#202b3d] focus:border-[#084734] focus:outline-none">
+                            class="min-h-11 w-full rounded-[10px] border border-[#dce3e6] bg-white px-3.5 text-[14px] text-[#202b3d] focus:border-[#084734] focus:outline-none sm:w-auto">
                         <option value="">Semua Status</option>
                         <option value="available" @selected(($productStatusFilter ?? '') === 'available')>Tersedia</option>
                         <option value="sold" @selected(($productStatusFilter ?? '') === 'sold')>Terjual</option>
@@ -269,13 +269,13 @@
                     </select>
 
                     <button type="submit"
-                            class="rounded-[10px] bg-[#084734] px-4 py-2 text-[13px] font-semibold text-white hover:bg-[#063829]">
+                            class="min-h-11 rounded-[10px] bg-[#084734] px-4 text-[14px] font-semibold text-white hover:bg-[#063829]">
                         Cari
                     </button>
 
                     @if (($productSearch ?? '') !== '' || ($productStatusFilter ?? '') !== '')
                         <a href="{{ route('admin.dashboard') }}"
-                           class="rounded-[10px] border border-[#dce3e6] bg-white px-3.5 py-2 text-[13px] font-medium text-[#475569] hover:bg-[#f7f9fa]">
+                           class="inline-flex min-h-11 items-center rounded-[10px] border border-[#dce3e6] bg-white px-3.5 text-[14px] font-medium text-[#475569] hover:bg-[#f7f9fa]">
                             Reset
                         </a>
                     @endif
@@ -283,7 +283,7 @@
             </div>
 
             <div class="mt-5 overflow-x-auto">
-                <table class="w-full border-collapse text-left">
+                <table class="w-full min-w-[760px] border-collapse text-left">
                     <thead>
                         <tr class="border-b border-[#e5eaed] text-[11px] font-bold uppercase tracking-wider text-[#64748b]">
                             <th class="py-3 pr-4">Produk</th>
@@ -332,7 +332,7 @@
                                 <td class="py-3.5 text-right">
                                     <div class="inline-flex items-center justify-end gap-2">
                                         <a href="{{ route('products.show', $product) }}" target="_blank"
-                                           class="rounded-[8px] border border-[#dce3e6] bg-white px-3 py-1.5 text-[12px] font-medium text-[#202b3d] hover:bg-[#f7f9fa]">
+                                           class="min-h-11 rounded-[8px] border border-[#dce3e6] bg-white px-3 text-[14px] font-medium text-[#202b3d] hover:bg-[#f7f9fa]">
                                             Lihat
                                         </a>
 
@@ -342,7 +342,7 @@
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit"
-                                                    class="rounded-[8px] bg-[#fee2e2] px-3 py-1.5 text-[12px] font-medium text-[#b91c1c] hover:bg-[#fecaca]">
+                                                    class="min-h-11 rounded-[8px] bg-[#fee2e2] px-3 text-[14px] font-medium text-[#b91c1c] hover:bg-[#fecaca]">
                                                 Hapus
                                             </button>
                                         </form>
@@ -375,26 +375,26 @@
                     <p class="text-[13px] text-[#64748b]">Atur hak akses admin atau nonaktifkan akun bermasalah.</p>
                 </div>
 
-                <form action="{{ route('admin.dashboard') }}" method="GET" class="flex flex-wrap items-center gap-2">
+                <form action="{{ route('admin.dashboard') }}" method="GET" class="flex w-full flex-wrap items-center gap-2 sm:w-auto">
                     <input type="text" name="q" value="{{ $search }}"
                            placeholder="Cari nama, email, atau NPM..."
-                           class="rounded-[10px] border border-[#dce3e6] bg-white px-3.5 py-2 text-[13px] text-[#202b3d] placeholder:text-[#94a3b8] focus:border-[#084734] focus:outline-none">
+                           class="min-h-11 w-full min-w-0 rounded-[10px] border border-[#dce3e6] bg-white px-3.5 text-[14px] text-[#202b3d] placeholder:text-[#94a3b8] focus:border-[#084734] focus:outline-none sm:w-auto">
 
                     <select name="role"
-                            class="rounded-[10px] border border-[#dce3e6] bg-white px-3.5 py-2 text-[13px] text-[#202b3d] focus:border-[#084734] focus:outline-none">
+                            class="min-h-11 w-full rounded-[10px] border border-[#dce3e6] bg-white px-3.5 text-[14px] text-[#202b3d] focus:border-[#084734] focus:outline-none sm:w-auto">
                         <option value="">Semua Role</option>
                         <option value="user" @selected($roleFilter === 'user')>User</option>
                         <option value="admin" @selected($roleFilter === 'admin')>Admin</option>
                     </select>
 
                     <button type="submit"
-                            class="rounded-[10px] bg-[#084734] px-4 py-2 text-[13px] font-semibold text-white hover:bg-[#063829]">
+                            class="min-h-11 rounded-[10px] bg-[#084734] px-4 text-[14px] font-semibold text-white hover:bg-[#063829]">
                         Cari
                     </button>
 
                     @if ($search !== '' || $roleFilter !== '')
                         <a href="{{ route('admin.dashboard') }}"
-                           class="rounded-[10px] border border-[#dce3e6] bg-white px-3.5 py-2 text-[13px] font-medium text-[#475569] hover:bg-[#f7f9fa]">
+                           class="inline-flex min-h-11 items-center rounded-[10px] border border-[#dce3e6] bg-white px-3.5 text-[14px] font-medium text-[#475569] hover:bg-[#f7f9fa]">
                             Reset
                         </a>
                     @endif
@@ -402,7 +402,7 @@
             </div>
 
             <div class="mt-5 overflow-x-auto">
-                <table class="w-full border-collapse text-left">
+                <table class="w-full min-w-[700px] border-collapse text-left">
                     <thead>
                         <tr class="border-b border-[#e5eaed] text-[11px] font-bold uppercase tracking-wider text-[#64748b]">
                             <th class="py-3 pr-4">Pengguna</th>
@@ -428,7 +428,7 @@
                                         @method('PATCH')
                                         <select name="role" onchange="this.form.submit()"
                                                 @disabled($user->user_id === auth()->id())
-                                                class="rounded-[8px] border border-[#dce3e6] bg-white px-2.5 py-1 text-[12px] font-medium text-[#202b3d] disabled:bg-[#f1f5f9] disabled:text-[#94a3b8]">
+                                                class="min-h-11 rounded-[8px] border border-[#dce3e6] bg-white px-2.5 text-[14px] font-medium text-[#202b3d] disabled:bg-[#f1f5f9] disabled:text-[#94a3b8]">
                                             <option value="user" @selected($user->role === 'user')>user</option>
                                             <option value="admin" @selected($user->role === 'admin')>admin</option>
                                         </select>
@@ -453,7 +453,7 @@
                                             @csrf
                                             @method('PATCH')
                                             <button type="submit"
-                                                    class="rounded-[8px] px-3 py-1.5 text-[12px] font-medium {{ $user->is_active ? 'bg-[#fee2e2] text-[#b91c1c] hover:bg-[#fecaca]' : 'bg-[#dcfce7] text-[#15803d] hover:bg-[#bbf7d0]' }}">
+                                                    class="min-h-11 rounded-[8px] px-3 text-[14px] font-medium {{ $user->is_active ? 'bg-[#fee2e2] text-[#b91c1c] hover:bg-[#fecaca]' : 'bg-[#dcfce7] text-[#15803d] hover:bg-[#bbf7d0]' }}">
                                                 {{ $user->is_active ? 'Nonaktifkan' : 'Aktifkan' }}
                                             </button>
                                         </form>
@@ -480,11 +480,11 @@
 
     {{-- Modal Edit Titik COD --}}
     <div id="editPointModal" style="display: none;"
-         class="fixed inset-0 z-50 items-center justify-center bg-black/50 p-4">
-        <div class="w-full max-w-md rounded-[16px] bg-white p-6 shadow-xl">
+         class="fixed inset-0 z-50 items-center justify-center overflow-y-auto bg-black/50 p-4">
+        <div class="max-h-[calc(100vh-2rem)] w-full max-w-md overflow-y-auto overscroll-contain rounded-[16px] bg-white p-5 shadow-xl sm:p-6">
             <div class="flex items-center justify-between">
                 <h3 class="text-[16px] font-bold text-[#0f172a]">Edit Titik COD Kampus</h3>
-                <button type="button" onclick="closeEditPointModal()" class="text-[20px] leading-none text-[#64748b] hover:text-[#0f172a]">&times;</button>
+                <button type="button" onclick="closeEditPointModal()" aria-label="Tutup" class="grid size-11 place-items-center text-[24px] leading-none text-[#64748b] hover:text-[#0f172a]">&times;</button>
             </div>
 
             <form id="editPointForm" method="POST" class="mt-4 space-y-3.5">

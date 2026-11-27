@@ -10,7 +10,7 @@
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="m-0 bg-[#f7f9fa] font-['Inter'] text-[#202b3d] antialiased">
+    <body class="m-0 min-h-screen bg-[#f7f9fa] font-['Inter'] text-[#202b3d] antialiased">
         <header class="px-4 pt-4 sm:px-6 sm:pt-6">
             <x-navbar />
         </header>

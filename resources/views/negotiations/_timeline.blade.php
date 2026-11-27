@@ -34,11 +34,11 @@
                         <div class="mt-3 flex flex-wrap gap-2 border-t border-[#edf0f2] pt-3">
                             <form method="POST" action="{{ route('negotiations.accept', $offer) }}">
                                 @csrf
-                                <button type="submit" class="rounded-[8px] bg-[#00523f] px-4 py-2 text-[11px] font-semibold text-white hover:bg-[#006c52]">Terima</button>
+                                <button type="submit" class="min-h-11 rounded-[8px] bg-[#00523f] px-4 py-2 text-[14px] font-semibold text-white hover:bg-[#006c52]">Terima</button>
                             </form>
                             <form method="POST" action="{{ route('negotiations.reject', $offer) }}">
                                 @csrf
-                                <button type="submit" class="rounded-[8px] border border-[#dce3e6] px-4 py-2 text-[11px] font-semibold text-[#526170] hover:bg-[#f7f9fa]">Tolak</button>
+                                <button type="submit" class="min-h-11 rounded-[8px] border border-[#dce3e6] px-4 py-2 text-[14px] font-semibold text-[#526170] hover:bg-[#f7f9fa]">Tolak</button>
                             </form>
                         </div>
                     @endif

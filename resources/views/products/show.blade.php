@@ -22,7 +22,7 @@
             $sellerInitial = \Illuminate\Support\Str::upper(\Illuminate\Support\Str::substr($sellerName, 0, 1));
         @endphp
 
-        <main class="mx-auto max-w-[1076px] px-4 pb-10 pt-5 sm:px-0 sm:pt-7">
+        <main class="mx-auto max-w-[1076px] px-4 pb-10 pt-5 sm:px-6 sm:pt-7 lg:px-0">
             <nav class="mb-5 truncate text-[12px] text-[#718096] sm:text-[13px]" aria-label="Breadcrumb">
                 <a href="{{ route('home') }}" class="hover:text-[#00523f]">Beranda</a>
                 <span class="px-2">/</span>
@@ -108,7 +108,7 @@
 
                     <div class="mt-4 border-t border-[#e2e7e9] pt-4 sm:mt-4">
                         <h2 class="text-[13px] font-semibold text-[#263746]">Tentang produk</h2>
-                        <p class="mt-2 line-clamp-3 whitespace-pre-line text-[12px] leading-[1.7] text-[#718096]">{{ $product->description }}</p>
+                        <p class="mt-2 line-clamp-3 whitespace-pre-line text-[14px] leading-[1.7] text-[#718096]">{{ $product->description }}</p>
                     </div>
 
                     <div class="mt-auto pt-6">
@@ -207,7 +207,7 @@
 
             <section class="mt-5 rounded-[12px] border border-[#e5e9ed] bg-white p-4 sm:p-5" aria-labelledby="description-title">
                 <h2 id="description-title" class="font-['Poppins'] text-[15px] font-semibold text-[#263746]">Deskripsi Produk</h2>
-                <p class="mt-2 whitespace-pre-line text-[12px] leading-[1.8] text-[#718096]">{{ $product->description }}</p>
+                <p class="mt-2 whitespace-pre-line text-[14px] leading-[1.8] text-[#718096]">{{ $product->description }}</p>
                 @if ($product->usage_period || $product->defects)
                     <div class="mt-3 flex flex-wrap gap-x-6 gap-y-2 text-[12px] text-[#526170]">
                         @if ($product->usage_period)
@@ -226,7 +226,7 @@
                     <a href="{{ route('home', ['kategori' => $product->category_id]) }}" class="text-[11px] font-medium text-[#00523f] hover:underline">Lihat semua</a>
                 </div>
                 @if ($relatedProducts->isNotEmpty())
-                    <div class="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-5">
+                    <div class="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 sm:gap-5">
                         @foreach ($relatedProducts as $relatedProduct)
                             <a href="{{ route('products.show', $relatedProduct) }}" class="group flex min-w-0 flex-col overflow-hidden rounded-[17px] bg-white shadow-[0_2px_10px_rgba(22,34,48,0.045)] transition hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(22,34,48,0.09)]">
                                 <div class="aspect-[0.82] overflow-hidden bg-[#f0f1ef]">

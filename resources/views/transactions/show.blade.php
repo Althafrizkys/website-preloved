@@ -90,21 +90,21 @@
                     <div class="mt-3 divide-y divide-[#edf0f2] rounded-[12px] border border-[#e7ebee]">
                         @foreach ($transaction->items as $item)
                             @php($cover = $item->product?->media->firstWhere('media_type', 'foto'))
-                            <div class="flex items-center justify-between p-4">
-                                <div class="flex items-center gap-3">
+                            <div class="flex items-center justify-between gap-3 p-4">
+                                <div class="flex min-w-0 flex-1 items-center gap-3">
                                     <div class="size-14 shrink-0 overflow-hidden rounded-[8px] bg-[#f0f1ef]">
                                         @if ($cover)
                                             <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($cover->media_url) }}" alt="" class="size-full object-cover">
                                         @endif
                                     </div>
                                     <div>
-                                        <h3 class="text-[14px] font-semibold text-[#202b3d]">{{ $item->item_name_snapshot ?? $item->product?->product_name ?? 'Produk' }}</h3>
+                                        <h3 class="break-words text-[14px] font-semibold text-[#202b3d]">{{ $item->item_name_snapshot ?? $item->product?->product_name ?? 'Produk' }}</h3>
                                         <p class="text-[12px] text-[#718096]">
                                             Rp{{ number_format((float) $item->agreed_price, 0, ',', '.') }} × {{ $item->quantity }}
                                         </p>
                                     </div>
                                 </div>
-                                <span class="font-bold text-[#00523f]">
+                                <span class="shrink-0 text-right font-bold text-[#00523f]">
                                     Rp{{ number_format((float) $item->subtotal, 0, ',', '.') }}
                                 </span>
                             </div>
@@ -277,7 +277,7 @@
         @if (session('reward_popup'))
             <div id="rewardModal"
                 style="position: fixed; inset: 0; z-index: 9999; background-color: rgba(0, 0, 0, 0.55); display: flex; align-items: center; justify-content: center; padding: 16px;">
-                <div style="background: #ffffff; border-radius: 20px; max-width: 420px; width: 100%; padding: 28px 24px; text-align: center; box-shadow: 0 16px 40px rgba(0,0,0,0.2);">
+                <div class="max-h-[calc(100vh-2rem)] overflow-y-auto overscroll-contain" style="background: #ffffff; border-radius: 20px; max-width: 420px; width: 100%; padding: 28px 24px; text-align: center; box-shadow: 0 16px 40px rgba(0,0,0,0.2);">
                     <div style="margin: 0 auto 16px; width: 64px; height: 64px; border-radius: 9999px; background-color: #e6f7f1; display: flex; align-items: center; justify-content: center; font-size: 32px;">
                         🏆
                     </div>

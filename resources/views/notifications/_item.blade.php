@@ -27,12 +27,12 @@
 
         <div class="min-w-0 flex-1">
             {{-- Judul event (konteks apa yang terjadi) --}}
-            <h4 class="truncate text-[13px] font-semibold text-[#1c2c26]" title="{{ $notification->title }}">
+            <h4 class="truncate text-[14px] font-semibold text-[#1c2c26]" title="{{ $notification->title }}">
                 {{ $notification->title }}
             </h4>
             {{-- Pesan detail kontekstual --}}
             @if ($notification->message)
-                <p class="mt-0.5 line-clamp-2 text-[11.5px] leading-snug text-[#4a5a52]">{{ $notification->message }}</p>
+                <p class="mt-0.5 line-clamp-2 text-[14px] leading-snug text-[#4a5a52]">{{ $notification->message }}</p>
             @else
                 {{-- Fallback: tampilkan nama produk dan harga --}}
                 <div class="mt-0.5 flex flex-wrap items-center gap-1.5 text-[12px]">
@@ -53,7 +53,7 @@
         data-chat-link
         data-notification-id="{{ $notification->notification_id }}"
         title="Buka tawaran"
-        class="flex size-8 shrink-0 items-center justify-center rounded-full border border-[#cbd5e1] bg-white text-[#00523f] shadow-sm transition hover:border-[#00523f] hover:bg-[#edf7f4]"
+        class="flex size-11 shrink-0 items-center justify-center rounded-full border border-[#cbd5e1] bg-white text-[#00523f] shadow-sm transition hover:border-[#00523f] hover:bg-[#edf7f4]"
     >
         <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>

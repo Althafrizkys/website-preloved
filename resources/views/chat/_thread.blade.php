@@ -26,7 +26,7 @@
     @endif
     <header class="flex items-center justify-between gap-3 border-b border-[#e7ebee] px-5 py-4">
         <div class="flex min-w-0 items-center gap-3">
-            <a href="{{ route('chat.index') }}" class="mr-1 text-[#236a5a] lg:hidden" aria-label="Kembali ke daftar pesan">‹</a>
+            <a href="{{ route('chat.index') }}" class="mr-1 grid size-11 shrink-0 place-items-center rounded-full text-[24px] text-[#236a5a] hover:bg-[#edf7f4] lg:hidden" aria-label="Kembali ke daftar pesan">‹</a>
             @include('chat._avatar', ['user' => $other, 'size' => 'size-12'])
             <div class="min-w-0">
                 <p class="truncate font-['Poppins'] text-[16px] font-semibold text-[#263746]">{{ $other?->name ?? 'Pengguna' }}</p>
@@ -141,31 +141,31 @@
                                             @if ($wishlistIsOpen && (($offer->product_id === null && $offer->offered_item_name) || ($offerProduct && $offerProduct->status === 'tersedia' && $offerProduct->stock > 0)))
                                                 <form method="POST" action="{{ route('wishlist-deals.accept', $offer) }}">
                                                     @csrf
-                                                    <button type="submit" class="rounded-[8px] bg-[#00523f] px-5 py-1.5 text-[12px] font-semibold text-white shadow hover:bg-[#006c52]">Setujui &amp; lanjut transaksi</button>
+                                                    <button type="submit" class="min-h-11 rounded-[8px] bg-[#00523f] px-4 py-2 text-[14px] font-semibold text-white shadow hover:bg-[#006c52]">Setujui &amp; lanjut transaksi</button>
                                                 </form>
                                             @else
                                                 <p class="self-center text-[11px] text-[#718096]">Wishlist atau barang ini sudah tidak aktif.</p>
                                             @endif
                                             <form method="POST" action="{{ route('wishlist-deals.reject', $offer) }}">
                                                 @csrf
-                                                <button type="submit" class="rounded-[8px] bg-white px-5 py-1.5 text-[12px] font-semibold text-[#c53030] shadow hover:bg-[#f7f9fa]">Tolak</button>
+                                                <button type="submit" class="min-h-11 rounded-[8px] bg-white px-5 py-2 text-[14px] font-semibold text-[#c53030] shadow hover:bg-[#f7f9fa]">Tolak</button>
                                             </form>
                                         </div>
                                     @elseif (! $isWishlistConversation && $iAmSeller && $offer->status === 'menunggu' && $product?->status === 'tersedia')
                                         <div class="flex gap-2">
                                             <form method="POST" action="{{ route('negotiations.accept', $offer) }}">
                                                 @csrf
-                                                <button type="submit" class="rounded-[8px] bg-white px-5 py-1.5 text-[12px] font-semibold text-[#00523f] shadow hover:bg-[#f7f9fa]">Terima</button>
+                                                <button type="submit" class="min-h-11 rounded-[8px] bg-white px-5 py-2 text-[14px] font-semibold text-[#00523f] shadow hover:bg-[#f7f9fa]">Terima</button>
                                             </form>
                                             <form method="POST" action="{{ route('negotiations.reject', $offer) }}">
                                                 @csrf
-                                                <button type="submit" class="rounded-[8px] bg-white px-5 py-1.5 text-[12px] font-semibold text-[#c53030] shadow hover:bg-[#f7f9fa]">Tolak</button>
+                                                <button type="submit" class="min-h-11 rounded-[8px] bg-white px-5 py-2 text-[14px] font-semibold text-[#c53030] shadow hover:bg-[#f7f9fa]">Tolak</button>
                                             </form>
                                         </div>
                                     @else
                                         <p class="text-[12px] font-semibold text-[#00523f]">{{ $statusLabel }}</p>
                                         @if ($isWishlistConversation && ! $iAmSeller && $offer->status === 'diterima')
-                                            <a href="{{ $offer->product_id ? route('transactions.create', ['product' => $offerProduct, 'negotiation_id' => $offer]) : route('transactions.create-wishlist', $offer) }}" class="mt-2 inline-flex rounded-[8px] bg-[#00523f] px-4 py-2 text-[12px] font-semibold text-white hover:bg-[#006c52]">Lanjut ke checkout COD</a>
+                                            <a href="{{ $offer->product_id ? route('transactions.create', ['product' => $offerProduct, 'negotiation_id' => $offer]) : route('transactions.create-wishlist', $offer) }}" class="mt-2 inline-flex min-h-11 items-center rounded-[8px] bg-[#00523f] px-4 py-2 text-[14px] font-semibold text-white hover:bg-[#006c52]">Lanjut ke checkout COD</a>
                                         @endif
                                     @endif
                                 </div>
@@ -189,15 +189,15 @@
             @else
                 <form method="POST" action="{{ route('wishlist-deals.store', $active) }}" class="flex flex-wrap items-end gap-2">
                     @csrf
-                    <label class="min-w-[180px] flex-1 text-[11px] font-medium text-[#526170]">
+                    <label class="min-w-0 flex-1 text-[14px] font-medium text-[#526170] sm:min-w-[180px]">
                         Nama barang yang ditawarkan
                         <input type="text" value="{{ $wishlist?->item_name }}" readonly class="mt-1 h-10 w-full rounded-[8px] border border-[#e1e6e9] bg-[#f7f9fa] px-3 text-[13px] text-[#202b3d]">
                     </label>
-                    <label class="w-40 text-[11px] font-medium text-[#526170]">
+                    <label class="w-full text-[14px] font-medium text-[#526170] sm:w-40">
                         Harga yang ditawarkan (Rp)
                         <input type="number" name="offered_price" min="1" max="9999999999" step="1" required value="{{ old('offered_price', (int) $wishlist?->budget) }}" class="mt-1 h-10 w-full rounded-[8px] border border-[#e1e6e9] px-3 text-[13px] text-[#202b3d]">
                     </label>
-                    <button type="submit" class="h-10 rounded-[8px] bg-[#00523f] px-4 text-[12px] font-semibold text-white hover:bg-[#006c52]">Kirim penawaran</button>
+                    <button type="submit" class="min-h-11 w-full rounded-[8px] bg-[#00523f] px-4 text-[14px] font-semibold text-white hover:bg-[#006c52] sm:w-auto">Kirim penawaran</button>
                 </form>
                 @error('offered_price')
                     <p class="mt-1 text-[12px] text-[#c53030]" role="alert">{{ $message }}</p>

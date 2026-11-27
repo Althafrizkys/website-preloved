@@ -1,8 +1,8 @@
 @php
     $w = $wishlist ?? null;
     $input = 'h-11 w-full rounded-[8px] border border-[#e1e6e9] bg-[#f7f9fa] px-3 text-[14px] text-[#202b3d] placeholder:text-[#a0aab4] focus:border-[#00523f] focus:bg-white focus:outline-none focus:ring-0';
-    $label = 'mb-1.5 block text-[13px] font-semibold text-[#263746]';
-    $error = 'mt-1 text-[12px] text-[#e53e3e]';
+    $label = 'mb-1.5 block text-[14px] font-semibold text-[#263746]';
+    $error = 'mt-1 text-[14px] text-[#e53e3e]';
 @endphp
 
 <form method="POST" action="{{ $w ? route('wishlist.update', $w) : route('wishlist.store') }}" enctype="multipart/form-data"
@@ -59,9 +59,9 @@
 
     <div>
         <label for="image" class="{{ $label }}">Foto referensi (opsional)</label>
-        <input id="image" type="file" name="image" accept="image/*" class="block w-full text-[13px] text-[#526170] file:mr-3 file:rounded-[8px] file:border-0 file:bg-[#edf7f4] file:px-4 file:py-2 file:text-[13px] file:font-semibold file:text-[#00523f]">
+        <input id="image" type="file" name="image" accept="image/*" class="block w-full text-[14px] text-[#526170] file:mr-3 file:rounded-[8px] file:border-0 file:bg-[#edf7f4] file:px-4 file:py-2 file:text-[14px] file:font-semibold file:text-[#00523f]">
         @if ($w?->image)
-            <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($w->image) }}" alt="Foto saat ini" class="mt-3 h-28 rounded-[10px] object-cover">
+            <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($w->image) }}" alt="Foto saat ini" class="mt-3 h-28 w-full max-w-[280px] rounded-[10px] object-cover">
         @endif
         @error('image') <p class="{{ $error }}">{{ $message }}</p> @enderror
     </div>
@@ -78,8 +78,8 @@
         </div>
     @endunless
 
-    <div class="flex items-center gap-3 pt-2">
-        <button type="submit" class="h-11 rounded-[10px] bg-[#00523f] px-6 text-[14px] font-semibold text-white transition hover:bg-[#006c52]">Simpan</button>
-        <a href="{{ route('profile.me', ['tab' => 'wishlist']) }}" class="px-3 text-[14px] font-medium text-[#718096] hover:text-[#00523f]">Batal</a>
+    <div class="flex flex-wrap items-center gap-3 pt-2">
+        <button type="submit" class="min-h-11 flex-1 rounded-[10px] bg-[#00523f] px-6 text-[14px] font-semibold text-white transition hover:bg-[#006c52] sm:flex-none">Simpan</button>
+        <a href="{{ route('profile.me', ['tab' => 'wishlist']) }}" class="inline-flex min-h-11 items-center px-3 text-[14px] font-medium text-[#718096] hover:text-[#00523f]">Batal</a>
     </div>
 </form>

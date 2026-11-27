@@ -28,16 +28,16 @@
             </div>
 
             {{-- Tab Filter (Pembelian Saya / Penjualan Saya) --}}
-            <div class="mb-6 flex max-w-[340px] rounded-full bg-[#f0f2f1] p-1 text-[13px] font-medium text-[#5c6f68]">
+            <div class="mb-6 flex w-full max-w-[340px] rounded-full bg-[#f0f2f1] p-1 text-[14px] font-medium text-[#5c6f68]">
                 <a
                     href="{{ route('transactions.index', ['tab' => 'pembelian']) }}"
-                    class="flex-1 rounded-full py-2 text-center transition {{ $currentTab === 'pembelian' ? 'bg-white font-semibold text-[#00523f] shadow-sm' : 'hover:text-[#00523f]' }}"
+                    class="flex min-h-11 flex-1 items-center justify-center rounded-full py-2 text-center transition {{ $currentTab === 'pembelian' ? 'bg-white font-semibold text-[#00523f] shadow-sm' : 'hover:text-[#00523f]' }}"
                 >
                     Pembelian Saya
                 </a>
                 <a
                     href="{{ route('transactions.index', ['tab' => 'penjualan']) }}"
-                    class="flex-1 rounded-full py-2 text-center transition {{ $currentTab === 'penjualan' ? 'bg-white font-semibold text-[#00523f] shadow-sm' : 'hover:text-[#00523f]' }}"
+                    class="flex min-h-11 flex-1 items-center justify-center rounded-full py-2 text-center transition {{ $currentTab === 'penjualan' ? 'bg-white font-semibold text-[#00523f] shadow-sm' : 'hover:text-[#00523f]' }}"
                 >
                     Penjualan Saya
                 </a>
@@ -64,7 +64,7 @@
                                     type="date"
                                     name="start"
                                     value="{{ $startDate ?? '' }}"
-                                    class="rounded-[10px] border border-[#d6dee2] bg-white px-3 py-2 text-[13px] text-[#202b3d] focus:border-[#00523f] focus:outline-none"
+                                    class="min-h-11 w-full rounded-[10px] border border-[#d6dee2] bg-white px-3 text-[14px] text-[#202b3d] focus:border-[#00523f] focus:outline-none sm:w-auto"
                                 >
                             </div>
                             <div>
@@ -76,19 +76,19 @@
                                     type="date"
                                     name="end"
                                     value="{{ $endDate ?? '' }}"
-                                    class="rounded-[10px] border border-[#d6dee2] bg-white px-3 py-2 text-[13px] text-[#202b3d] focus:border-[#00523f] focus:outline-none"
+                                    class="min-h-11 w-full rounded-[10px] border border-[#d6dee2] bg-white px-3 text-[14px] text-[#202b3d] focus:border-[#00523f] focus:outline-none sm:w-auto"
                                 >
                             </div>
                             <button
                                 type="submit"
-                                class="rounded-[10px] border border-[#00523f] bg-white px-4 py-2 text-[13px] font-semibold text-[#00523f] transition hover:bg-[#edf7f4]"
+                                class="min-h-11 rounded-[10px] border border-[#00523f] bg-white px-4 text-[14px] font-semibold text-[#00523f] transition hover:bg-[#edf7f4]"
                             >
                                 Tampilkan
                             </button>
                             @if (! empty($startDate) || ! empty($endDate))
                                 <a
                                     href="{{ route('transactions.index', ['tab' => 'penjualan']) }}"
-                                    class="rounded-[10px] px-3 py-2 text-[13px] font-medium text-[#718096] transition hover:text-[#202b3d]"
+                                    class="inline-flex min-h-11 items-center rounded-[10px] px-3 text-[14px] font-medium text-[#718096] transition hover:text-[#202b3d]"
                                 >
                                     Reset
                                 </a>
@@ -97,7 +97,7 @@
 
                         <a
                             href="{{ route('transactions.export', array_filter(['start' => $startDate ?? null, 'end' => $endDate ?? null])) }}"
-                            class="inline-flex items-center justify-center gap-2 rounded-[10px] bg-[#00523f] px-4 py-2.5 text-[13px] font-semibold text-white transition hover:bg-[#003d2e]"
+                            class="inline-flex min-h-11 items-center justify-center gap-2 rounded-[10px] bg-[#00523f] px-4 py-2.5 text-[14px] font-semibold text-white transition hover:bg-[#003d2e]"
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
@@ -128,7 +128,7 @@
                             $cover = $firstItem?->product?->media->firstWhere('media_type', 'foto');
                             $contact = $currentTab === 'penjualan' ? $transaction->buyer : $transaction->seller;
                         @endphp
-                        <article class="rounded-[16px] border border-[#e5e9ed] bg-white p-5 shadow-[0_2px_10px_rgba(22,34,48,0.03)] transition hover:border-[#00523f]/40 sm:p-6">
+                        <article class="min-w-0 rounded-[16px] border border-[#e5e9ed] bg-white p-4 shadow-[0_2px_10px_rgba(22,34,48,0.03)] transition hover:border-[#00523f]/40 sm:p-6">
                             <div class="flex flex-wrap items-center justify-between gap-2 border-b border-[#edf0f2] pb-3 text-[12px] text-[#718096]">
                                 <div class="flex items-center gap-2">
                                     <span class="font-semibold text-[#202b3d]">Pesanan #{{ $transaction->transaction_id }}</span>
@@ -141,14 +141,14 @@
                             </div>
 
                             <div class="mt-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                                <div class="flex items-center gap-3.5">
+                                <div class="flex min-w-0 items-center gap-3.5">
                                     <div class="size-14 shrink-0 overflow-hidden rounded-[10px] bg-[#f0f1ef]">
                                         @if ($cover)
                                             <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($cover->media_url) }}" alt="" class="size-full object-cover">
                                         @endif
                                     </div>
-                                    <div>
-                                        <h2 class="text-[15px] font-semibold text-[#202b3d]">
+                                    <div class="min-w-0 flex-1">
+                                        <h2 class="break-words text-[15px] font-semibold text-[#202b3d]">
                                             {{ $firstItem?->item_name_snapshot ?? $firstItem?->product?->product_name ?? 'Barang' }}
                                         </h2>
                                         <p class="mt-0.5 text-[12px] text-[#718096]">
@@ -168,14 +168,14 @@
                                         @if ($contact)
                                             <a
                                                 href="{{ route('transactions.chat', $transaction) }}"
-                                                class="rounded-[10px] border border-[#00523f] px-4 py-2 text-[12px] font-semibold text-[#00523f] transition hover:bg-[#edf7f4]"
+                                                class="inline-flex min-h-11 items-center rounded-[10px] border border-[#00523f] px-4 py-2 text-[14px] font-semibold text-[#00523f] transition hover:bg-[#edf7f4]"
                                             >
                                                 Hubungi {{ $currentTab === 'penjualan' ? 'Pembeli' : 'Penjual' }}
                                             </a>
                                         @endif
                                         <a
                                             href="{{ route('transactions.show', $transaction) }}"
-                                            class="rounded-[10px] bg-[#00523f] px-4 py-2 text-[12px] font-semibold text-white transition hover:bg-[#003d2e]"
+                                            class="inline-flex min-h-11 items-center rounded-[10px] bg-[#00523f] px-4 py-2 text-[14px] font-semibold text-white transition hover:bg-[#003d2e]"
                                         >
                                             Lihat Detail
                                         </a>
