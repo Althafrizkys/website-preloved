@@ -77,6 +77,7 @@
             @if (auth()->user()->isAdmin())
                 <a href="{{ route('admin.dashboard') }}" class="rounded-[10px] bg-white/10 px-3 py-2 text-[13px] font-semibold hover:bg-white/20 sm:px-4">Dashboard Admin</a>
             @endif
+            <span class="hidden max-w-[140px] truncate text-[13px] font-semibold text-white sm:block">{{ auth()->user()->name }}</span>
            <a href="{{ route('profile.me') }}" title="Profil saya" aria-label="Profil saya" class="shrink-0 rounded-full ring-2 ring-white/70 transition hover:ring-white">
     <x-avatar :user="auth()->user()" size="size-10 sm:size-11" text="text-base" />
 </a>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreMessageRequest;
 use App\Models\Conversation;
+use App\Models\Product;
 use App\Models\WishlistRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;

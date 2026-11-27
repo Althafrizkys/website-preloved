@@ -6,9 +6,47 @@ use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
+use RuntimeException;
 
 class ProfileController extends Controller
 {
+    public function edit(Request $request): View
+    {
+        return view('profile.edit', ['user' => $request->user()]);
+    }
+
+    public function update(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'gender' => ['nullable', Rule::in(['Laki-laki', 'Perempuan'])],
+            'profile_photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+        ]);
+
+        $user = $request->user();
+        $oldPhoto = $user->profile_photo;
+
+        if ($request->hasFile('profile_photo')) {
+            $photoPath = $request->file('profile_photo')->store('profiles', 'public');
+
+            if (! is_string($photoPath)) {
+                throw new RuntimeException('Foto profil gagal disimpan.');
+            }
+
+            $data['profile_photo'] = $photoPath;
+        }
+
+        $user->update($data);
+
+        if (isset($data['profile_photo']) && $oldPhoto) {
+            Storage::disk('public')->delete($oldPhoto);
+        }
+
+        return redirect()->route('profile.me')->with('success', 'Profil berhasil diperbarui.');
+    }
+
     public function me(Request $request): View
     {
         return $this->render($request, $request->user());

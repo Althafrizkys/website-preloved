@@ -182,6 +182,8 @@ Route::get('/toko/{user}', [\App\Http\Controllers\ProfileController::class, 'sho
 
 Route::middleware('auth')->group(function () {
     Route::get('/profil-saya', [\App\Http\Controllers\ProfileController::class, 'me'])->name('profile.me');
+    Route::get('/profil-saya/edit', [\App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profil-saya', [\App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
 
     Route::get('/wishlist/buat', [\App\Http\Controllers\WishlistController::class, 'create'])->name('wishlist.create');
     Route::post('/wishlist', [\App\Http\Controllers\WishlistController::class, 'store'])->name('wishlist.store');
