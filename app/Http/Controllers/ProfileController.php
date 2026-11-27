@@ -89,8 +89,13 @@ class ProfileController extends Controller
                     'seller:user_id,name,campus',
                 ])
                 ->latest('created_at')
-                ->get(),
-            'wishlist' => $wishlistsQuery()->with('category')->latest('created_at')->get(),
+                ->paginate(12)
+                ->withQueryString(),
+            'wishlist' => $wishlistsQuery()
+                ->with('category')
+                ->latest('created_at')
+                ->paginate(12)
+                ->withQueryString(),
             'reviews' => $ratingsQuery()->orderByDesc('created_at')->get(),
         };
 

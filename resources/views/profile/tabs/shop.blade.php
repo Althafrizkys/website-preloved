@@ -3,7 +3,7 @@
         <h2 class="font-['Poppins'] text-[21px] font-semibold tracking-[-0.025em] sm:text-[26px]">{{ $isOwner ? 'Barang Saya' : 'Barang Dijual' }}</h2>
         <p class="mt-1 text-[13px] text-[#718096]">{{ $isOwner ? 'Daftar barang yang sedang kamu jual' : 'Daftar barang yang dijual oleh '.$user->name }}</p>
     </div>
-    <p class="text-[13px] text-[#718096]">{{ $items->count() }} barang</p>
+    <p class="text-[13px] text-[#718096]">{{ $items->total() }} barang</p>
 </div>
 
 @if ($items->isNotEmpty())
@@ -12,6 +12,9 @@
             <x-product-card :product="$product" />
         @endforeach
     </div>
+    @if ($items->hasPages())
+        <div class="mt-8">{{ $items->links() }}</div>
+    @endif
 @else
     <div class="rounded-[16px] border border-dashed border-[#d6dee2] bg-white px-5 py-12 text-center">
         <h3 class="font-['Poppins'] text-[18px] font-semibold text-[#263746]">Belum ada barang yang dijual</h3>
