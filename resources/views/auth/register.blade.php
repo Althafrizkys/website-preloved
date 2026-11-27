@@ -14,25 +14,25 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="m-0 bg-white font-['Inter']">
-        <div class="relative flex min-h-screen overflow-hidden bg-white">
+        <div class="relative flex min-h-screen flex-col overflow-hidden bg-white lg:flex-row">
 
             {{-- Dekorasi pojok kanan atas --}}
-            <div class="absolute top-0 right-0 h-[200px] w-[243px]">
+            <div class="absolute top-0 right-0 hidden h-[200px] w-[243px] lg:block">
                 <div class="absolute inset-[0_-1.65%_-4%_-1.65%]">
                     <img src="{{ asset('images/dekor-kanan-atas.svg') }}" alt="" class="block size-full max-w-none">
                 </div>
             </div>
 
             {{-- Panel kiri --}}
-            <div class="flex w-[55%] flex-col items-center justify-center rounded-tr-[383px] rounded-bl-[396px] bg-linear-to-b from-[#00523c] via-[#005a42] via-[44.231%] to-[#00b888] shadow-[0_4px_4px_rgba(0,0,0,0.25)]">
+            <div class="flex w-full flex-col items-center justify-center rounded-b-[48px] px-6 py-10 lg:w-[55%] lg:rounded-b-none lg:rounded-tr-[383px] lg:rounded-bl-[396px] lg:p-0 bg-linear-to-b from-[#00523c] via-[#005a42] via-[44.231%] to-[#00b888] shadow-[0_4px_4px_rgba(0,0,0,0.25)]">
                 {{-- Logo: sementara placeholder lingkaran putih --}}
-                <div class="size-[182px] rounded-full bg-white shadow-[0_4px_4px_rgba(0,0,0,0.25)]"></div>
+                <div class="size-[88px] rounded-full bg-white lg:size-[182px] shadow-[0_4px_4px_rgba(0,0,0,0.25)]"></div>
 
-                <h1 class="mt-[29px] text-center font-['Poppins'] text-[48px] leading-[72px] font-semibold text-[#ececec] [text-shadow:0_4px_4px_rgba(0,0,0,0.25)]">
+                <h1 class="mt-4 text-center font-['Poppins'] text-[28px] leading-[40px] lg:mt-[29px] lg:text-[48px] lg:leading-[72px] font-semibold text-[#ececec] [text-shadow:0_4px_4px_rgba(0,0,0,0.25)]">
                     WELCOME TO<br>SEKLOV
                 </h1>
 
-                <div class="mt-[184px] w-[395px]">
+                <div class="mt-[184px] hidden w-[395px] lg:block">
                     <p class="text-center text-[24px] text-white [text-shadow:0_4px_4px_rgba(0,0,0,0.25)]">Sudah punya akun?</p>
                     <a href="/login" class="mt-[12px] flex h-[48px] w-full items-center justify-center rounded-[10px] bg-white text-[24px] font-semibold text-[#00523f]">
                         Login
@@ -41,9 +41,9 @@
             </div>
 
             {{-- Panel kanan --}}
-            <div class="flex flex-1 items-center justify-center">
-                <div class="w-[395px]">
-                    <h2 class="mb-[70px] text-center font-['Poppins'] text-[48px] leading-normal font-semibold text-[#00523f] [text-shadow:0_4px_4px_rgba(0,0,0,0.25)]">
+            <div class="flex flex-1 items-start justify-center px-6 py-8 lg:items-center lg:p-0">
+                <div class="w-full max-w-[395px]">
+                    <h2 class="mb-8 text-center lg:mb-[70px] font-['Poppins'] text-[32px] leading-normal font-semibold text-[#00523f] lg:text-[48px] [text-shadow:0_4px_4px_rgba(0,0,0,0.25)]">
                         Sign Up
                     </h2>
 
@@ -51,43 +51,47 @@
                         @csrf
 
                         <div>
-                            <label for="email" class="block text-[24px] text-[#00523f]">email kampus :</label>
+                            <label for="email" class="block text-[16px] text-[#00523f] lg:text-[24px]">email kampus :</label>
                             <input id="email" name="email" type="email" value="{{ old('email') }}" autocomplete="email"
-                                class="mt-[6px] block h-[48px] w-full rounded-[5px] bg-[rgba(0,82,63,0.6)] px-[21px] text-[24px] text-white">
+                                class="mt-[6px] block h-[48px] w-full rounded-[5px] bg-[rgba(0,82,63,0.6)] px-4 text-[16px] text-white lg:px-[21px] lg:text-[24px]">
                             @error('email')
                                 <p class="mt-1 text-[16px] text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
 
                         <div class="mt-[11px]">
-                            <label for="npm" class="block text-[24px] text-[#00523f]">Npm atau NIM :</label>
+                            <label for="npm" class="block text-[16px] text-[#00523f] lg:text-[24px]">Npm atau NIM :</label>
                             <input id="npm" name="npm" type="text" value="{{ old('npm') }}" inputmode="numeric"
-                                class="mt-[6px] block h-[48px] w-full rounded-[5px] bg-[rgba(0,82,63,0.6)] px-[21px] text-[24px] text-white">
+                                class="mt-[6px] block h-[48px] w-full rounded-[5px] bg-[rgba(0,82,63,0.6)] px-4 text-[16px] text-white lg:px-[21px] lg:text-[24px]">
                             @error('npm')
                                 <p class="mt-1 text-[16px] text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
 
                         <div class="mt-[11px]">
-                            <label for="password" class="block text-[24px] text-[#00523f]">Buat Password :</label>
+                            <label for="password" class="block text-[16px] text-[#00523f] lg:text-[24px]">Buat Password :</label>
                             <input id="password" name="password" type="password" autocomplete="new-password"
-                                class="mt-[6px] block h-[48px] w-full rounded-[5px] bg-[rgba(0,82,63,0.6)] px-[21px] text-[24px] text-white">
+                                class="mt-[6px] block h-[48px] w-full rounded-[5px] bg-[rgba(0,82,63,0.6)] px-4 text-[16px] text-white lg:px-[21px] lg:text-[24px]">
                             @error('password')
                                 <p class="mt-1 text-[16px] text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
 
                         <div class="mt-[11px]">
-                            <label for="password_confirmation" class="block text-[24px] text-[#00523f]">Konfirmasi Password :</label>
+                            <label for="password_confirmation" class="block text-[16px] text-[#00523f] lg:text-[24px]">Konfirmasi Password :</label>
                             <input id="password_confirmation" name="password_confirmation" type="password" autocomplete="new-password"
-                                class="mt-[6px] block h-[48px] w-full rounded-[5px] bg-[rgba(0,82,63,0.6)] px-[21px] text-[24px] text-white">
+                                class="mt-[6px] block h-[48px] w-full rounded-[5px] bg-[rgba(0,82,63,0.6)] px-4 text-[16px] text-white lg:px-[21px] lg:text-[24px]">
                         </div>
 
                         <button type="submit"
-                            class="mt-[57px] h-[48px] w-full cursor-pointer rounded-[10px] border border-[#00523f] bg-[#00523f] text-[24px] font-semibold text-white">
+                            class="mt-[57px] h-[48px] w-full cursor-pointer rounded-[10px] border border-[#00523f] bg-[#00523f] text-[18px] font-semibold text-white lg:text-[24px]">
                             Daftar
                         </button>
                     </form>
+
+                    <p class="mt-6 text-center text-[15px] text-[#00523f] lg:hidden">
+                        Sudah punya akun? <a href="{{ route('login') }}" class="font-semibold underline">Login</a>
+                    </p>
                 </div>
             </div>
         </div>
