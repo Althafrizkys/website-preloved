@@ -16,8 +16,8 @@
         </header>
 
         <main class="mx-auto max-w-[1320px] px-4 pb-10 pt-6 sm:px-6">
-            <a href="{{ $active?->product ? route('products.show', $active->product) : route('home') }}" class="mb-3 inline-flex items-center gap-2 text-[13px] text-[#263746] hover:text-[#00523f]">
-                <span aria-hidden="true">←</span> {{ $active ? 'Kembali ke produk' : 'Kembali ke beranda' }}
+            <a href="{{ $active?->wishlist_request_id ? route('wishlist.index') : ($active?->product ? route('products.show', $active->product) : route('home')) }}" class="mb-3 inline-flex items-center gap-2 text-[13px] text-[#263746] hover:text-[#00523f]">
+                <span aria-hidden="true">←</span> {{ $active?->wishlist_request_id ? 'Kembali ke permintaan barang' : ($active ? 'Kembali ke produk' : 'Kembali ke beranda') }}
             </a>
 
             <div class="flex h-[calc(100vh-220px)] min-h-[560px] overflow-hidden rounded-[8px] border border-[#e1e6e9] bg-white">

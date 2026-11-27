@@ -16,6 +16,9 @@ class TransactionItem extends Model
     protected $fillable = [
         'transaction_id',
         'product_id',
+        'wishlist_request_id',
+        'item_name_snapshot',
+        'negotiation_id',
         'quantity',
         'agreed_price',
         'subtotal',
@@ -38,5 +41,15 @@ class TransactionItem extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class, 'product_id', 'product_id');
+    }
+
+    public function wishlistRequest(): BelongsTo
+    {
+        return $this->belongsTo(WishlistRequest::class, 'wishlist_request_id', 'request_id');
+    }
+
+    public function negotiation(): BelongsTo
+    {
+        return $this->belongsTo(Negotiation::class, 'negotiation_id', 'negotiation_id');
     }
 }

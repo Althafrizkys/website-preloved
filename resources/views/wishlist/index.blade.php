@@ -11,7 +11,7 @@
 
     <section class="rounded-3xl bg-gradient-to-r from-[#00523F] to-[#10B98A] px-6 py-8 text-white shadow-[0_8px_24px_rgba(0,82,63,0.16)] sm:px-10">
         <h1 class="font-['Poppins'] text-[26px] font-semibold tracking-[-0.03em] sm:text-[34px]">Permintaan Barang</h1>
-        <p class="mt-2 max-w-xl text-[14px] leading-6 text-white/90 sm:text-[16px]">Barang yang sedang dicari mahasiswa. Punya barangnya? Buka profil pencarinya dan hubungi dia.</p>
+        <p class="mt-2 max-w-xl text-[14px] leading-6 text-white/90 sm:text-[16px]">Barang yang sedang dicari mahasiswa. Punya barangnya? Mulai chat dari kartu wishlist untuk menawarkan barangmu.</p>
         <a href="{{ auth()->check() ? route('wishlist.create') : route('login') }}" class="mt-5 inline-flex h-11 items-center rounded-xl bg-white px-5 text-[14px] font-bold text-[#00523F] shadow-sm transition hover:bg-[#e8fff7]">+ Minta Barang</a>
     </section>
 

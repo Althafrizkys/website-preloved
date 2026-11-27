@@ -37,6 +37,18 @@ class HomePageTest extends TestCase
             ->assertSee('href="'.route('register').'"', false);
     }
 
+    public function test_tautan_banner_wishlist_tidak_mencakup_section_barang_terbaru(): void
+    {
+        $this->withoutVite();
+        $html = $this->get('/')->assertOk()->getContent();
+        $wishlistUrl = preg_quote(route('wishlist.index'), '~');
+
+        $this->assertMatchesRegularExpression(
+            '~<a href="'.$wishlistUrl.'"[^>]*>\s*<img\b(?=[^>]*alt="Banner wishlist: minta barang yang belum tersedia")[^>]*>\s*</a>\s*</div>\s*<section class="mt-7 sm:mt-9">~s',
+            $html,
+        );
+    }
+
     public function test_barang_tersedia_ditampilkan_dengan_foto_pertama_harga_dan_paginasi(): void
     {
         $this->withoutVite();

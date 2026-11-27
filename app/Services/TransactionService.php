@@ -9,6 +9,7 @@ use App\Models\Product;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Models\UserNotification;
+use App\Models\WishlistRequest;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -56,33 +57,72 @@ class TransactionService
             $unitPrice = (int) $lockedProduct->price;
             $agreedDiscount = 0;
 
-            // Jika ada tawaran nego yang disepakati untuk pembeli ini
-            $conversation = Conversation::query()
-                ->where('product_id', $lockedProduct->product_id)
-                ->where('buyer_id', $buyer->user_id)
-                ->where('seller_id', $lockedProduct->seller_id)
-                ->first();
-
-            $agreedOffer = $conversation?->agreedOffer();
-
+            $conversation = null;
+            $agreedOffer = null;
             if ($negotiationId) {
                 $offer = Negotiation::query()
                     ->where('negotiation_id', $negotiationId)
-                    ->where('conversation_id', $conversation?->conversation_id)
-                    ->where('status', 'diterima')
+                    ->lockForUpdate()
                     ->first();
 
-                if (! $offer) {
+                $offerConversation = $offer
+                    ? Conversation::query()
+                        ->where('conversation_id', $offer->conversation_id)
+                        ->lockForUpdate()
+                        ->first()
+                    : null;
+                $isProductOffer = $offerConversation
+                    && (int) $offerConversation->product_id === (int) $lockedProduct->product_id
+                    && $offer->product_id === null;
+                $isWishlistOffer = $offerConversation
+                    && $offerConversation->wishlist_request_id !== null
+                    && (int) $offer->product_id === (int) $lockedProduct->product_id;
+
+                if (
+                    ! $offer
+                    || $offer->status !== 'diterima'
+                    || (int) $offerConversation?->buyer_id !== (int) $buyer->user_id
+                    || (int) $offerConversation?->seller_id !== (int) $lockedProduct->seller_id
+                    || (! $isProductOffer && ! $isWishlistOffer)
+                ) {
                     throw ValidationException::withMessages([
                         'negotiation_id' => 'Tawaran nego yang dipilih tidak berlaku untuk barang ini.',
                     ]);
                 }
 
-                $unitPrice = (int) $offer->offered_price;
-                $agreedDiscount = max(0, (int) $lockedProduct->price - $unitPrice);
-            } elseif ($agreedOffer) {
+                $conversation = $offerConversation;
+                $agreedOffer = $offer;
+            } else {
+                $conversation = Conversation::query()
+                    ->where('product_id', $lockedProduct->product_id)
+                    ->where('buyer_id', $buyer->user_id)
+                    ->where('seller_id', $lockedProduct->seller_id)
+                    ->first();
+                $agreedOffer = $conversation?->agreedOffer();
+            }
+
+            if ($agreedOffer) {
                 $unitPrice = (int) $agreedOffer->offered_price;
                 $agreedDiscount = max(0, (int) $lockedProduct->price - $unitPrice);
+            }
+
+            $wishlistRequest = null;
+            if ($conversation?->wishlist_request_id !== null) {
+                $wishlistRequest = WishlistRequest::query()
+                    ->where('request_id', $conversation->wishlist_request_id)
+                    ->lockForUpdate()
+                    ->firstOrFail();
+
+                if (
+                    ! $agreedOffer
+                    || (int) $wishlistRequest->user_id !== (int) $buyer->user_id
+                    || $wishlistRequest->status !== 'aktif'
+                    || $wishlistRequest->expired_at?->isPast()
+                ) {
+                    throw ValidationException::withMessages([
+                        'negotiation_id' => 'Kesepakatan wishlist ini sudah tidak berlaku.',
+                    ]);
+                }
             }
 
             $subtotal = $unitPrice * $quantity;
@@ -115,6 +155,10 @@ class TransactionService
                 'status' => $lockedProduct->stock === 0 ? 'terjual' : 'tersedia',
             ]);
 
+            if ($wishlistRequest) {
+                $wishlistRequest->update(['status' => 'terpenuhi']);
+            }
+
             // Notifikasi untuk Penjual
             UserNotification::create([
                 'user_id' => $lockedProduct->seller_id,
@@ -143,6 +187,122 @@ class TransactionService
         });
     }
 
+    public function createWishlistCodTransaction(
+        User $buyer,
+        CampusMeetingPoint $meetingPoint,
+        int $quantity,
+        ?string $buyerNotes,
+        int $negotiationId,
+    ): Transaction {
+        return DB::transaction(function () use ($buyer, $meetingPoint, $quantity, $buyerNotes, $negotiationId): Transaction {
+            $offer = Negotiation::query()
+                ->where('negotiation_id', $negotiationId)
+                ->lockForUpdate()
+                ->firstOrFail();
+            $conversation = Conversation::query()
+                ->where('conversation_id', $offer->conversation_id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            if (
+                $offer->status !== 'diterima'
+                || $offer->product_id !== null
+                || ! $offer->offered_item_name
+                || (int) $conversation->buyer_id !== (int) $buyer->user_id
+                || (int) $conversation->seller_id !== (int) $offer->sender_id
+                || $conversation->wishlist_request_id === null
+            ) {
+                throw ValidationException::withMessages([
+                    'negotiation_id' => 'Kesepakatan wishlist tidak berlaku.',
+                ]);
+            }
+
+            if ($quantity !== 1) {
+                throw ValidationException::withMessages([
+                    'quantity' => 'Jumlah barang wishlist harus 1.',
+                ]);
+            }
+
+            if (! $meetingPoint->is_active) {
+                throw ValidationException::withMessages([
+                    'meeting_point_id' => 'Titik temu COD yang dipilih tidak aktif.',
+                ]);
+            }
+
+            $wishlist = WishlistRequest::query()
+                ->where('request_id', $conversation->wishlist_request_id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            if (
+                (int) $wishlist->user_id !== (int) $buyer->user_id
+                || $wishlist->status !== 'aktif'
+                || $wishlist->expired_at?->isPast()
+            ) {
+                throw ValidationException::withMessages([
+                    'negotiation_id' => 'Permintaan wishlist ini sudah tidak aktif.',
+                ]);
+            }
+
+            if ($offer->transactionItem()->exists()) {
+                throw ValidationException::withMessages([
+                    'negotiation_id' => 'Kesepakatan ini sudah digunakan untuk transaksi.',
+                ]);
+            }
+
+            $price = (int) $offer->offered_price;
+            $transaction = Transaction::create([
+                'buyer_id' => $buyer->user_id,
+                'seller_id' => $conversation->seller_id,
+                'meeting_point_id' => $meetingPoint->meeting_point_id,
+                'subtotal_price' => $price,
+                'service_fee' => 0,
+                'agreed_discount' => 0,
+                'total_price' => $price,
+                'payment_method' => 'cod',
+                'transaction_status' => 'menunggu',
+                'buyer_notes' => $buyerNotes,
+                'created_at' => now(),
+            ]);
+
+            $transaction->items()->create([
+                'product_id' => null,
+                'wishlist_request_id' => $wishlist->request_id,
+                'item_name_snapshot' => $offer->offered_item_name,
+                'negotiation_id' => $offer->negotiation_id,
+                'quantity' => 1,
+                'agreed_price' => $price,
+                'subtotal' => $price,
+            ]);
+
+            $wishlist->update(['status' => 'terpenuhi']);
+
+            UserNotification::create([
+                'user_id' => $conversation->seller_id,
+                'product_id' => null,
+                'negotiation_id' => $offer->negotiation_id,
+                'role' => 'penjual',
+                'notification_type' => 'transaksi',
+                'title' => 'Pesanan wishlist masuk — '.$offer->offered_item_name,
+                'message' => $buyer->name.' membuat pesanan COD untuk "'.$offer->offered_item_name.'" seharga Rp '.number_format($price, 0, ',', '.').' di '.$meetingPoint->point_name.'.',
+                'offered_price' => $price,
+            ]);
+
+            UserNotification::create([
+                'user_id' => $buyer->user_id,
+                'product_id' => null,
+                'negotiation_id' => $offer->negotiation_id,
+                'role' => 'pembeli',
+                'notification_type' => 'transaksi',
+                'title' => 'Pesanan berhasil dibuat — '.$offer->offered_item_name,
+                'message' => 'Pesanan COD untuk "'.$offer->offered_item_name.'" (Rp '.number_format($price, 0, ',', '.').') berhasil dibuat.',
+                'offered_price' => $price,
+            ]);
+
+            return $transaction;
+        });
+    }
+
     public function confirmSchedule(User $user, Transaction $transaction, ?string $scheduledAt = null): Transaction
     {
         if ((int) $transaction->seller_id !== (int) $user->user_id && ! $user->isAdmin()) {
@@ -155,11 +315,12 @@ class TransactionService
         ]);
 
         $item = $transaction->items()->with('product')->first();
-        $productName = $item?->product?->product_name ?? 'Barang';
+        $productName = $item?->item_name_snapshot ?? $item?->product?->product_name ?? 'Barang';
 
         UserNotification::create([
             'user_id' => $transaction->buyer_id,
             'product_id' => $item?->product_id,
+            'negotiation_id' => $item?->negotiation_id,
             'role' => 'pembeli',
             'notification_type' => 'transaksi',
             'title' => 'Jadwal COD dikonfirmasi — '.$productName,
@@ -184,11 +345,12 @@ class TransactionService
         ]);
 
         $item = $transaction->items()->with('product')->first();
-        $productName = $item?->product?->product_name ?? 'Barang';
+        $productName = $item?->item_name_snapshot ?? $item?->product?->product_name ?? 'Barang';
 
         UserNotification::create([
             'user_id' => $transaction->buyer_id,
             'product_id' => $item?->product_id,
+            'negotiation_id' => $item?->negotiation_id,
             'role' => 'pembeli',
             'notification_type' => 'transaksi',
             'title' => 'Transaksi selesai — '.$productName,
@@ -198,6 +360,7 @@ class TransactionService
         UserNotification::create([
             'user_id' => $transaction->seller_id,
             'product_id' => $item?->product_id,
+            'negotiation_id' => $item?->negotiation_id,
             'role' => 'penjual',
             'notification_type' => 'transaksi',
             'title' => 'Barang berhasil terjual — '.$productName,
@@ -255,24 +418,37 @@ class TransactionService
 
             foreach ($items as $item) {
                 $product = $products->get($item->product_id);
-                if (! $product) {
-                    continue;
+
+                if ($product) {
+                    $product->stock += $item->quantity;
+                    $product->update([
+                        'stock' => $product->stock,
+                        'status' => 'tersedia',
+                    ]);
                 }
 
-                $product->stock += $item->quantity;
-                $product->update([
-                    'stock' => $product->stock,
-                    'status' => 'tersedia',
-                ]);
+                if ($item->product_id === null && $item->wishlist_request_id !== null) {
+                    $wishlist = WishlistRequest::query()
+                        ->where('request_id', $item->wishlist_request_id)
+                        ->lockForUpdate()
+                        ->first();
+
+                    if ($wishlist?->status === 'terpenuhi') {
+                        $wishlist->update([
+                            'status' => $wishlist->expired_at?->isPast() ? 'kedaluwarsa' : 'aktif',
+                        ]);
+                    }
+                }
             }
 
             if ($buyerCancelled) {
                 $item = $items->first();
-                $productName = $item?->product?->product_name ?? 'Barang';
+                $productName = $item?->item_name_snapshot ?? $item?->product?->product_name ?? 'Barang';
 
                 UserNotification::create([
                     'user_id' => $lockedTransaction->seller_id,
                     'product_id' => $item?->product_id,
+                    'negotiation_id' => $item?->negotiation_id,
                     'role' => 'penjual',
                     'notification_type' => 'transaksi',
                     'title' => 'Pesanan dibatalkan — '.$productName,

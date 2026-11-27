@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreMessageRequest;
 use App\Models\Conversation;
-use App\Models\Product;
+use App\Models\WishlistRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -38,6 +38,21 @@ class ChatController extends Controller
         return redirect()->route('chat.show', $conversation);
     }
 
+    public function startWishlist(Request $request, WishlistRequest $wishlist): RedirectResponse
+    {
+        abort_if((int) $wishlist->user_id === (int) $request->user()->user_id, 403);
+        abort_unless($wishlist->status === 'aktif' && $wishlist->expired_at?->isFuture(), 404);
+
+        $conversation = Conversation::firstOrCreate([
+            'product_id' => null,
+            'wishlist_request_id' => $wishlist->request_id,
+            'buyer_id' => $wishlist->user_id,
+            'seller_id' => $request->user()->user_id,
+        ]);
+
+        return redirect()->route('chat.show', $conversation);
+    }
+
     public function messages(Request $request, Conversation $conversation): JsonResponse
     {
         Gate::authorize('view', $conversation);
@@ -47,7 +62,17 @@ class ChatController extends Controller
             ->orderBy('message_id')
             ->get(['message_id', 'sender_id', 'message_text', 'sent_at', 'read_at']);
 
-        return response()->json(['messages' => $messages]);
+        $latestOffer = $conversation->negotiations()
+            ->orderByDesc('created_at')
+            ->orderByDesc('negotiation_id')
+            ->first(['negotiation_id', 'status']);
+
+        return response()->json([
+            'messages' => $messages,
+            'latest_offer_state' => $conversation->wishlist_request_id !== null && $latestOffer
+                ? $latestOffer->negotiation_id.':'.$latestOffer->status
+                : '',
+        ]);
     }
 
     public function store(StoreMessageRequest $request, Conversation $conversation): JsonResponse
@@ -91,6 +116,7 @@ class ChatController extends Controller
 
                 $query->where(function ($inner) use ($like, $userId) {
                     $inner->whereHas('product', fn ($product) => $product->where('product_name', 'like', $like))
+                        ->orWhereHas('wishlistRequest', fn ($wishlist) => $wishlist->where('item_name', 'like', $like))
                         ->orWhereHas('buyer', fn ($person) => $person->where('user_id', '!=', $userId)->where('name', 'like', $like))
                         ->orWhereHas('seller', fn ($person) => $person->where('user_id', '!=', $userId)->where('name', 'like', $like));
                 });
@@ -98,6 +124,7 @@ class ChatController extends Controller
             ->with([
                 'buyer:user_id,name,campus,profile_photo',
                 'seller:user_id,name,campus,profile_photo',
+                'wishlistRequest',
                 'product' => fn ($product) => $product->with([
                     'media' => fn ($media) => $media->where('media_type', 'foto')->orderBy('display_order'),
                 ]),
@@ -114,11 +141,21 @@ class ChatController extends Controller
             $active->load([
                 'buyer:user_id,name,campus,profile_photo',
                 'seller:user_id,name,campus,profile_photo',
+                'wishlistRequest',
                 'product' => fn ($product) => $product->with([
                     'media' => fn ($media) => $media->where('media_type', 'foto')->orderBy('display_order'),
                 ]),
                 'messages' => fn ($messages) => $messages->orderBy('message_id'),
-                'negotiations' => fn ($offers) => $offers->orderBy('created_at')->orderBy('negotiation_id'),
+                'negotiations' => fn ($offers) => $offers
+                    ->with([
+                        'product' => fn ($product) => $product->with([
+                            'media' => fn ($media) => $media
+                                ->where('media_type', 'foto')
+                                ->orderBy('display_order'),
+                        ]),
+                    ])
+                    ->orderBy('created_at')
+                    ->orderBy('negotiation_id'),
             ]);
 
             $timeline = $active->messages

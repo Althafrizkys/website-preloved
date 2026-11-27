@@ -15,15 +15,22 @@
         </header>
 
         @php
-            $photos = $product->media->where('media_type', 'foto')->values();
+            $photos = $product?->media?->where('media_type', 'foto')->values() ?? collect();
             $cover = $photos->first();
+            $checkoutItemName = $product?->product_name ?? $wishlistDeal?->offered_item_name;
+            $checkoutSellerName = $product?->seller?->name ?? ($seller ?? null)?->name;
+            $checkoutSellerCampus = $product?->seller?->campus ?? ($seller ?? null)?->campus;
         @endphp
 
         <main class="mx-auto max-w-[1200px] px-4 pb-16 pt-6 sm:px-6 sm:pt-8">
             <nav class="mb-5 text-[13px] text-[#718096]" aria-label="Breadcrumb">
                 <a href="{{ route('home') }}" class="hover:text-[#00523f]">Beranda</a>
                 <span class="px-2">›</span>
-                <a href="{{ route('products.show', $product) }}" class="hover:text-[#00523f]">{{ $product->product_name }}</a>
+                @if ($product)
+                    <a href="{{ route('products.show', $product) }}" class="hover:text-[#00523f]">{{ $product->product_name }}</a>
+                @else
+                    <a href="{{ route('chat.show', $wishlistDeal->conversation_id) }}" class="hover:text-[#00523f]">{{ $checkoutItemName }}</a>
+                @endif
                 <span class="px-2">›</span>
                 <span class="font-medium text-[#00523f]">Checkout COD</span>
             </nav>
@@ -43,12 +50,14 @@
                 action="{{ route('transactions.store') }}"
                 data-checkout-form
                 data-unit-price="{{ $unitPrice }}"
-                data-stock-max="{{ $product->stock }}"
+                data-stock-max="{{ $product?->stock ?? 1 }}"
                 class="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1.8fr)_380px]"
             >
                 @csrf
-                <input type="hidden" name="product_id" value="{{ $product->product_id }}">
-                <input type="hidden" name="negotiation_id" value="{{ request('negotiation_id', $agreedOffer?->negotiation_id) }}">
+                @if ($product)
+                    <input type="hidden" name="product_id" value="{{ $product->product_id }}">
+                @endif
+                <input type="hidden" name="negotiation_id" value="{{ $wishlistDeal?->negotiation_id ?? request('negotiation_id', $agreedOffer?->negotiation_id) }}">
                 <input type="hidden" name="campus" id="selected_campus" value="{{ $defaultCampus }}">
 
                 {{-- Kolom Kiri: Form Detail COD --}}
@@ -157,23 +166,27 @@
                                         @if ($cover)
                                             <img
                                                 src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($cover->media_url) }}"
-                                                alt="{{ $product->product_name }}"
+                                                alt="{{ $checkoutItemName }}"
                                                 class="size-full object-cover"
                                             >
                                         @else
                                             <div class="flex size-full items-center justify-center text-[10px] text-[#8a969d]">
-                                                Foto
+                                                {{ $product ? 'Foto' : 'Wishlist' }}
                                             </div>
                                         @endif
                                     </div>
                                     <div class="min-w-0 flex-1">
                                         <h3 class="line-clamp-2 text-[14px] font-semibold text-[#202b3d]">
-                                            {{ $product->product_name }}
+                                            {{ $checkoutItemName }}
                                         </h3>
                                         <p class="mt-0.5 text-[11px] text-[#718096]">
-                                            Penjual: {{ $product->seller?->name }} ({{ $product->seller?->campus ?? 'Kampus' }})
+                                            Penjual: {{ $checkoutSellerName }} ({{ $checkoutSellerCampus ?? 'Kampus' }})
                                         </p>
-                                        <p class="mt-0.5 text-[11px] text-[#718096]">Stok tersedia: {{ $product->stock }} unit</p>
+                                        @if ($product)
+                                            <p class="mt-0.5 text-[11px] text-[#718096]">Stok tersedia: {{ $product->stock }} unit</p>
+                                        @else
+                                            <p class="mt-0.5 text-[11px] text-[#718096]">Barang baru untuk memenuhi wishlist</p>
+                                        @endif
                                     </div>
                                 </div>
 
@@ -184,8 +197,9 @@
                                 </div>
 
                                 {{-- Jumlah (Interactive Stepper) --}}
-                                <div class="flex items-center sm:justify-center">
-                                    <div class="inline-flex h-9 items-center rounded-[8px] border border-[#e1e6e9] bg-white">
+                                @if ($product)
+                                    <div class="flex items-center sm:justify-center">
+                                        <div class="inline-flex h-9 items-center rounded-[8px] border border-[#e1e6e9] bg-white">
                                         <button
                                             type="button"
                                             data-qty-minus
@@ -208,8 +222,14 @@
                                             aria-label="Tambah jumlah"
                                             class="grid h-full w-8 place-items-center text-[#00523f] transition hover:bg-[#f7f9fa] hover:text-[#003d2e]"
                                         >+</button>
+                                        </div>
                                     </div>
-                                </div>
+                                @else
+                                    <div class="flex items-center sm:justify-center">
+                                        <input type="hidden" name="quantity" value="1">
+                                        <span class="px-3 text-[13px] font-semibold text-[#202b3d]">1</span>
+                                    </div>
+                                @endif
 
                                 {{-- Subtotal --}}
                                 <div class="text-[14px] font-bold text-[#00523f] sm:text-right">

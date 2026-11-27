@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Negotiation extends Model
 {
@@ -20,6 +21,8 @@ class Negotiation extends Model
 
     protected $fillable = [
         'conversation_id',
+        'product_id',
+        'offered_item_name',
         'sender_id',
         'parent_offer_id',
         'offered_price',
@@ -48,6 +51,11 @@ class Negotiation extends Model
         return $this->belongsTo(User::class, 'sender_id', 'user_id');
     }
 
+    public function product(): BelongsTo
+    {
+        return $this->belongsTo(Product::class, 'product_id', 'product_id');
+    }
+
     public function parentOffer(): BelongsTo
     {
         return $this->belongsTo(self::class, 'parent_offer_id', 'negotiation_id');
@@ -56,5 +64,10 @@ class Negotiation extends Model
     public function childOffers(): HasMany
     {
         return $this->hasMany(self::class, 'parent_offer_id', 'negotiation_id');
+    }
+
+    public function transactionItem(): HasOne
+    {
+        return $this->hasOne(TransactionItem::class, 'negotiation_id', 'negotiation_id');
     }
 }

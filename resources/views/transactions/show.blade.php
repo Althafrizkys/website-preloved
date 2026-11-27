@@ -98,7 +98,7 @@
                                         @endif
                                     </div>
                                     <div>
-                                        <h3 class="text-[14px] font-semibold text-[#202b3d]">{{ $item->product?->product_name ?? 'Produk' }}</h3>
+                                        <h3 class="text-[14px] font-semibold text-[#202b3d]">{{ $item->item_name_snapshot ?? $item->product?->product_name ?? 'Produk' }}</h3>
                                         <p class="text-[12px] text-[#718096]">
                                             Rp{{ number_format((float) $item->agreed_price, 0, ',', '.') }} × {{ $item->quantity }}
                                         </p>

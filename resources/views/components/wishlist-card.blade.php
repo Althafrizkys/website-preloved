@@ -42,6 +42,20 @@
                     <span class="block text-[11px] text-[#718096]">{{ $wishlist->user->campus }} · Lihat profil</span>
                 </span>
             </a>
+            @if (! $isOwner && $wishlist->status === 'aktif' && $wishlist->expired_at?->isFuture())
+                @auth
+                    <form method="POST" action="{{ route('chat.wishlist.start', $wishlist) }}" class="mt-3">
+                        @csrf
+                        <button type="submit" class="inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-[10px] bg-[#00523f] px-4 text-[13px] font-semibold text-white transition hover:bg-[#006c52]">
+                            <span aria-hidden="true">◉</span> Chat pemilik wishlist
+                        </button>
+                    </form>
+                @else
+                    <a href="{{ route('login') }}" class="mt-3 inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-[10px] bg-[#00523f] px-4 text-[13px] font-semibold text-white transition hover:bg-[#006c52]">
+                        Chat pemilik wishlist
+                    </a>
+                @endauth
+            @endif
         @endif
 
         @if ($isOwner)

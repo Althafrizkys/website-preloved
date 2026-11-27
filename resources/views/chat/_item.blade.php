@@ -10,7 +10,7 @@
         @include('chat._avatar', ['user' => $other, 'size' => 'size-10'])
         <div class="min-w-0 flex-1">
             <p class="truncate text-[13px] font-semibold text-[#263746]">{{ $other?->name ?? 'Pengguna' }}</p>
-            <p class="truncate text-[11px] font-medium text-[#236a5a]">{{ $conversation->product?->product_name }}</p>
+            <p class="truncate text-[11px] font-medium text-[#236a5a]">{{ $conversation->product?->product_name ?? $conversation->wishlistRequest?->item_name ?? 'Percakapan' }}</p>
         </div>
     </div>
     <div class="mt-2 flex items-end justify-between gap-2">

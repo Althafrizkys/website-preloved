@@ -5,6 +5,8 @@ if (thread && form) {
     const messagesUrl = thread.dataset.messagesUrl;
     const myId = Number(thread.dataset.me);
     let lastId = Number(thread.dataset.lastId || 0);
+    let offerState = thread.dataset.offerState || '';
+    const watchOffers = thread.dataset.watchOffers === 'true';
     const input = form.querySelector('input[name="message_text"]');
     const button = form.querySelector('button[type="submit"]');
     let polling = false;
@@ -48,6 +50,10 @@ if (thread && form) {
         polling = true;
         try {
             const { data } = await window.axios.get(messagesUrl, { params: { after: lastId } });
+            if (watchOffers && data.latest_offer_state !== offerState) {
+                window.location.reload();
+                return;
+            }
             if (data.messages.length) {
                 data.messages.forEach(appendMessage);
                 scrollToBottom();

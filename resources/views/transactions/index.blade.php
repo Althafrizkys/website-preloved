@@ -149,7 +149,7 @@
                                     </div>
                                     <div>
                                         <h2 class="text-[15px] font-semibold text-[#202b3d]">
-                                            {{ $firstItem?->product?->product_name ?? 'Barang' }}
+                                            {{ $firstItem?->item_name_snapshot ?? $firstItem?->product?->product_name ?? 'Barang' }}
                                         </h2>
                                         <p class="mt-0.5 text-[12px] text-[#718096]">
                                             COD: {{ $transaction->meetingPoint?->campus }} ({{ $transaction->meetingPoint?->point_name }})
