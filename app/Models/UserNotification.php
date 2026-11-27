@@ -116,12 +116,12 @@ class UserNotification extends Model
 
     public function getTargetUrlAttribute(): string
     {
-        if (! $this->product_id) {
-            return route('home');
-        }
-
         if ($this->negotiation?->conversation_id) {
             return route('chat.show', $this->negotiation->conversation_id);
+        }
+
+        if (! $this->product_id) {
+            return route('home');
         }
 
         if ($this->notification_type === 'transaksi') {

@@ -60,7 +60,7 @@ class SellerTransactionsExport implements FromCollection, ShouldAutoSize, WithHe
     public function map($transaction): array
     {
         $productNames = $transaction->items
-            ->map(fn ($item) => $item->product?->product_name ?? 'Barang')
+            ->map(fn ($item) => $item->item_name_snapshot ?? $item->product?->product_name ?? 'Barang')
             ->filter()
             ->implode(', ');
 

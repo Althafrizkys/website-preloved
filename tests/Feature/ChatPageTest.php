@@ -52,7 +52,9 @@ class ChatPageTest extends TestCase
             ->assertOk()
             ->assertSee('Halo pembeli')
             ->assertSee('Halo penjual')
-            ->assertSee('data-chat-thread', false);
+            ->assertSee('data-chat-thread', false)
+            ->assertDontSee('Permintaan wishlist')
+            ->assertDontSee('Tawarkan barang untuk wishlist');
 
         $this->assertNotNull($fromSeller->fresh()->read_at);
         $this->assertNull($fromBuyer->fresh()->read_at);

@@ -152,6 +152,7 @@
                     loading="lazy"
                     class="block h-auto w-full rounded-3xl"
                 >
+                </a>
             </div>
 
             <section class="mt-7 sm:mt-9">

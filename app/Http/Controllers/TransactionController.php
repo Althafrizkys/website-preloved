@@ -6,6 +6,7 @@ use App\Exports\SellerTransactionsExport;
 use App\Http\Requests\StoreTransactionRequest;
 use App\Models\CampusMeetingPoint;
 use App\Models\Conversation;
+use App\Models\Negotiation;
 use App\Models\Product;
 use App\Models\Rating;
 use App\Models\Transaction;
@@ -116,9 +117,17 @@ class TransactionController extends Controller
             403,
         );
 
-        $productId = $transaction->items()->value('product_id');
+        $item = $transaction->items()
+            ->with('negotiation.conversation')
+            ->first();
+        $productId = $item?->product_id;
 
-        abort_unless($productId, 404);
+        if (! $productId) {
+            $conversation = $item?->negotiation?->conversation;
+            abort_unless($conversation, 404);
+
+            return redirect()->route('chat.show', $conversation);
+        }
 
         $conversation = Conversation::firstOrCreate([
             'product_id' => $productId,
@@ -170,30 +179,46 @@ class TransactionController extends Controller
         $unsikaPoints = $meetingPoints->where('campus', 'UNSIKA')->values();
         $ubpPoints = $meetingPoints->where('campus', 'UBP')->values();
 
-        // Cari tawaran yang disepakati (jika ada)
-        $conversation = Conversation::query()
-            ->where('product_id', $product->product_id)
-            ->where('buyer_id', $user->user_id)
-            ->where('seller_id', $product->seller_id)
-            ->first();
-
-        $agreedOffer = $conversation?->agreedOffer();
-
         $negotiationId = $request->query('negotiation_id');
-        $activeNegotiation = null;
+        $conversation = null;
+        $agreedOffer = null;
+
         if ($negotiationId) {
-            if (! $agreedOffer || (int) $agreedOffer->negotiation_id !== (int) $negotiationId) {
+            $requestedOffer = Negotiation::query()
+                ->with('conversation')
+                ->find($negotiationId);
+            $offerConversation = $requestedOffer?->conversation;
+            $isProductOffer = $offerConversation
+                && (int) $offerConversation->product_id === (int) $product->product_id
+                && $requestedOffer->product_id === null;
+            $isWishlistOffer = $offerConversation
+                && $offerConversation->wishlist_request_id !== null
+                && (int) $requestedOffer->product_id === (int) $product->product_id;
+
+            if (
+                ! $requestedOffer
+                || $requestedOffer->status !== 'diterima'
+                || (int) $offerConversation?->buyer_id !== (int) $user->user_id
+                || (int) $offerConversation?->seller_id !== (int) $product->seller_id
+                || (! $isProductOffer && ! $isWishlistOffer)
+            ) {
                 return redirect()
                     ->route('products.show', $product)
                     ->with('error', 'Tawaran nego tidak berlaku untuk barang ini.');
             }
 
-            $activeNegotiation = $agreedOffer;
+            $conversation = $offerConversation;
+            $agreedOffer = $requestedOffer;
+        } else {
+            $conversation = Conversation::query()
+                ->where('product_id', $product->product_id)
+                ->where('buyer_id', $user->user_id)
+                ->where('seller_id', $product->seller_id)
+                ->first();
+            $agreedOffer = $conversation?->agreedOffer();
         }
 
-        $unitPrice = $activeNegotiation?->status === 'diterima'
-            ? (int) $activeNegotiation->offered_price
-            : ($agreedOffer ? (int) $agreedOffer->offered_price : (int) $product->price);
+        $unitPrice = $agreedOffer ? (int) $agreedOffer->offered_price : (int) $product->price;
 
         $defaultQuantity = $requestedQuantity;
         $subtotal = $unitPrice * $defaultQuantity;
@@ -204,6 +229,7 @@ class TransactionController extends Controller
 
         return view('transactions.create', [
             'product' => $product,
+            'wishlistDeal' => null,
             'unsikaPoints' => $unsikaPoints,
             'ubpPoints' => $ubpPoints,
             'defaultCampus' => $defaultCampus,
@@ -215,22 +241,93 @@ class TransactionController extends Controller
         ]);
     }
 
+    public function createWishlist(Request $request, Negotiation $negotiation): View|RedirectResponse
+    {
+        $conversation = $negotiation->conversation()
+            ->with(['wishlistRequest', 'seller:user_id,name,campus'])
+            ->firstOrFail();
+
+        abort_unless((int) $conversation->buyer_id === (int) $request->user()->user_id, 403);
+
+        if (
+            $negotiation->status !== 'diterima'
+            || $negotiation->product_id !== null
+            || ! $negotiation->offered_item_name
+            || $conversation->wishlist_request_id === null
+            || (int) $conversation->seller_id !== (int) $negotiation->sender_id
+        ) {
+            return redirect()
+                ->route('chat.show', $conversation)
+                ->with('error', 'Kesepakatan wishlist ini tidak berlaku.');
+        }
+
+        $existingTransactionId = $negotiation->transactionItem()->value('transaction_id');
+        if ($existingTransactionId) {
+            return redirect()->route('transactions.show', $existingTransactionId);
+        }
+
+        $wishlist = $conversation->wishlistRequest;
+        if (
+            ! $wishlist
+            || $wishlist->status !== 'aktif'
+            || $wishlist->expired_at?->isPast()
+        ) {
+            return redirect()
+                ->route('chat.show', $conversation)
+                ->with('error', 'Permintaan wishlist ini sudah tidak aktif.');
+        }
+
+        $meetingPoints = CampusMeetingPoint::active()
+            ->orderBy('campus')
+            ->orderBy('point_name')
+            ->get();
+        $unsikaPoints = $meetingPoints->where('campus', 'UNSIKA')->values();
+        $ubpPoints = $meetingPoints->where('campus', 'UBP')->values();
+        $unitPrice = (int) $negotiation->offered_price;
+
+        return view('transactions.create', [
+            'product' => null,
+            'wishlistDeal' => $negotiation,
+            'wishlist' => $wishlist,
+            'seller' => $conversation->seller,
+            'unsikaPoints' => $unsikaPoints,
+            'ubpPoints' => $ubpPoints,
+            'defaultCampus' => in_array($request->user()->campus, ['UNSIKA', 'UBP'])
+                ? $request->user()->campus
+                : 'UNSIKA',
+            'unitPrice' => $unitPrice,
+            'defaultQuantity' => 1,
+            'subtotal' => $unitPrice,
+            'totalPrice' => $unitPrice,
+            'agreedOffer' => $negotiation,
+        ]);
+    }
+
     public function store(StoreTransactionRequest $request): RedirectResponse
     {
         $user = $request->user();
         $data = $request->validated();
-
-        $product = Product::findOrFail($data['product_id']);
         $meetingPoint = CampusMeetingPoint::findOrFail($data['meeting_point_id']);
 
-        $transaction = $this->transactionService->createCodTransaction(
-            buyer: $user,
-            product: $product,
-            meetingPoint: $meetingPoint,
-            quantity: (int) $data['quantity'],
-            buyerNotes: $data['buyer_notes'] ?? null,
-            negotiationId: isset($data['negotiation_id']) ? (int) $data['negotiation_id'] : null,
-        );
+        if (empty($data['product_id'])) {
+            $transaction = $this->transactionService->createWishlistCodTransaction(
+                buyer: $user,
+                meetingPoint: $meetingPoint,
+                quantity: (int) $data['quantity'],
+                buyerNotes: $data['buyer_notes'] ?? null,
+                negotiationId: (int) $data['negotiation_id'],
+            );
+        } else {
+            $product = Product::findOrFail($data['product_id']);
+            $transaction = $this->transactionService->createCodTransaction(
+                buyer: $user,
+                product: $product,
+                meetingPoint: $meetingPoint,
+                quantity: (int) $data['quantity'],
+                buyerNotes: $data['buyer_notes'] ?? null,
+                negotiationId: isset($data['negotiation_id']) ? (int) $data['negotiation_id'] : null,
+            );
+        }
 
         return redirect()
             ->route('transactions.show', $transaction)

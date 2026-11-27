@@ -15,6 +15,7 @@ class Conversation extends Model
 
     protected $fillable = [
         'product_id',
+        'wishlist_request_id',
         'buyer_id',
         'seller_id',
     ];
@@ -30,6 +31,11 @@ class Conversation extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class, 'product_id', 'product_id');
+    }
+
+    public function wishlistRequest(): BelongsTo
+    {
+        return $this->belongsTo(WishlistRequest::class, 'wishlist_request_id', 'request_id');
     }
 
     public function buyer(): BelongsTo

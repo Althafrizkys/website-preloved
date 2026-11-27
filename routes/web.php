@@ -13,6 +13,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\RewardController;
 use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\WishlistDealController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -118,10 +119,22 @@ Route::middleware('auth')->group(function () {
     Route::post('/chat/mulai/{product}', [ChatController::class, 'start'])
         ->whereNumber('product')
         ->name('chat.start');
+    Route::post('/chat/wishlist/{wishlist}/mulai', [ChatController::class, 'startWishlist'])
+        ->whereNumber('wishlist')
+        ->name('chat.wishlist.start');
     Route::get('/chat', [ChatController::class, 'index'])->name('chat.index');
     Route::get('/chat/{conversation}', [ChatController::class, 'show'])
         ->whereNumber('conversation')
         ->name('chat.show');
+    Route::post('/chat/{conversation}/wishlist-offers', [WishlistDealController::class, 'store'])
+        ->whereNumber('conversation')
+        ->name('wishlist-deals.store');
+    Route::post('/wishlist-offers/{negotiation}/terima', [WishlistDealController::class, 'accept'])
+        ->whereNumber('negotiation')
+        ->name('wishlist-deals.accept');
+    Route::post('/wishlist-offers/{negotiation}/tolak', [WishlistDealController::class, 'reject'])
+        ->whereNumber('negotiation')
+        ->name('wishlist-deals.reject');
     Route::get('/chat/{conversation}/pesan', [ChatController::class, 'messages'])
         ->whereNumber('conversation')
         ->name('chat.messages');
@@ -135,6 +148,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/transaksi/buat/{product}', [TransactionController::class, 'create'])
         ->whereNumber('product')
         ->name('transactions.create');
+    Route::get('/transaksi/buat-wishlist/{negotiation}', [TransactionController::class, 'createWishlist'])
+        ->whereNumber('negotiation')
+        ->name('transactions.create-wishlist');
     Route::post('/transaksi', [TransactionController::class, 'store'])->name('transactions.store');
     Route::get('/transaksi/{transaction}', [TransactionController::class, 'show'])
         ->whereNumber('transaction')
