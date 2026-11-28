@@ -12,6 +12,7 @@ use App\Http\Controllers\NegotiationController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\RewardController;
+use App\Http\Controllers\CartController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\WishlistDealController;
 use Illuminate\Http\Request;
@@ -143,6 +144,18 @@ Route::middleware('auth')->group(function () {
         ->name('chat.store');
 
     // Transaksi & COD
+    Route::get('/keranjang', [CartController::class, 'index'])->name('cart.index');
+    Route::post('/keranjang', [CartController::class, 'store'])->name('cart.store');
+    Route::delete('/keranjang', [CartController::class, 'destroySelected'])->name('cart.destroy-selected');
+    Route::get('/keranjang/checkout', [CartController::class, 'checkout'])->name('cart.checkout');
+    Route::post('/keranjang/checkout', [CartController::class, 'placeOrder'])->name('cart.place-order');
+    Route::patch('/keranjang/{cartItem}', [CartController::class, 'update'])
+        ->whereNumber('cartItem')
+        ->name('cart.update');
+    Route::delete('/keranjang/{cartItem}', [CartController::class, 'destroy'])
+        ->whereNumber('cartItem')
+        ->name('cart.destroy');
+
     Route::get('/transaksi', [TransactionController::class, 'index'])->name('transactions.index');
     Route::get('/transaksi/export', [TransactionController::class, 'export'])->name('transactions.export');
     Route::get('/transaksi/buat/{product}', [TransactionController::class, 'create'])

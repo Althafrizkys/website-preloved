@@ -34,6 +34,9 @@
             @if (session('success'))
                 <p class="mb-5 rounded-[10px] bg-[#e6f7f1] px-4 py-3 text-[14px] text-[#00523f]">{{ session('success') }}</p>
             @endif
+            @if ($errors->has('product_id') || $errors->has('quantity'))
+                <p class="mb-5 rounded-[10px] bg-[#fff5f5] px-4 py-3 text-[14px] text-[#9b3434]" role="alert">{{ $errors->first('product_id') ?: $errors->first('quantity') }}</p>
+            @endif
 
             <section class="grid gap-6 rounded-[14px] border border-[#e5e9ed] bg-white p-4 shadow-[0_3px_12px_rgba(22,34,48,0.04)] sm:p-[22px] lg:grid-cols-[0.83fr_1fr] lg:gap-[42px]" aria-labelledby="product-title">
                 <div class="min-w-0">
@@ -144,14 +147,23 @@
                                     @endif
                                 @endif
                             @endif
-                            <button type="button" disabled title="Fitur keranjang segera hadir" class="inline-flex min-h-11 cursor-not-allowed items-center justify-center gap-1.5 rounded-[8px] border border-[#dce3e6] px-4 text-[12px] font-semibold text-[#236a5a] opacity-80">
-                                <svg class="size-[17px]" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                                    <path d="M3 4h2l2.2 11.1a2 2 0 0 0 2 1.6h8.2a2 2 0 0 0 1.9-1.4L21 8H6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"/>
-                                    <circle cx="10" cy="20" r="1.2" fill="currentColor"/>
-                                    <circle cx="18" cy="20" r="1.2" fill="currentColor"/>
-                                </svg>
-                                Keranjang
-                            </button>
+                            @php
+                                $cartIcon = '<svg class="size-[17px]" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 4h2l2.2 11.1a2 2 0 0 0 2 1.6h8.2a2 2 0 0 0 1.9-1.4L21 8H6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"/><circle cx="10" cy="20" r="1.2" fill="currentColor"/><circle cx="18" cy="20" r="1.2" fill="currentColor"/></svg>';
+                            @endphp
+                            @guest
+                                <a href="{{ route('login') }}" class="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-[8px] border border-[#dce3e6] px-4 text-[12px] font-semibold text-[#236a5a] transition hover:border-[#00523f] hover:bg-[#f7f9fa]">{!! $cartIcon !!} Keranjang</a>
+                            @else
+                                @if ((int) auth()->id() === (int) $product->seller_id || $product->status !== 'tersedia' || $product->stock < 1)
+                                    <button type="button" disabled title="{{ (int) auth()->id() === (int) $product->seller_id ? 'Tidak bisa memasukkan barang sendiri ke keranjang' : 'Stok barang habis' }}" class="inline-flex min-h-11 cursor-not-allowed items-center justify-center gap-1.5 rounded-[8px] border border-[#dce3e6] px-4 text-[12px] font-semibold text-[#718096] opacity-70">{!! $cartIcon !!} Keranjang</button>
+                                @else
+                                    <form method="POST" action="{{ route('cart.store') }}" data-product-cart-form class="contents">
+                                        @csrf
+                                        <input type="hidden" name="product_id" value="{{ $product->product_id }}">
+                                        <input type="hidden" name="quantity" value="1" data-product-cart-quantity>
+                                        <button type="submit" class="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-[8px] border border-[#dce3e6] px-4 text-[12px] font-semibold text-[#236a5a] transition hover:border-[#00523f] hover:bg-[#f7f9fa]">{!! $cartIcon !!} Keranjang</button>
+                                    </form>
+                                @endif
+                            @endguest
                         </div>
                     </div>
                 </div>

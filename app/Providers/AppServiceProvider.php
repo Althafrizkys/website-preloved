@@ -39,11 +39,13 @@ class AppServiceProvider extends ServiceProvider
                 $view->with([
                     'notifications' => $notifications,
                     'unreadNotificationCount' => $notifications->where('is_read', false)->count(),
+                    'cartCount' => \App\Models\CartItem::query()->where('user_id', $user->user_id)->count(),
                 ]);
             } else {
                 $view->with([
                     'notifications' => collect(),
                     'unreadNotificationCount' => 0,
+                    'cartCount' => 0,
                 ]);
             }
         });
