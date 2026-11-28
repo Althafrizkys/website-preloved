@@ -9,6 +9,7 @@ use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
@@ -23,6 +24,8 @@ class AdminDashboardController extends Controller
         $pointSearch = trim((string)$request->query('point_q', ''));
         $productSearch = trim((string)$request->query('product_q', ''));
         $productStatusFilter = (string)$request->query('product_status', '');
+        $transactionSearch = trim((string)$request->query('tx_q', ''));
+        $transactionStatusFilter = trim((string)$request->query('tx_status', ''));
 
         $stats = [
             'total_users' => User::count(),
@@ -64,6 +67,25 @@ class AdminDashboardController extends Controller
             ->paginate(10, ['*'], 'products_page')
             ->withQueryString();
 
+        $txStatusColumn = match (true) {
+            Schema::hasColumn('transactions', 'transaction_status') => 'transaction_status',
+            Schema::hasColumn('transactions', 'cod_status') => 'cod_status',
+            default => 'status',
+        };
+
+        $transactions = Transaction::query()
+            ->with(['items.product', 'buyer', 'seller', 'meetingPoint'])
+            ->when($transactionSearch !== '', function ($q) use ($transactionSearch) {$q->where(function ($sub) use ($transactionSearch) {
+                    $sub->whereHas('items.product', fn ($p) => $p->where('product_name', 'like', "\%{$transactionSearch}%"))
+                        ->orWhereHas('buyer', fn ($b) => $b->where('name', 'like', "\%{$transactionSearch}%"))
+                        ->orWhereHas('seller', fn ($s) => $s->where('name', 'like', "\%{$transactionSearch}%"));
+                });
+            })
+            ->when($transactionStatusFilter !== '', fn ($q) =>$q->where($txStatusColumn,$transactionStatusFilter))
+            ->orderByDesc('transaction_id')
+            ->paginate(10, ['*'], 'transactions_page')
+            ->withQueryString();
+
         $users = User::query()
             ->when($search !== '', function ($q) use ($search) {$q->where(function ($sub) use ($search) {
                     $sub->where('name', 'like', "\%{$search}%")
@@ -80,6 +102,7 @@ class AdminDashboardController extends Controller
             'stats' => $stats,
             'meetingPoints' => $meetingPoints,
             'products' => $products,
+            'transactions' => $transactions,
             'users' => $users,
             'search' => $search,
             'roleFilter' => $roleFilter,
@@ -87,6 +110,8 @@ class AdminDashboardController extends Controller
             'pointSearch' => $pointSearch,
             'productSearch' => $productSearch,
             'productStatusFilter' => $productStatusFilter,
+            'transactionSearch' => $transactionSearch,
+            'transactionStatusFilter' => $transactionStatusFilter,
         ]);
     }
 
@@ -198,9 +223,8 @@ class AdminDashboardController extends Controller
                 ->with('error', 'Kamu tidak dapat menonaktifkan akunmu sendiri.');
         }
 
-        $user->update([
-            'is_active' => ! $user->is_active,
-        ]);
+        $user->is_active = ! (bool)$user->is_active;
+        $user->save();
 
         $statusText =$user->is_active ? 'diaktifkan kembali' : 'dinonaktifkan';
 
@@ -221,9 +245,7 @@ class AdminDashboardController extends Controller
                 ->with('error', 'Kamu tidak dapat mengubah role akunmu sendiri menjadi user.');
         }
 
-        $user->update([
-            'role' => $validated['role'],
-        ]);
+        $user->role = $validated['role'];$user->save();
 
         return redirect()
             ->route('admin.dashboard')
