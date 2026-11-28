@@ -5,3 +5,4 @@ import './notification';
 import './transaction';
 import './chat';
 import './mobile-navigation';
+import './cart';

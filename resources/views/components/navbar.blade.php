@@ -25,13 +25,16 @@
     <div class="flex items-center gap-2 sm:gap-3">
         @auth
             <div class="flex items-center gap-1 sm:gap-2">
-                <button type="button" disabled title="Keranjang segera hadir" aria-label="Keranjang segera hadir" class="flex size-10 cursor-not-allowed items-center justify-center rounded-[12px] bg-white text-[#00523f] opacity-80 sm:size-11">
+                <a href="{{ route('cart.index') }}" title="Keranjang" aria-label="Keranjang" class="relative flex size-10 items-center justify-center rounded-[12px] bg-white text-[#00523f] transition hover:bg-[#edf7f4] sm:size-11">
                     <svg class="size-5 sm:size-6" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                         <path d="M3 4h2l2.2 11.1a2 2 0 0 0 2 1.6h8.2a2 2 0 0 0 1.9-1.4L21 8H6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"/>
                         <circle cx="10" cy="20" r="1.2" fill="currentColor"/>
                         <circle cx="18" cy="20" r="1.2" fill="currentColor"/>
                     </svg>
-                </button>
+                    @if (($cartCount ?? 0) > 0)
+                        <span data-cart-badge class="absolute -right-1 -top-1 flex size-5 items-center justify-center rounded-full bg-[#e53e3e] text-[10px] font-bold text-white shadow">{{ $cartCount > 9 ? '9+' : $cartCount }}</span>
+                    @endif
+                </a>
                 <a href="{{ route('transactions.index') }}" title="Daftar Transaksi" aria-label="Daftar Transaksi" class="flex size-10 items-center justify-center rounded-[12px] bg-white text-[#00523f] transition hover:bg-[#edf7f4] sm:size-11">
                     <svg class="size-5 sm:size-6" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                         <path d="M6 3.5h9l4 4V20a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4.5a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.8"/>
@@ -132,7 +135,12 @@
             @auth
                 <div class="space-y-1 border-t border-[#edf0ee] pt-3">
                     <p class="px-3 pb-2 text-xs font-semibold uppercase tracking-wide text-[#718096]">Menu</p>
-                    <button type="button" disabled title="Keranjang segera hadir" class="flex min-h-11 w-full cursor-not-allowed items-center rounded-[10px] px-3 text-left text-[14px] font-medium text-[#98a2ad]">Keranjang · segera hadir</button>
+                    <a href="{{ route('cart.index') }}" data-mobile-navigation-close class="flex min-h-11 items-center justify-between rounded-[10px] px-3 text-[14px] font-medium transition hover:bg-[#edf7f4]">
+                        <span>Keranjang</span>
+                        @if (($cartCount ?? 0) > 0)
+                            <span class="flex size-5 items-center justify-center rounded-full bg-[#e53e3e] text-[10px] font-bold text-white">{{ $cartCount > 9 ? '9+' : $cartCount }}</span>
+                        @endif
+                    </a>
                     <a href="{{ route('transactions.index') }}" data-mobile-navigation-close class="flex min-h-11 items-center rounded-[10px] px-3 text-[14px] font-medium transition hover:bg-[#edf7f4]">Daftar Transaksi</a>
                     <a href="{{ route('wishlist.index') }}" data-mobile-navigation-close class="flex min-h-11 items-center rounded-[10px] px-3 text-[14px] font-medium transition hover:bg-[#edf7f4]">Wishlist / Permintaan Barang</a>
                     <a href="{{ route('chat.index') }}" data-mobile-navigation-close class="flex min-h-11 items-center rounded-[10px] px-3 text-[14px] font-medium transition hover:bg-[#edf7f4]">Pesan</a>

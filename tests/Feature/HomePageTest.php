@@ -247,7 +247,7 @@ class HomePageTest extends TestCase
             ->assertOk()
             ->assertSee($user->name)
             ->assertSee('Logout')
-            ->assertSee('Keranjang segera hadir')
+            ->assertSee('href="'.route('cart.index').'"', false)
             ->assertSee('Daftar Transaksi')
             ->assertSee('Pusat Notifikasi')
             ->assertSee('href="'.route('products.create').'"', false);
